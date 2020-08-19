@@ -1,0 +1,39 @@
+<html>
+<head>
+<style>
+label{
+    width:255px;
+    padding:1em;
+    background:linear-gradient(200deg,#A8E,#95D);
+    display:inline-block
+}
+input{
+    width:200px
+}
+</style>
+<script>
+    f=(a,u,w)=>{
+        x=new XMLHttpRequest();
+        x.onload=_=>{
+            if(200==x.status)
+                w(x.responseText)
+        };
+        x.open(a,u);
+        x.send()
+    }
+    u=_=>{
+        x=_.split(' ');
+        document.getElementById(x[0]).setAttribute('value',x[1])
+    }
+    w=_=>{
+        _.split('\n').forEach(_=>{
+            if(_){
+                x=_.split(' ');
+                document.body.innerHTML+=`<label>${x[0]}<input id=${x[0]} type=checkbox ${x[1]>0?'checked':' '} onchange="f('GET','/w/${x[0]}/'+255*this.checked,u)"></label>`;
+                u(_)
+            }
+        })
+    }
+</script>
+</head>
+<body onload="f('GET','/all.txt',w)">
