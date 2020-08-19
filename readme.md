@@ -30,6 +30,9 @@ Standard REST routes:
 - N**c**: `/o/{relay_id}`
   set a relay to NO mode
 
+- **s**ave: `/!`
+  save the wiring into EEPROM, not the values ON/OFF
+
 
 ## webApp
 

@@ -14,10 +14,12 @@
 #define MODE_VERBOSE_ALL        MODE_VERBOSE_HELP + MODE_VERBOSE_LIST + MODE_VERBOSE_WEBAPP
 #define RELAY_WIRING_NO         0
 #define RELAY_WIRING_NC         1
+#define STORAGE_NONE            0
+#define STORAGE_EEPROM          1
 
 
 /** HELP **/
-#define TEXT_HELP F("** HELP\n** ^(G|P|D) /(<pin>\\d+(/<value>\\d+)?)?\n")
+#define TEXT_HELP F("** HELP\n** /<action>\\w/(<relay>\\d+(/<extra>\\d+)?)?\n")
 
 
 #define DEBUG 0

@@ -23,18 +23,13 @@
 
 
 /**
- * ACTION /(<pin>\d+(/<value>\d+)?)? (...)
- * ACTION ::= G(ET) | P(UT) | D(ELETE)
+ * (...) /<action>\\w /(<pin>\d+( /<value>\d+)?)? (...)
  * */
 bool AbstractStream::read()
 {
     if (this->_findUntil(PATH_SEPARATOR, BUFFER_SIZE)) {
         this->_currentAction = this->_currentStream->read();
-
-        // jump next separator
-        this->_currentStream->read();
-
-        this->_currentRelay = this->_currentStream->parseInt(SKIP_NONE);
+        this->_currentRelay = this->_currentStream->parseInt(SKIP_ALL);
 
         return true;
     }
@@ -47,14 +42,18 @@ bool AbstractStream::read()
 
 void AbstractStream::process()
 {
-    // jump the separator
-    this->_currentStream->read();
-    const uint8_t extra = this->_currentStream->parseInt(SKIP_NONE);
+    const uint8_t extra = this->_currentStream->parseInt(SKIP_ALL);
     
     switch (this->_currentAction) {
         #if MODE_VERBOSE & MODE_VERBOSE_LIST
         case ACTION_ALL:
             this->_showAll();
+            return;
+        #endif
+
+        #if STORAGE != STORAGE_NONE
+        case ACTION_SAVE:
+            Relay::save();
             return;
         #endif
 
@@ -98,8 +97,10 @@ void AbstractStream::terminate()
 void AbstractStream::_showOne(const uint8_t relay)
 {
     this->_currentStream->print(relay);
-    this->_currentStream->print(SP);
-    this->_currentStream->println(Relay::getStateAt(relay));
+    this->_currentStream->print(SEP);
+    this->_currentStream->print(Relay::getStateAt(relay));
+    this->_currentStream->print(Relay::isNcAt(relay) ? TEXT_NC : TEXT_NO);
+    this->_currentStream->println(Relay::getPinAt(relay));
 }
 
 

@@ -18,9 +18,10 @@
 #define ACTION_MAP          'm'
 #define ACTION_NC           'c'
 #define ACTION_NO           'o'
-#define ACTION_GOOGLE_TOKEN 'g'
+#define ACTION_SAVE         '!'
 #define PATH_SEPARATOR      '/'
 #define LF                  '\n'
+#define SEP                 ' '
 #define TEXT_NC             F(" NC ")
 #define TEXT_NO             F(" NO ")
 #define RELAY_NONE          -1
