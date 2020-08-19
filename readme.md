@@ -24,14 +24,11 @@ Standard REST routes:
 - **m**ap: `/m/{relay_id}/{pin_id}`
   map a relay to a pin controller
 
-- N**C**: `/c/{relay_id}`
+- N**o**: `/c/{relay_id}`
   set a relay to NC mode
 
-- N**O**: `/o/{relay_id}`
+- N**c**: `/o/{relay_id}`
   set a relay to NO mode
-
-- **g**oogle: `/o/{google_calendar_token}`
-  set the google calendar token
 
 
 ## webApp
