@@ -5,19 +5,23 @@
 
 #include <Arduino.h>
 #include <avr/pgmspace.h>
+#include <EEPROM.h>
 #include "config.h"
 #include "macro.h"
 
 
 
-#define PIN_NONE    ((uint8_t) -1)
+#define PIN_NONE      ((uint8_t) -1)
+#define EEPROM_VOID   ((byte) -1)
 
 
 
 class Relay {
 
   public:
+  static void begin();
   static const bool exists(const uint8_t relayId);
+  static void save();
 
   static const uint8_t getPinAt(const uint8_t relayId);
   static void setPinAt(const uint8_t relayId, const uint8_t pin);
@@ -29,14 +33,9 @@ class Relay {
   static void setStateAt(const uint8_t relayId, const bool value);
 
   protected:
-  struct option {
-    option(): pin(PIN_NONE), isNc(RELAY_WIRING), value(false) {};
-    bool isNc : 1;
-    bool value : 1;
-    uint8_t pin;
-  };
+  static void _save(const uint8_t relayId);
 
-  static option _options[NB_RELAYS];
+  static uint8_t _options[NB_RELAYS];
 
 };
 

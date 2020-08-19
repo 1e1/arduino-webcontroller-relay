@@ -55,11 +55,14 @@ static AbstractInterface* _engines[MODE_SERIAL_COUNT(MODE_SERIAL)];
 
 void setup()
 {
+  BUSYLED_IDLE;
   DEBUG_START();
   LOGLN(F("DEBUG ON"));
 
   const FastTimer::Precision p = FastTimer::Precision::P65s_4h;
   _timer = new FastTimer(p);
+
+  Relay::begin();
 
   uint8_t i = MODE_SERIAL_COUNT(MODE_SERIAL);
 
@@ -82,6 +85,7 @@ void setup()
   #endif
 
   LOGLN(F("CONFIGURED"));
+  BUSYLED_NONE;
 }
 
 

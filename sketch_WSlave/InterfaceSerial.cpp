@@ -34,6 +34,7 @@ void InterfaceSerial::loop()
   if (Serial.available() > 0) {
     if (this->read()) {
       this->process();
+      Serial.println();
     } else {
       #if MODE_VERBOSE & MODE_VERBOSE_HELP
       Serial.println(TEXT_HELP);
