@@ -19,6 +19,7 @@
 #define ACTION_NC           'c'
 #define ACTION_NO           'o'
 #define ACTION_SAVE         '!'
+#define ACTION_RESET        '~'
 #define PATH_SEPARATOR      '/'
 #define LF                  '\n'
 #define SEP                 ' '

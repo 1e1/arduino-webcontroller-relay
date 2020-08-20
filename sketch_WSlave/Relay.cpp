@@ -28,7 +28,7 @@ uint8_t _BIT_IS_ACTIVE  = 7;
 
 void Relay::begin()
 {
-  #if STORAGE & STORAGE_EEPROM
+  #if DATA_STORAGE & DATA_STORAGE_EEPROM
   uint8_t option;
   for (int i=0; i<NB_RELAYS && i<EEPROM.length(); i++) {
     option = EEPROM.read(i);
@@ -49,7 +49,7 @@ const bool Relay::exists(const uint8_t relayId)
 
 void Relay::save()
 {
-  #if STORAGE & STORAGE_EEPROM
+  #if DATA_STORAGE & DATA_STORAGE_EEPROM
   for (int i=0; i<NB_RELAYS && i<EEPROM.length(); i++) {
     Relay::_save(i);
   }
@@ -107,7 +107,7 @@ void Relay::setStateAt(const uint8_t relayId, const bool state)
 
 void Relay::_save(const uint8_t relayId)
 {
-    #if STORAGE & STORAGE_EEPROM
+    #if DATA_STORAGE & DATA_STORAGE_EEPROM
     const uint8_t data = Relay::_options[relayId] & (_MASK_PIN | (B1 << _BIT_IS_NC));
 
     EEPROM.update(relayId, data);
