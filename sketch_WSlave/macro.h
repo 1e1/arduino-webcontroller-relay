@@ -5,17 +5,22 @@
 /* mode */
 #define MODE_SERIAL_USB         1
 #define MODE_SERIAL_ETHERNET    2
-#define MODE_SERIAL_ALL         MODE_SERIAL_USB + MODE_SERIAL_ETHERNET
-#define MODE_SERIAL_COUNT(m)    bool(m & MODE_SERIAL_USB) + bool(m & MODE_SERIAL_ETHERNET)
+#define MODE_SERIAL_ALL         (MODE_SERIAL_USB + MODE_SERIAL_ETHERNET)
+#define MODE_SERIAL_COUNT(m)    (bool(m & MODE_SERIAL_USB) + bool(m & MODE_SERIAL_ETHERNET))
 #define MODE_VERBOSE_NONE       0
 #define MODE_VERBOSE_HELP       1
 #define MODE_VERBOSE_LIST       2
 #define MODE_VERBOSE_WEBAPP     4
-#define MODE_VERBOSE_ALL        MODE_VERBOSE_HELP + MODE_VERBOSE_LIST + MODE_VERBOSE_WEBAPP
+#define MODE_VERBOSE_BONJOUR    8
+#define MODE_VERBOSE_ALL        (MODE_VERBOSE_HELP + MODE_VERBOSE_LIST + MODE_VERBOSE_WEBAPP + MODE_VERBOSE_BONJOUR)
 #define RELAY_WIRING_NO         0
 #define RELAY_WIRING_NC         1
-#define STORAGE_NONE            0
-#define STORAGE_EEPROM          1
+#define TYPE_MAC_STATIC         0
+#define TYPE_MAC_RANDOM         1
+#define ACL_ALLOW_NONE          0
+#define ACL_ALLOW_RESET         1
+#define DATA_STORAGE_NONE       0
+#define DATA_STORAGE_EEPROM     1
 
 
 /** HELP **/
@@ -65,7 +70,8 @@
 
 
 /** NETWORK **/
-#define MAC_ADDRESS(index) { 0x40,0x6C,0x61,0x6E,0x23, index }
+#define MAC_ADDRESS(index)      { 0x40,0x6C,0x61,0x6E,0x23, index }
+#define DEVICE_NAME_MDNS(dn)    dn "_##"
 
 
 
@@ -115,6 +121,9 @@ FOREACH (int, p2, c2, ARRAYLEN(c2) ){
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
+
+
+#define SOFTWARE_RESET    asm volatile ("jmp 0");
 
 
 #endif // macro_H_

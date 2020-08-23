@@ -30,8 +30,11 @@ Standard REST routes:
 - N**c**: `/o/{relay_id}`
   set a relay to NO mode
 
-- **s**ave: `/!`
+- save (**!**): `/!`
   save the wiring into EEPROM, not the values ON/OFF
+
+- reset (**~**): `/~`
+  reset the board  if `#define ACL_ALLOW ACL_ALLOW_RESET` (or `ACL_ALLOW_RESET` by default)
 
 
 ## webApp
@@ -66,3 +69,8 @@ write anything and the read the help
 - edit ./web/html/index.html
 - export to ./sketch_WSlave/_webApp.h by `./web/html2h.h`
 - run `./web/docker-compose up` for testing
+
+
+#### Node-Red
+
+TODO: Configure: http-request + google-calendar + home-bridge

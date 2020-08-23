@@ -51,9 +51,15 @@ void AbstractStream::process()
             return;
         #endif
 
-        #if STORAGE != STORAGE_NONE
+        #if DATA_STORAGE != DATA_STORAGE_NONE
         case ACTION_SAVE:
             Relay::save();
+            return;
+        #endif
+
+        #if ACL_ALLOW == ACL_ALLOW_RESET
+        case ACTION_RESET:
+            SOFTWARE_RESET;
             return;
         #endif
 

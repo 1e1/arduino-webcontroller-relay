@@ -30,20 +30,6 @@
 
 
 /** ===================== **/
-/**       observers       **/
-/** ===================== **/
-
-// Restarts program from beginning but does not reset the peripherals and registers
-__attribute__((always_inline)) inline void software_reset();
-void software_reset()
-{
-  asm volatile ("jmp 0");
-}
-
-
-
-
-/** ===================== **/
 
 
 
@@ -67,14 +53,6 @@ void setup()
   uint8_t i = MODE_SERIAL_COUNT(MODE_SERIAL);
 
   #if MODE_SERIAL & MODE_SERIAL_ETHERNET
-  randomSeed(analogRead(0));
-
-  const uint8_t deviceNumber = random(2, 253);
-  byte mac[] = MAC_ADDRESS(deviceNumber);
-
-  Ethernet.begin(mac, DHCP_TIMEOUT_MS);
-  LOGLN(Ethernet.localIP());
-
   _engines[--i] = new InterfaceEthernet();
   _engines[i]->begin();
   #endif

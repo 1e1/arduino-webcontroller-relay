@@ -12,6 +12,12 @@
 
 
 
+#if MODE_VERBOSE & MODE_VERBOSE_BONJOUR
+#include <EthernetBonjour.h>
+#endif
+
+
+
 #define ETH_SPI_D0_UNO    10
 #define ETH_SPI_D1_UNO    11
 #define ETH_SPI_D2_UNO    12

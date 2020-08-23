@@ -15,6 +15,13 @@ static size_t webpage_len = ARRAYLEN(webpage);
 
 
 
+char uint8_t2hex(const uint8_t i)
+{  
+  return "0123456789ABCDEF"[0x0F & i];
+}
+
+
+
 
 /***********************************************************
  *                         PUBLIC                          *
@@ -25,6 +32,29 @@ static size_t webpage_len = ARRAYLEN(webpage);
 
 InterfaceEthernet::InterfaceEthernet()
 {
+  #if TYPE_MAC & TYPE_MAC_RANDOM
+  randomSeed(analogRead(0));
+
+  const uint8_t deviceNumber = random(2, 253);
+  #else
+  const uint8_t deviceNumber = DEVICE_NUMBER;
+  #endif
+
+  byte mac[] = MAC_ADDRESS(deviceNumber);
+
+  Ethernet.begin(mac, DHCP_TIMEOUT_MS);
+  LOGLN(Ethernet.localIP());
+
+  #if MODE_VERBOSE & MODE_VERBOSE_BONJOUR
+  char deviceName[] = DEVICE_NAME_MDNS(DEVICE_NAME);
+
+  const uint8_t deviceNameLength = ARRAYLEN(deviceName);
+  deviceName[deviceNameLength-1] = uint8_t2hex(deviceNumber);
+  deviceName[deviceNameLength-2] = uint8_t2hex(deviceNumber >> 4);
+
+  EthernetBonjour.begin(deviceName);
+  #endif
+
   this->_webServer = new EthernetServer(WEB_PORT);
 }
 
@@ -45,10 +75,9 @@ void InterfaceEthernet::loop()
 
   if (client.connected()) {
     if (client.available()) {
-
-      #if MODE_VERBOSE & MODE_VERBOSE_WEBAPP
       client.print(HEADER_START);
 
+      #if MODE_VERBOSE & MODE_VERBOSE_WEBAPP
       if (this->read()) {
         client.print(HEADER_END_ACTION);
         this->process();
@@ -60,7 +89,7 @@ void InterfaceEthernet::loop()
       }
       #else
       if (this->read()) {
-        client.print(HEADER_START HEADER_END_ACTION);
+        client.print(HEADER_END_ACTION);
         this->process();
       }
       #endif
@@ -75,6 +104,9 @@ void InterfaceEthernet::loop()
 
 void InterfaceEthernet::raise()
 {
+  #if MODE_VERBOSE & MODE_VERBOSE_BONJOUR
+  EthernetBonjour.run();
+  #endif
 }
 
 
