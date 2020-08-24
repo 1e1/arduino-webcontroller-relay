@@ -1,0 +1,11 @@
+FROM nodered/node-red
+
+
+# install plugins
+RUN npm install \
+    node-red-contrib-loop-processing \
+    node-red-node-pi-gpio \
+    node-red-contrib-dlna \
+    node-red-contrib-homekit \
+    node-red-contrib-alexa-local \
+    ;

@@ -32,7 +32,7 @@ char uint8_t2hex(const uint8_t i)
 
 InterfaceEthernet::InterfaceEthernet()
 {
-  #if TYPE_MAC & TYPE_MAC_RANDOM
+  #if TYPE_MAC & TYPE_MAC_DYNAMIC
   randomSeed(analogRead(0));
 
   const uint8_t deviceNumber = random(2, 253);
@@ -45,7 +45,10 @@ InterfaceEthernet::InterfaceEthernet()
   Ethernet.begin(mac, DHCP_TIMEOUT_MS);
   LOGLN(Ethernet.localIP());
 
-  #if MODE_VERBOSE & MODE_VERBOSE_BONJOUR
+  #if MODE_BONJOUR == MODE_BONJOUR_STATIC
+  EthernetBonjour.begin(DEVICE_NAME);
+  
+  #elif MODE_BONJOUR == MODE_BONJOUR_DYNAMIC
   char deviceName[] = DEVICE_NAME_MDNS(DEVICE_NAME);
 
   const uint8_t deviceNameLength = ARRAYLEN(deviceName);
@@ -104,7 +107,7 @@ void InterfaceEthernet::loop()
 
 void InterfaceEthernet::raise()
 {
-  #if MODE_VERBOSE & MODE_VERBOSE_BONJOUR
+  #if MODE_BONJOUR != MODE_BONJOUR_NONE
   EthernetBonjour.run();
   #endif
 }
