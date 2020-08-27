@@ -1,0 +1,31 @@
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+switch:
+
+  #- platform: rpi_gpio
+  #  ports:
+  #    11: Fan Office
+  #    12: Light Desk
+
+  - platform: http_plaintext
+    host: http://web
+    relays:
+      0: Fan Office
+      1: Light Desk
+      2: Light Kitchen
+      3: Light Living room
+      4: Light Bedroom 1
+      5: Light Bedroom 2
+      6: Light Garage
+      7: Light Garden

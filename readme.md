@@ -62,6 +62,26 @@ write anything and the read the help
 - standard Serial (Arduino.h)
 
 
+### integrations
+
+#### Home Assistant (hass)
+
+Install `http_plaintext` from `./web/hass/custom_compoenents/http_plaintext` to `/config/custom_compoenents/http_plaintext`, 
+then add the following lines into `configuration.yaml`
+
+```yaml
+switch:
+  - platform: http_plaintext
+    host: http://webrelay.local
+    relays:
+      0:  relayname 1
+      1:  relay name 2
+      2:  a relay name 3
+      30: another relayname 31
+      31: and this relayname 32
+```
+
+
 ### tools
 
 #### custom HTML

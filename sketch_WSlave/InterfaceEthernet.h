@@ -4,17 +4,12 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 #include <Ethernet.h>
+#include <EthernetBonjour.h>
 #include "config.h"
 #include "macro.h"
 #include "AbstractStream.h"
 #include "Relay.h"
 #include "_webApp.h"
-
-
-
-#if MODE_VERBOSE & MODE_VERBOSE_BONJOUR
-#include <EthernetBonjour.h>
-#endif
 
 
 

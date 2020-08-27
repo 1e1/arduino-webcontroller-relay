@@ -8,3 +8,25 @@ services:
             - "8080:80"
         environment:
             - NGINX_PORT=80
+
+    nodered:
+        build:
+            context: .
+            dockerfile: Dockerfile_nodered
+        environment:
+            - TZ=Europe/Paris
+        volumes:
+            - "./nodered:/data"
+        ports:
+            - "1880:1880"
+        restart: unless-stopped
+
+    hass:
+        image: homeassistant/home-assistant:stable
+        environment:
+            - TZ=Europe/Paris
+        volumes:
+            - "./hass:/config"
+        ports:
+            - "8123:8123"
+        restart: unless-stopped
