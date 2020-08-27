@@ -23,13 +23,13 @@ input{
     }
     u=_=>{
         x=_.split(' ');
-        document.getElementById(x[0]).setAttribute('value',x[1])
+        document.getElementById(x[1]).setAttribute('value',x[0])
     }
     w=_=>{
         _.split('\n').forEach(_=>{
             if(_){
                 x=_.split(' ');
-                document.body.innerHTML+=`<label>${x[0]}<input id=${x[0]} type=checkbox ${x[1]>0?'checked':' '} onchange="f('GET','/w/${x[0]}/'+255*this.checked,u)"></label>`;
+                document.body.innerHTML+=`<label>${x[1]}<input id=${x[1]} type=checkbox ${x[0]>0?'checked':' '} onchange="f('GET','/w/${x[1]}/'+1*this.checked,u)"></label>`;
                 u(_)
             }
         })
