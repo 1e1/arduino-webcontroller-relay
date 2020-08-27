@@ -120,4 +120,4 @@ class HttpPlainTextSwitch(SwitchEntity):
     def _parseResponse(self, request):
         response = request.text
         data = response.split()
-        self._state = data[1] == '1'
+        self._state = data[0] == '1'
