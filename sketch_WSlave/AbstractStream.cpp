@@ -102,9 +102,9 @@ void AbstractStream::terminate()
 
 void AbstractStream::_showOne(const uint8_t relay)
 {
-    this->_currentStream->print(relay);
-    this->_currentStream->print(SEP);
     this->_currentStream->print(Relay::getStateAt(relay));
+    this->_currentStream->print(SEP);
+    this->_currentStream->print(relay);
     this->_currentStream->print(Relay::isNcAt(relay) ? TEXT_NC : TEXT_NO);
     this->_currentStream->println(Relay::getPinAt(relay));
 }
