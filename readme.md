@@ -66,7 +66,9 @@ write anything and the read the help
 
 #### Home Assistant (hass)
 
-Install `http_plaintext` from `./web/hass/custom_compoenents/http_plaintext` to `/config/custom_compoenents/http_plaintext`, 
+![hass](./doc/hass/preview.png)
+
+Install `http_plaintext` from `./doc/hass/custom_compoenents/http_plaintext` to `/config/custom_compoenents/http_plaintext`, 
 then add the following lines into `configuration.yaml`
 
 ```yaml
@@ -81,6 +83,12 @@ switch:
       31: and this relayname 32
 ```
 
+#### NodeRed
+
+![hass](./doc/nodered/preview.png)
+
+Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`)
+
 
 ### tools
 
@@ -90,7 +98,18 @@ switch:
 - export to ./sketch_WSlave/_webApp.h by `./web/html2h.h`
 - run `./web/docker-compose up` for testing
 
+#### docker-compose
 
-#### Node-Red
+```bash
+$ ./web
+$ docker-compose up
+```
 
-TODO: Configure: http-request + google-calendar + home-bridge
+- test custom HTML on http://{docker-machine}:8080
+- test Home Assistant on http://{docker-machine}:8123
+- test NodeRed on http://{docker-machine}:1880
+
+
+#### Suggestions
+
+TODO: read states from calendar

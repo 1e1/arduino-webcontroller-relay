@@ -5,7 +5,8 @@
 /* mode */
 #define MODE_SERIAL_USB         1
 #define MODE_SERIAL_ETHERNET    2
-#define MODE_SERIAL_ALL         (MODE_SERIAL_USB + MODE_SERIAL_ETHERNET)
+#define MODE_SERIAL_LED         4
+#define MODE_SERIAL_ALL         (MODE_SERIAL_USB + MODE_SERIAL_ETHERNET + MODE_SERIAL_LED)
 #define MODE_SERIAL_COUNT(m)    (bool(m & MODE_SERIAL_USB) + bool(m & MODE_SERIAL_ETHERNET))
 #define MODE_VERBOSE_NONE       0
 #define MODE_VERBOSE_HELP       1
