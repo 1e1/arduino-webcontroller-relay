@@ -1,8 +1,8 @@
 {
-  "domain": "HTTP_INLINE",
-  "name": "http_inline",
-  "config_flow": true,
-  "documentation": "https://github.com/1e1/arduino-webcontroller-relay",
-  "codeowners": ["@1e1"],
-  "quality_scale": "silver"
+    "domain": "http_inline",
+    "name": "HTTP inline",
+    "config_flow": true,
+    "documentation": "https://github.com/1e1/arduino-webcontroller-relay",
+    "codeowners": ["@1e1"],
+    "quality_scale": "silver"
 }
