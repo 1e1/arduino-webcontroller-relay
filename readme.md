@@ -58,8 +58,7 @@ write anything and the read the help
 
 ### software
 
-- Ethernet.h
-- standard Serial (Arduino.h)
+- EthernetBonjour if `MODE_BONJOUR` != `MODE_BONJOUR_NONE`
 
 
 ### integrations
@@ -68,12 +67,12 @@ write anything and the read the help
 
 ![hass](./doc/hass/preview.png)
 
-Install `http_plaintext` from `./doc/hass/custom_compoenents/http_plaintext` to `/config/custom_compoenents/http_plaintext`, 
+Install `http_inline` from `./doc/hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`, 
 then add the following lines into `configuration.yaml`
 
 ```yaml
 switch:
-  - platform: http_plaintext
+  - platform: http_inline
     host: http://webrelay.local
     relays:
       0:  relayname 1

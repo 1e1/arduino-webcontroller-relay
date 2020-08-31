@@ -18,7 +18,7 @@ switch:
   #    11: Fan Office
   #    12: Light Desk
 
-  - platform: http_plaintext
+  - platform: http_inline
     host: http://web
     relays:
       0: Fan Office
