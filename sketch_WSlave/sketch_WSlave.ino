@@ -25,7 +25,7 @@
 #include "InterfaceEthernet.h"
 #include "InterfaceSerial.h"
 #include "FastTimer.h"
-#include "LedBuiltIn.h"
+#include "InterfaceLedBuiltIn.h"
 
 
 
@@ -41,7 +41,6 @@ static AbstractInterface* _engines[MODE_SERIAL_COUNT(MODE_SERIAL)];
 
 void setup()
 {
-  BUSYLED_IDLE;
   DEBUG_START();
   LOGLN(F("DEBUG ON"));
 
@@ -62,8 +61,12 @@ void setup()
   _engines[i]->begin();
   #endif
 
+  #if MODE_SERIAL & MODE_SERIAL_LED
+  _engines[--i] = new InterfaceLedBuiltIn();
+  _engines[i]->begin();
+  #endif
+
   LOGLN(F("CONFIGURED"));
-  BUSYLED_NONE;
 }
 
 
@@ -75,11 +78,9 @@ void loop()
 
   while (i-->0) {
     if (isTick) {
-      // broadcast
       _engines[i]->raise();
 
       if (0 == _timer->getTime()) {
-        // maintain
         _engines[i]->reset();
       }
     }

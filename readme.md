@@ -58,20 +58,21 @@ write anything and the read the help
 
 ### software
 
-- Ethernet.h
-- standard Serial (Arduino.h)
+- EthernetBonjour if `MODE_BONJOUR` != `MODE_BONJOUR_NONE`
 
 
 ### integrations
 
 #### Home Assistant (hass)
 
-Install `http_plaintext` from `./web/hass/custom_compoenents/http_plaintext` to `/config/custom_compoenents/http_plaintext`, 
+![hass](./doc/hass/preview.png)
+
+Install `http_inline` from `./doc/hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`, 
 then add the following lines into `configuration.yaml`
 
 ```yaml
 switch:
-  - platform: http_plaintext
+  - platform: http_inline
     host: http://webrelay.local
     relays:
       0:  relayname 1
@@ -80,6 +81,12 @@ switch:
       30: another relayname 31
       31: and this relayname 32
 ```
+
+#### NodeRed
+
+![hass](./doc/nodered/preview.png)
+
+Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`)
 
 
 ### tools
@@ -90,7 +97,18 @@ switch:
 - export to ./sketch_WSlave/_webApp.h by `./web/html2h.h`
 - run `./web/docker-compose up` for testing
 
+#### docker-compose
 
-#### Node-Red
+```bash
+$ ./web
+$ docker-compose up
+```
 
-TODO: Configure: http-request + google-calendar + home-bridge
+- test custom HTML on http://{docker-machine}:8080
+- test Home Assistant on http://{docker-machine}:8123
+- test NodeRed on http://{docker-machine}:1880
+
+
+#### Suggestions
+
+TODO: read states from calendar

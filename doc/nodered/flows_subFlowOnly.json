@@ -1,0 +1,145 @@
+[
+    {
+        "id": "6822ebbe.24ce94",
+        "type": "subflow",
+        "name": "syncWebcontrollerRelay",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 40,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "27b5f0bf.bff2d8"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 860,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "5c4a5094.4ac118",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "host",
+                "type": "str",
+                "value": "http://web"
+            }
+        ],
+        "color": "#DDAA99"
+    },
+    {
+        "id": "e6b0f0e2.054dc8",
+        "type": "http request",
+        "z": "6822ebbe.24ce94",
+        "name": "read",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "{{{host}}}/r/{{{relay.id}}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 530,
+        "y": 40,
+        "wires": [
+            [
+                "5c4a5094.4ac118"
+            ]
+        ]
+    },
+    {
+        "id": "c99182c2.57d91",
+        "type": "switch",
+        "z": "6822ebbe.24ce94",
+        "name": "has relayState?",
+        "property": "relay.state",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "null"
+            },
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 340,
+        "y": 100,
+        "wires": [
+            [
+                "e6b0f0e2.054dc8"
+            ],
+            [
+                "99846f2.1bbd39"
+            ]
+        ]
+    },
+    {
+        "id": "99846f2.1bbd39",
+        "type": "http request",
+        "z": "6822ebbe.24ce94",
+        "name": "write",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "{{{host}}}/w/{{{relay.id}}}/{{{relay.state}}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 530,
+        "y": 160,
+        "wires": [
+            [
+                "5c4a5094.4ac118"
+            ]
+        ]
+    },
+    {
+        "id": "5c4a5094.4ac118",
+        "type": "function",
+        "z": "6822ebbe.24ce94",
+        "name": "set relayState",
+        "func": "msg.relay.state = 0 != msg.payload.split(/\\D+/)[0];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 720,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "27b5f0bf.bff2d8",
+        "type": "function",
+        "z": "6822ebbe.24ce94",
+        "name": "set Host",
+        "func": "msg.host = env.get(\"host\");\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 160,
+        "y": 100,
+        "wires": [
+            [
+                "c99182c2.57d91"
+            ]
+        ]
+    }
+]

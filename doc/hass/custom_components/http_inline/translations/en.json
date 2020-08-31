@@ -1,0 +1,24 @@
+{
+	"config": {
+		"step": {
+			"user": {
+				"title": "HTTP inline",
+				"description": "Set up a Webcontroller-Relay - https://github.com/1e1/arduino-webcontroller-relay",
+				"data": {
+					"host": "Host URL",
+					"name": "Name of the integration",
+					"path_read": "path URL for reading",
+					"path_write": "path URL for writing",
+					"first_relay_id": "first relayId (include)",
+					"last_relay_id": "last relayId (exclude)"
+				}
+			}
+		},
+		"error": {
+			"unknown": "Unknown error: please retry later"
+		},
+		"abort": {
+			"already_configured": "Host already configured"
+		}
+	}
+}

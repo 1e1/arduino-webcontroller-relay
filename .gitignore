@@ -1,5 +1,7 @@
 !**/.keep
+**/__pycache__
 
 _.html
 web/nodered
 web/hass
+

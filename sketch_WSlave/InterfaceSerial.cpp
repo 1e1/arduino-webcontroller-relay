@@ -48,10 +48,11 @@ void InterfaceSerial::loop()
 
 void InterfaceSerial::raise()
 {
-  // Serial.println(F("IDLE"));
+  LOGLN(F("[raise]"));
 }
 
 
 void InterfaceSerial::reset()
 {
+  LOGLN(F("[reset]"));
 }

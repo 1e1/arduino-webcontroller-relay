@@ -1,4 +1,4 @@
-#include "LedBuiltIn.h"
+#include "InterfaceLedBuiltIn.h"
 
 
 
@@ -22,7 +22,7 @@
 
 
 
-LedBuiltIn::LedBuiltIn(const byte pin)
+InterfaceLedBuiltIn::InterfaceLedBuiltIn(const byte pin)
 {
   this->_pin = pin;
   pinMode(this->_pin, OUTPUT);
