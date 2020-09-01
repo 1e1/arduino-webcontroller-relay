@@ -2,25 +2,22 @@
 
 import logging
 
+import homeassistant.helpers.config_validation as cv
 import requests
 import voluptuous as vol
-
 from homeassistant.components.switch import PLATFORM_SCHEMA, SwitchEntity
-from homeassistant.const import CONF_NAME, CONF_HOST, HTTP_OK
-import homeassistant.helpers.config_validation as cv
+from homeassistant.const import CONF_HOST, CONF_NAME, HTTP_OK
 
 from .const import (
-    DOMAIN, 
-    CONF_PATH_PATTERN_READ, 
-    CONF_PATH_PATTERN_WRITE, 
-    CONF_RELAY_ID_MIN, 
-    CONF_RELAY_ID_MAX, 
-    CONF_RELAYS, 
-    DEFAULT_NAME, 
-    DEFAULT_PATH_PATTERN_READ, 
+    CONF_NB_RELAYS,
+    CONF_PATH_PATTERN_READ,
+    CONF_PATH_PATTERN_WRITE,
+    CONF_RELAY_NAMES,
+    CONF_RELAYS,
+    DEFAULT_NAME,
+    DEFAULT_PATH_PATTERN_READ,
     DEFAULT_PATH_PATTERN_WRITE,
 )
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,8 +27,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_HOST): cv.url,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_PATH_PATTERN_READ, default=DEFAULT_PATH_PATTERN_READ): cv.string,
-        vol.Optional(CONF_PATH_PATTERN_WRITE, default=DEFAULT_PATH_PATTERN_WRITE): cv.string,
+        vol.Optional(
+            CONF_PATH_PATTERN_READ, default=DEFAULT_PATH_PATTERN_READ
+        ): cv.string,
+        vol.Optional(
+            CONF_PATH_PATTERN_WRITE, default=DEFAULT_PATH_PATTERN_WRITE
+        ): cv.string,
         vol.Required(CONF_RELAYS): _SWITCHES_SCHEMA,
     }
 )
@@ -44,52 +45,48 @@ def async_setup_platform(hass, config, add_entities, discovery_info=None) -> Non
     path_write = config[CONF_PATH_PATTERN_WRITE]
 
     try:
-        response = requests.get(host, timeout=10)
+        requests.get(host, timeout=10)
     except requests.exceptions.MissingSchema:
         _LOGGER.error(
             "Missing host or schema in configuration. Add http:// to your URL"
         )
-        return False
+        return
     except requests.exceptions.ConnectionError:
-        _LOGGER.error("No route to device at {}".format(host))
-        return False
+        _LOGGER.error("No route to device at %d", host)
+        return
+
+    net_config = {
+        CONF_HOST: host,
+        CONF_PATH_PATTERN_READ: path_read,
+        CONF_PATH_PATTERN_WRITE: path_write,
+    }
 
     dev = []
     relays = config[CONF_RELAYS]
-    for relayId, name in relays.items():
-        dev.append(
-            HttpInlineSwitch(
-                host,
-                path_read,
-                path_write,
-                relayId,
-                name,
-            )
-        )
+    for relay_id, name in relays.items():
+        dev.append(HttpInlineSwitch(net_config, relay_id, name,))
 
     async_add_entities(dev, True)
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up WebController-Relay entities based on a config entry."""
-    name = config_entry.data[CONF_NAME]
+    # name = config_entry.data[CONF_NAME]
     host = config_entry.data[CONF_HOST]
     path_read = config_entry.data[CONF_PATH_PATTERN_READ]
     path_write = config_entry.data[CONF_PATH_PATTERN_WRITE]
-    relay_id_min = config_entry.data[CONF_RELAY_ID_MIN]
-    relay_id_max = config_entry.data[CONF_RELAY_ID_MAX]
+    nb_relays = config_entry.data[CONF_NB_RELAYS]
+    relay_names = config_entry.data[CONF_RELAY_NAMES]
+
+    net_config = {
+        CONF_HOST: host,
+        CONF_PATH_PATTERN_READ: path_read,
+        CONF_PATH_PATTERN_WRITE: path_write,
+    }
 
     dev = []
-    for relayId in range(relay_id_min, relay_id_max):
-        dev.append(
-            HttpInlineSwitch(
-                host,
-                path_read,
-                path_write,
-                relayId,
-                "{} #{}".format(name, relayId),
-            )
-        )
+    for i in range(0, nb_relays):
+        dev.append(HttpInlineSwitch(net_config, i, relay_names[i],))
 
     async_add_entities(dev, True)
 
@@ -97,12 +94,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class HttpInlineSwitch(SwitchEntity):
     """Representation of an http_inline switch."""
 
-    def __init__(self, host, path_read, path_write, relayId, name) -> None:
+    def __init__(self, net_config, relay_id, name) -> None:
         """Initialize the switch."""
-        self._host = host
-        self._path_read = path_read
-        self._path_write = path_write
-        self._relayId = relayId
+        self._host = net_config[CONF_HOST]
+        self._path_read = net_config[CONF_PATH_PATTERN_READ]
+        self._path_write = net_config[CONF_PATH_PATTERN_WRITE]
+        self._relay_id = relay_id
         self._name = name
         self._state = None
         self._available = True
@@ -138,25 +135,25 @@ class HttpInlineSwitch(SwitchEntity):
 
     def _read(self):
         path = self._path_read
-        path = path.replace('{relay_id}', str(self._relayId))
+        path = path.replace("{relay_id}", str(self._relay_id))
         request = requests.get(self._host + path, timeout=10)
         if request.status_code != HTTP_OK:
             _LOGGER.error("Can't set mode")
             self._available = False
         else:
-            self._parseResponse(request)
+            self._parse_response(request)
 
     def _write(self, state):
         path = self._path_write
-        path = path.replace('{relay_id}', str(self._relayId))
-        path = path.replace('{state}', '1' if state else '0')
+        path = path.replace("{relay_id}", str(self._relay_id))
+        path = path.replace("{state}", "1" if state else "0")
         request = requests.post(self._host + path, timeout=10)
         if request.status_code == HTTP_OK:
-            self._parseResponse(request)
+            self._parse_response(request)
         else:
-            _LOGGER.error("Can't switch relay {} at {}".format(self._relayId, self._host))
+            _LOGGER.error("Can't switch relay %d at %s", self._relay_id, self._host)
 
-    def _parseResponse(self, request) -> None:
+    def _parse_response(self, request) -> None:
         response = request.text
         data = response.split()
-        self._state = data[0] == '1'
+        self._state = data[0] == "1"
