@@ -87,15 +87,16 @@ switch:
   - platform: command_line
     switches:
       {sluggedEntityId}:
-        command_on: "/usr/bin/curl -X GET http://web/w/{relayId}/1"
-        command_off: "/usr/bin/curl -X GET http://web/w/{relayId}/0"
-        command_state: "/usr/bin/curl -X GET http://web/r/{relayId}"
+        command_on: "/usr/bin/curl -X GET http://{host}/w/{relayId}/1"
+        command_off: "/usr/bin/curl -X GET http://{host}/w/{relayId}/0"
+        command_state: "/usr/bin/curl -X GET http://{host}/r/{relayId}"
         value_template: '{{ value.split()[0] == "1" }}'
         friendly_name: {friendlyName}
 ```
 
 And customize:
 - `{sluggedEntityId}`: HASS entity ID
+- `{host}`: WebController IP or host
 - `{relayId}`: WebController ID
 - `{friendlyName}`: a free text
 
@@ -106,15 +107,15 @@ switch:
   - platform: command_line
     switches:
       r0:
-        command_on: "/usr/bin/curl -X GET http://web/w/0/1"
-        command_off: "/usr/bin/curl -X GET http://web/w/0/0"
-        command_state: "/usr/bin/curl -X GET http://web/r/0"
+        command_on: "/usr/bin/curl -X GET http://webrelay.local/w/0/1"
+        command_off: "/usr/bin/curl -X GET http://webrelay.local/w/0/0"
+        command_state: "/usr/bin/curl -X GET http://webrelay.local/r/0"
         value_template: '{{ value.split()[0] == "1" }}'
         friendly_name: "Relay #0"
       r42:
-        command_on: "/usr/bin/curl -X GET http://web/w/42/1"
-        command_off: "/usr/bin/curl -X GET http://web/w/42/0"
-        command_state: "/usr/bin/curl -X GET http://web/r/42"
+        command_on: "/usr/bin/curl -X GET http://webrelay.local/w/42/1"
+        command_off: "/usr/bin/curl -X GET http://webrelay.local/w/42/0"
+        command_state: "/usr/bin/curl -X GET http://webrelay.local/r/42"
         value_template: '{{ value.split()[0] == "1" }}'
         friendly_name: "Relay #42"
 ```
