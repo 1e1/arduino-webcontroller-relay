@@ -10,7 +10,8 @@ Edit `./sketch_WSlave/config.h`
 
 ## Commands
 
-Standard REST routes:
+Standard no-REST routes:
+
 - **$**: `/$`
   full status list of all pins if `#define MODE_VERBOSE MODE_VERBOSE_LIST` (or `MODE_VERBOSE_ALL` by default)
 
@@ -31,10 +32,12 @@ Standard REST routes:
   set a relay to NO mode
 
 - save (**!**): `/!`
-  save the wiring into EEPROM, not the values ON/OFF
+  save the wiring into EEPROM, not the values ON/OFF if `#define DATA_STORAGE != DATA_STORAGE_NONE`
 
 - reset (**~**): `/~`
   reset the board  if `#define ACL_ALLOW ACL_ALLOW_RESET` (or `ACL_ALLOW_RESET` by default)
+
+Read the ![swagger](./doc/swagger.yml)
 
 
 ## webApp
