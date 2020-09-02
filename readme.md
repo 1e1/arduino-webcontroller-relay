@@ -10,7 +10,8 @@ Edit `./sketch_WSlave/config.h`
 
 ## Commands
 
-Standard REST routes:
+Standard no-REST routes:
+
 - **$**: `/$`
   full status list of all pins if `#define MODE_VERBOSE MODE_VERBOSE_LIST` (or `MODE_VERBOSE_ALL` by default)
 
@@ -31,10 +32,12 @@ Standard REST routes:
   set a relay to NO mode
 
 - save (**!**): `/!`
-  save the wiring into EEPROM, not the values ON/OFF
+  save the wiring into EEPROM, not the values ON/OFF if `#define DATA_STORAGE != DATA_STORAGE_NONE`
 
 - reset (**~**): `/~`
   reset the board  if `#define ACL_ALLOW ACL_ALLOW_RESET` (or `ACL_ALLOW_RESET` by default)
+
+Read the ![swagger](./doc/swagger.yml)
 
 
 ## webApp
@@ -67,19 +70,53 @@ write anything and the read the help
 
 ![hass](./doc/hass/preview.png)
 
-Install `http_inline` from `./doc/hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`, 
-then add the following lines into `configuration.yaml`
+##### UI Wizard setup
+
+If the component is not embed in your HASS version, 
+install `http_inline` from `./doc/hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`, 
+then use the wizard. 
+
+
+##### CLI install
+
+Add the following lines into `configuration.yaml`, 
+and apply this template:
 
 ```yaml
 switch:
-  - platform: http_inline
-    host: http://webrelay.local
-    relays:
-      0:  relayname 1
-      1:  relay name 2
-      2:  a relay name 3
-      30: another relayname 31
-      31: and this relayname 32
+  - platform: command_line
+    switches:
+      {sluggedEntityId}:
+        command_on: "/usr/bin/curl -X GET http://web/w/{relayId}/1"
+        command_off: "/usr/bin/curl -X GET http://web/w/{relayId}/0"
+        command_state: "/usr/bin/curl -X GET http://web/r/{relayId}"
+        value_template: '{{ value.split()[0] == "1" }}'
+        friendly_name: {friendlyName}
+```
+
+And customize:
+- `{sluggedEntityId}`: HASS entity ID
+- `{relayId}`: WebController ID
+- `{friendlyName}`: a free text
+
+Example:
+
+```yaml
+switch:
+  - platform: command_line
+    switches:
+      r0:
+        command_on: "/usr/bin/curl -X GET http://web/w/0/1"
+        command_off: "/usr/bin/curl -X GET http://web/w/0/0"
+        command_state: "/usr/bin/curl -X GET http://web/r/0"
+        value_template: '{{ value.split()[0] == "1" }}'
+        friendly_name: "Relay #0"
+      r42:
+        command_on: "/usr/bin/curl -X GET http://web/w/42/1"
+        command_off: "/usr/bin/curl -X GET http://web/w/42/0"
+        command_state: "/usr/bin/curl -X GET http://web/r/42"
+        value_template: '{{ value.split()[0] == "1" }}'
+        friendly_name: "Relay #42"
 ```
 
 #### NodeRed

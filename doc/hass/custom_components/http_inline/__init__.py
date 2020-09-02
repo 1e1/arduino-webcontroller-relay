@@ -1,10 +1,11 @@
-"""Support for WebController-Relay devices"""
+"""Support for WebController-Relay devices."""
+
 import asyncio
 import logging
 
-import requests
 import voluptuous as vol
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_ID, CONF_NAME
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType, HomeAssistantType
@@ -12,7 +13,7 @@ from homeassistant.helpers.typing import ConfigType, HomeAssistantType
 from .const import (
     CONF_PATH_PATTERN_READ,
     CONF_PATH_PATTERN_WRITE,
-    CONF_RELAYS,
+    CONF_SWITCHES,
     DEFAULT_NAME,
     DEFAULT_PATH_PATTERN_READ,
     DEFAULT_PATH_PATTERN_WRITE,
@@ -42,7 +43,7 @@ HTTP_INLINE_SCHEMA = vol.Schema(
         vol.Optional(
             CONF_PATH_PATTERN_WRITE, default=DEFAULT_PATH_PATTERN_WRITE
         ): cv.string,
-        vol.Required(CONF_RELAYS): _SWITCHES_SCHEMA,
+        vol.Required(CONF_SWITCHES): _SWITCHES_SCHEMA,
     }
 )
 

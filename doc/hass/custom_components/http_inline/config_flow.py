@@ -1,21 +1,22 @@
 """Config flow to configure the WebController-Relay integration."""
+
 import logging
 
 import requests
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_NAME, HTTP_OK
-from homeassistant.helpers import config_validation as cv
 
-from .const import ( # pylint: disable=unused-import
-    CONF_NB_RELAYS,
+from .const import (  # pylint: disable=unused-import
+    CONF_NB_SWITCHES,
     CONF_PATH_PATTERN_READ,
     CONF_PATH_PATTERN_WRITE,
-    CONF_RELAY_I_NAME_PATTERN,
-    CONF_RELAY_NAMES,
+    CONF_SWITCH_I_NAME_PATTERN,
+    CONF_SWITCH_NAMES,
     DEFAULT_HOST,
     DEFAULT_NAME,
-    DEFAULT_NB_RELAYS,
+    DEFAULT_NB_SWITCHES,
     DEFAULT_PATH_PATTERN_READ,
     DEFAULT_PATH_PATTERN_WRITE,
     DOMAIN,
@@ -36,8 +37,8 @@ class HttpInlineFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._name = None
         self._path_read = None
         self._path_write = None
-        self._nb_relays = 0
-        self._relay_names = []
+        self._nb_switches = 0
+        self._switch_names = []
 
     def _global_data_schema(self, user_input=None):
         if user_input is None:
@@ -49,8 +50,8 @@ class HttpInlineFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_HOST, default=user_input.get(CONF_HOST, DEFAULT_HOST)
                 ): str,
                 vol.Required(
-                    CONF_NB_RELAYS,
-                    default=user_input.get(CONF_NB_RELAYS, DEFAULT_NB_RELAYS),
+                    CONF_NB_SWITCHES,
+                    default=user_input.get(CONF_NB_SWITCHES, DEFAULT_NB_SWITCHES),
                 ): int,
                 vol.Optional(
                     CONF_NAME, default=user_input.get(CONF_NAME, DEFAULT_NAME)
@@ -70,14 +71,14 @@ class HttpInlineFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
 
-    def _relays_data_schema(self, user_input=None):
+    def _switches_data_schema(self, user_input=None):
         if user_input is None:
             user_input = {}
 
         schema = vol.Schema({})
-        for i in range(0, self._nb_relays):
-            name = CONF_RELAY_I_NAME_PATTERN.format(i)
-            default = "{} #{}".format(self._name, i)
+        for i in range(0, self._nb_switches):
+            name = CONF_SWITCH_I_NAME_PATTERN.format(i)
+            default = f"{self._name} #{i}"
 
             schema = schema.extend({vol.Optional(name, default=default): str})
 
@@ -89,8 +90,8 @@ class HttpInlineFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             CONF_NAME: self._name,
             CONF_PATH_PATTERN_READ: self._path_read,
             CONF_PATH_PATTERN_WRITE: self._path_write,
-            CONF_NB_RELAYS: self._nb_relays,
-            CONF_RELAY_NAMES: self._relay_names,
+            CONF_NB_SWITCHES: self._nb_switches,
+            CONF_SWITCH_NAMES: self._switch_names,
         }
 
     def _show_global_setup_form(self, user_input=None, errors=None):
@@ -102,11 +103,11 @@ class HttpInlineFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors or {},
         )
 
-    def _show_relays_setup_form(self, user_input=None, errors=None):
+    def _show_switches_setup_form(self, user_input=None, errors=None):
         """Show the setup form to the user_bis."""
         return self.async_show_form(
-            step_id="relay",
-            data_schema=self._relays_data_schema(user_input),
+            step_id="switch",
+            data_schema=self._switches_data_schema(user_input),
             errors=errors or {},
         )
 
@@ -136,9 +137,9 @@ class HttpInlineFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 self._path_write = user_input.get(
                     CONF_PATH_PATTERN_WRITE, DEFAULT_PATH_PATTERN_WRITE
                 )
-                self._nb_relays = user_input[CONF_NB_RELAYS]
+                self._nb_switches = user_input[CONF_NB_SWITCHES]
 
-                return await self.async_step_relay()
+                return await self.async_step_switch()
 
             _LOGGER.error("Server error %d", request.status_code)
             errors[CONF_HOST] = "Server error"
@@ -163,21 +164,21 @@ class HttpInlineFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self._show_global_setup_form(user_input, errors)
 
-    async def async_step_relay(self, user_input=None):
+    async def async_step_switch(self, user_input=None):
         """Handle a flow initiated by the user."""
         errors = {}
 
         if user_input is None:
-            return self._show_relays_setup_form(user_input, errors)
+            return self._show_switches_setup_form(user_input, errors)
 
-        self._relay_names = [None] * self._nb_relays
+        self._switch_names = [None] * self._nb_switches
 
-        for i in range(0, self._nb_relays):
-            key = CONF_RELAY_I_NAME_PATTERN.format(i)
+        for i in range(0, self._nb_switches):
+            key = CONF_SWITCH_I_NAME_PATTERN.format(i)
             if key in user_input:
-                self._relay_names[i] = user_input[key]
+                self._switch_names[i] = user_input[key]
             else:
-                return self._show_relays_setup_form(user_input, errors)
+                return self._show_switches_setup_form(user_input, errors)
 
         return await self.async_step_import(user_input)
 
