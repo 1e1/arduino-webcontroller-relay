@@ -27,7 +27,7 @@
 
 
 /** HELP **/
-#define TEXT_HELP F("** HELP\n** /<action>\\w/(<relay>\\d+(/<extra>\\d+)?)?\n")
+#define TEXT_HELP F("** HELP\n** /<action>\\w/(<relay>\\d+(/<extra>\\d+)?)?\n\n")
 
 
 #define DEBUG 0

@@ -34,10 +34,10 @@ void InterfaceSerial::loop()
   if (Serial.available() > 0) {
     if (this->read()) {
       this->process();
-      Serial.println();
+      LOGLN();
     } else {
       #if MODE_VERBOSE & MODE_VERBOSE_HELP
-      Serial.println(TEXT_HELP);
+      Serial.print(TEXT_HELP);
       #endif
     }
 
