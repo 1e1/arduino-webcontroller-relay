@@ -46,7 +46,7 @@
 
 // ETH conf
 // =====================
-#define DHCP_TIMEOUT_MS 3000
+#define DHCP_TIMEOUT_MS 30000
 #define WEB_PORT        80
 // =====================
 

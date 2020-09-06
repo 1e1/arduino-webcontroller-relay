@@ -20,11 +20,11 @@ input{
         };
         x.open(a,u);
         x.send()
-    }
+    };
     u=_=>{
         x=_.split(' ');
         document.getElementById(x[1]).setAttribute('value',x[0])
-    }
+    };
     w=_=>{
         _.split('\n').forEach(_=>{
             if(_){
@@ -33,7 +33,7 @@ input{
                 u(_)
             }
         })
-    }
+    };
 </script>
 </head>
 <body onload="f('GET','/all.txt',w)">

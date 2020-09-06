@@ -43,7 +43,7 @@ void Relay::begin()
 
 const bool Relay::exists(const uint8_t relayId)
 {
-    return Relay::getPinAt(relayId) != PIN_NONE;
+    return Relay::getPinAt(relayId) != PIN_NONE & _MASK_PIN;
 }
 
 

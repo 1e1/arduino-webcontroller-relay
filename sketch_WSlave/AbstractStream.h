@@ -47,6 +47,8 @@ class AbstractStream : public AbstractInterface {
   void _showAll();
 
   bool _findUntil(const int terminator, size_t length);
+  uint8_t _parseInt();
+  char _read();
 
   Stream* _currentStream;
 
