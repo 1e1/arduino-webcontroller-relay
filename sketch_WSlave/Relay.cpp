@@ -83,7 +83,7 @@ void Relay::isNcAt(const uint8_t relayId, const bool isNc)
 
 const bool Relay::getStateAt(const uint8_t relayId)
 {
-    return bitRead_boolean(Relay::_options[relayId], _BIT_IS_NC) ^ bitRead_boolean(Relay::_options[relayId], _BIT_IS_ACTIVE);
+    return Relay::isNcAt(relayId) ^ Relay::_isActive(relayId);
 }
 
 
@@ -92,8 +92,10 @@ void Relay::setStateAt(const uint8_t relayId, const bool state)
     bitWrite_boolean(
             Relay::_options[relayId],
             _BIT_IS_ACTIVE,
-            bitRead_boolean(Relay::_options[relayId], _BIT_IS_NC) ^ state
+            Relay::isNcAt(relayId) ^ state
     );
+
+    Relay::_digitalWrite(relayId);
 }
 
 
@@ -103,6 +105,21 @@ void Relay::setStateAt(const uint8_t relayId, const bool state)
  *                        PROTECTED                        *
  **********************************************************/
 
+
+
+bool Relay::_isActive(const uint8_t relayId)
+{
+    return bitRead_boolean(Relay::_options[relayId], _BIT_IS_ACTIVE);
+}
+
+
+void Relay::_digitalWrite(const uint8_t relayId)
+{
+    const uint8_t pin = Relay::getPinAt(relayId);
+    const bool isActive = Relay::_isActive(relayId);
+
+    digitalWrite(pin, isActive);
+}
 
 
 void Relay::_save(const uint8_t relayId)
