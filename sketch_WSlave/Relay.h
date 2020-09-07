@@ -33,6 +33,8 @@ class Relay {
   static void setStateAt(const uint8_t relayId, const bool value);
 
   protected:
+  static bool _isActive(const uint8_t relayId);
+  static void _digitalWrite(const uint8_t relayId);
   static void _save(const uint8_t relayId);
 
   static uint8_t _options[NB_RELAYS];
