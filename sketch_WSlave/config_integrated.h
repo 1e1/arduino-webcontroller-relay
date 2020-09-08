@@ -22,6 +22,7 @@
 // a number between 2 and 253
 #define DEVICE_NUMBER   12
 #define DEVICE_NAME     "webrelay"
+#define LOOP_SLEEP_MS   0
 // =====================
 
 

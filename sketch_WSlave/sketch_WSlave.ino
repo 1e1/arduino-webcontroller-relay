@@ -83,10 +83,14 @@ void loop()
       if (0 == _timer->getTime()) {
         _engines[i]->reset();
       }
+    } else {
+      _engines[i]->loop();
     }
-
-    _engines[i]->loop();
   }
+
+  #if LOOP_SLEEP_MS > 0
+  delay(LOOP_SLEEP_MS);
+  #endif
 }
 
 
