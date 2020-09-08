@@ -1,36 +1,31 @@
 <html>
 <head>
 <style>
-label{
-    width:255px;
-    padding:1em;
-    background:linear-gradient(200deg,#A8E,#95D);
-    display:inline-block
+body{
+    display:flex;
+    flex-wrap:wrap
 }
-input{
-    width:200px
+label{
+    padding:2em 200px;
+    flex:2;
+    background:linear-gradient(200deg,#A8E,#95D)
 }
 </style>
 <script>
     f=(a,u,w)=>{
         x=new XMLHttpRequest();
-        x.onload=_=>{
+        x.onload=a=>{
             if(200==x.status)
                 w(x.responseText)
         };
         x.open(a,u);
         x.send()
     };
-    u=_=>{
-        x=_.split(' ');
-        document.getElementById(x[1]).setAttribute('value',x[0])
-    };
-    w=_=>{
-        _.split('\n').forEach(_=>{
-            if(_){
-                x=_.split(' ');
-                document.body.innerHTML+=`<label>${x[1]}<input id=${x[1]} type=checkbox ${x[0]>0?'checked':' '} onchange="f('GET','/w/${x[1]}/'+1*this.checked,u)"></label>`;
-                u(_)
+    w=a=>{
+        a.split('\n').forEach(a=>{
+            if(a){
+                x=a.split(' ');
+                document.body.innerHTML+=`<label><input type=checkbox ${x[0]>0?'checked':' '} onchange="f('GET','/w/${x[1]}/'+1*this.checked,u)">${x[1]}</label>`
             }
         })
     };
