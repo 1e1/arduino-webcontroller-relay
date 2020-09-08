@@ -10,7 +10,6 @@
 
 
 
-static uint8_t readLimitNbRetry = 128;
 
 
 
@@ -102,7 +101,6 @@ void AbstractStream::process()
 
 void AbstractStream::terminate()
 {
-    this->_findUntil(LF, -1);
     this->_currentStream->flush();
 }
 
@@ -158,17 +156,5 @@ uint8_t AbstractStream::_parseInt()
 
 char AbstractStream::_read()
 {
-    uint8_t nbRetry = readLimitNbRetry;
-    int c;
-
-    do {
-        c = this->_currentStream->read();
-        if (c>=0) {
-            break;
-        }
-
-        delay(1);
-    } while (--nbRetry);
-
-    return c;
+    return this->_currentStream->read();
 }

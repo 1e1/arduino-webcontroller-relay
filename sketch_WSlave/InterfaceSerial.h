@@ -17,6 +17,9 @@ class InterfaceSerial : public AbstractStream {
   void raise();
   void reset();
 
+  protected:
+  char _read();
+
 };
 
 

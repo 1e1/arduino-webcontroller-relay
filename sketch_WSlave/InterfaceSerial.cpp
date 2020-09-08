@@ -10,6 +10,8 @@
 
 
 
+static uint8_t readLimitNbRetry = 128;
+
 
 
 
@@ -55,4 +57,30 @@ void InterfaceSerial::raise()
 void InterfaceSerial::reset()
 {
   LOGLN(F("[reset]"));
+}
+
+
+
+/***********************************************************
+ *                        PROTECTED                        *
+ **********************************************************/
+
+
+
+
+char InterfaceSerial::_read()
+{
+    uint8_t nbRetry = readLimitNbRetry;
+    int c;
+
+    do {
+        c = Serial.read();
+        if (c>=0) {
+            break;
+        }
+
+        delay(1);
+    } while (--nbRetry);
+
+    return c;
 }

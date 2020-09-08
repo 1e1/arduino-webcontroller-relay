@@ -42,13 +42,12 @@ class AbstractStream : public AbstractInterface {
   __attribute__((always_inline)) inline void setStream(Stream* inputStream) { this->_currentStream = inputStream; };
 
   protected:
-
   void _showOne(const uint8_t relay);
   void _showAll();
 
   bool _findUntil(const int terminator, size_t length);
   uint8_t _parseInt();
-  char _read();
+  virtual char _read();
 
   Stream* _currentStream;
 
