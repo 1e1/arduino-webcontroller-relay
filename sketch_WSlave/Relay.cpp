@@ -118,7 +118,7 @@ void Relay::_digitalWrite(const uint8_t relayId)
     const uint8_t pin = Relay::getPinAt(relayId);
     const bool isActive = Relay::_isActive(relayId);
 
-    digitalWrite(pin, isActive);
+    digitalWrite(pin, isActive ? HIGH : LOW);
 }
 
 
