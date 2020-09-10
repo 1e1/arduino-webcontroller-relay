@@ -2,33 +2,31 @@
 <head>
 <style>
 body{
-    display:flex;
-    flex-wrap:wrap
+    flex-wrap:wrap;
+    display:flex
 }
 label{
-    padding:2em 200px;
     flex:2;
+    padding:40pt;
     background:linear-gradient(200deg,#A8E,#95D)
 }
 </style>
 <script>
-    f=(a,u,w)=>{
+    f=(a,u)=>{
         x=new XMLHttpRequest();
-        x.onload=a=>{
-            if(200==x.status)
-                w(x.responseText)
-        };
-        x.open(a,u);
-        x.send()
+        x.open(a,u,0);
+        x.send();
+        if(200==x.status)
+            return x.responseText
     };
-    w=a=>{
+    x=a=>{
         a.split('\n').forEach(a=>{
             if(a){
                 x=a.split(' ');
-                document.body.innerHTML+=`<label><input type=checkbox ${x[0]>0?'checked':' '} onchange="f('GET','/w/${x[1]}/'+1*this.checked,u)">${x[1]}</label>`
+                document.body.innerHTML+=`<label><input type=checkbox ${x[0]>0?'checked':' '} onchange="f('GET','/w/${x[1]}/'+1*this.checked)">${x[1]}</label>`
             }
         })
     };
 </script>
 </head>
-<body onload="f('GET','/all.txt',w)">
+<body onload="x(f('GET','/all.txt'))">

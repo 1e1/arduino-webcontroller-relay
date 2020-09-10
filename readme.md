@@ -2,6 +2,8 @@
 
 A single controller connected by Web or USB.
 
+![landscape](./doc/hardware.jpg)
+
 
 ## Setup
 
@@ -39,6 +41,16 @@ Standard no-REST routes:
 
 Read the ![swagger](./doc/swagger.yml)
 
+### Example for mapping the relay #7 on the pin #42
+
+#### HTTP
+
+Go to `http://webrelay.local/m/7/42`
+
+#### Serial
+
+Send `/m/7/42`
+
 
 ## webApp
 
@@ -72,14 +84,51 @@ write anything and the read the help
 
 ##### UI Wizard setup
 
-If the component is not embed in your HASS version, 
-install `http_inline` from `./doc/hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`, 
-then use the wizard. 
+If the component is not embed in your HASS version,
+install `http_inline` from `./doc/hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`,
+then use the wizard.
 
 
 ##### CLI install
 
-Add the following lines into `configuration.yaml`, 
+###### Custom component
+
+Add the following lines into `configuration.yaml`,
+and apply this template:
+
+```yaml
+switch:
+  - platform: http_inline
+    host: http://{host}
+    relays:
+      {relayId}: {friendlyName}
+```
+
+And customize:
+- `{host}`: WebController IP or host
+- `{relayId}`: WebController ID
+- `{friendlyName}`: a free text
+
+Example:
+
+```yaml
+switch:
+  - platform: http_inline
+    host: http://web
+    relays:
+      0: Fan Office
+      1: Light Desk
+      2: Light Kitchen
+      3: Light Living room
+      4: Light Bedroom 1
+      5: Light Bedroom 2
+      6: Light Garage
+      7: Light Garden
+```
+
+###### Official
+
+Add the following lines into `configuration.yaml`,
 and apply this template:
 
 ```yaml
