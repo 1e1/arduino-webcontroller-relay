@@ -10,7 +10,7 @@
 
 
 
-static uint8_t readLimitNbRetry = 128;
+static const uint8_t _READ_NB_RETRY = 128;
 
 
 
@@ -38,8 +38,8 @@ void InterfaceSerial::loop()
       this->process();
       LOGLN();
     } else {
-      #if MODE_VERBOSE & MODE_VERBOSE_HELP
-      Serial.print(TEXT_HELP);
+      #if WS_MODE_VERBOSE & WS_MODE_VERBOSE_HELP
+      Serial.print(F(WS_TEXT_HELP_P));
       #endif
     }
 
@@ -70,7 +70,7 @@ void InterfaceSerial::reset()
 
 char InterfaceSerial::_read()
 {
-    uint8_t nbRetry = readLimitNbRetry;
+    uint8_t nbRetry = _READ_NB_RETRY;
     int c;
 
     do {

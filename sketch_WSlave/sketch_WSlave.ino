@@ -17,11 +17,8 @@
 
 
 #include <Arduino.h>
-#include <avr/pgmspace.h>
-#include <SPI.h>
-#include <Ethernet.h>
-#include "macro.h"
 #include "config.h"
+#include "macro.h"
 #include "InterfaceEthernet.h"
 #include "InterfaceSerial.h"
 #include "FastTimer.h"
@@ -34,7 +31,7 @@
 
 
 static FastTimer* _timer;
-static AbstractInterface* _engines[MODE_SERIAL_COUNT(MODE_SERIAL)];
+static AbstractInterface* _engines[WS_MODE_SERIAL_COUNT(WS_MODE_SERIAL)];
 
 
 
@@ -49,20 +46,23 @@ void setup()
 
   Relay::begin();
 
-  uint8_t i = MODE_SERIAL_COUNT(MODE_SERIAL);
+  uint8_t i = ARRAYLEN(_engines);
 
-  #if MODE_SERIAL & MODE_SERIAL_ETHERNET
-  _engines[--i] = new InterfaceEthernet();
+  #if WS_MODE_SERIAL & WS_MODE_SERIAL_ETHERNET
+  --i;
+  _engines[i] = new InterfaceEthernet();
   _engines[i]->begin();
   #endif
 
-  #if MODE_SERIAL & MODE_SERIAL_USB
-  _engines[--i] = new InterfaceSerial();
+  #if WS_MODE_SERIAL & WS_MODE_SERIAL_USB
+  --i;
+  _engines[i] = new InterfaceSerial();
   _engines[i]->begin();
   #endif
 
-  #if MODE_SERIAL & MODE_SERIAL_LED
-  _engines[--i] = new InterfaceLedBuiltIn();
+  #if WS_MODE_SERIAL & WS_MODE_SERIAL_LED
+  --i;
+  _engines[i] = new InterfaceLedBuiltIn();
   _engines[i]->begin();
   #endif
 
@@ -74,7 +74,7 @@ void loop()
 {
   const bool isTick = _timer->update();
 
-  uint8_t i = MODE_SERIAL_COUNT(MODE_SERIAL);
+  uint8_t i = WS_MODE_SERIAL_COUNT(WS_MODE_SERIAL);
 
   while (i-->0) {
     if (isTick) {

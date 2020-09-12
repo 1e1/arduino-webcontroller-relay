@@ -2,6 +2,7 @@
 #define FastTimer_H_
 
 #include <Arduino.h>
+#include "macro.h"
 
 
 /** TIME **/
@@ -22,26 +23,11 @@
 //-->  const uint8_t maxEmbedTime         = 255;        // = 4h 38mn 31s 680ms
 //     const uint8_t moduloEmbedTime      = 219;        // = 4h 00mn 00s 000ms
 
-#define WS_FASTTIMER_PRECISION_1s_4m    byte(millis() >> 10)
-#define WS_FASTTIMER_PRECISION_4s_15m   byte(millis() >> 12)
-//#define WS_EMBEDTIME_4s_3d    int(millis() >> 12)
-#define WS_FASTTIMER_PRECISION_16s_1h   byte(millis() >> 14)
-#define WS_FASTTIMER_PRECISION_65s_4h   byte(millis() >> 16)
-
-
-#define WS_FASTTIMER_SECTION_1   7
-#define WS_FASTTIMER_SECTION_2   6
-#define WS_FASTTIMER_SECTION_4   5
-#define WS_FASTTIMER_SECTION_8   4
-#define WS_FASTTIMER_SECTION_16  3
-#define WS_FASTTIMER_SECTION_32  2
-#define WS_FASTTIMER_SECTION_64  1
-#define WS_FASTTIMER_SECTION_128 0
-
-
-/** BIT **/
-#define bitRead_boolean(value, bit)             byte(((value) >> (bit)) & byte(1))
-/** === **/
+//#define WS_FASTTIMER_PRECISION_1s_4m    byte(millis() >> 10)
+//#define WS_FASTTIMER_PRECISION_4s_15m   byte(millis() >> 12)
+//#define WS_FASTTIMER_PRECISION_4s_3d    int(millis() >> 12)
+//#define WS_FASTTIMER_PRECISION_16s_1h   byte(millis() >> 14)
+//#define WS_FASTTIMER_PRECISION_65s_4h   byte(millis() >> 16)
 
 
 class FastTimer {
@@ -51,7 +37,6 @@ class FastTimer {
 
   FastTimer(const Precision precision);
 
-  void begin(); // call it in setup()
   const uint8_t update(); // call it once in the main loop()
 
   // inline

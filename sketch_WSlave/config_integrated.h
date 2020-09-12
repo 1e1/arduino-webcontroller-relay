@@ -1,19 +1,19 @@
 #ifndef config_H_
 #define config_H_
 
-#include "Arduino.h"
-#include "macro.h"
+#include "constant.h"
 
 
-#define NB_RELAYS               32
+#define NB_RELAYS_MAX           32
 
-#define MODE_SERIAL             MODE_SERIAL_ETHERNET
-#define MODE_VERBOSE            MODE_VERBOSE_NONE
-#define RELAY_WIRING            RELAY_WIRING_NC
-#define TYPE_MAC                TYPE_MAC_RANDOM
-#define MODE_BONJOUR            MODE_BONJOUR_NONE
-#define ACL_ALLOW               ACL_ALLOW_NONE
-#define DATA_STORAGE            DATA_STORAGE_EEPROM
+#define WS_MODE_SERIAL             WS_MODE_SERIAL_ETHERNET
+#define WS_MODE_VERBOSE            WS_MODE_VERBOSE_NONE
+#define WS_RELAY_WIRING            WS_RELAY_WIRING_NC
+#define WS_TYPE_MAC                WS_TYPE_MAC_RANDOM
+#define WS_MODE_BONJOUR            WS_MODE_BONJOUR_NONE
+#define WS_ACL_ALLOW               WS_ACL_ALLOW_NONE
+#define WS_DATA_STORAGE            WS_DATA_STORAGE_EEPROM
+#define WS_LOG_LEVEL               WS_LOG_LEVEL_OFF
 
 
 

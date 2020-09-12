@@ -15,7 +15,7 @@ Edit `./sketch_WSlave/config.h`
 Standard no-REST routes:
 
 - **$**: `/$`
-  full status list of all pins if `#define MODE_VERBOSE MODE_VERBOSE_LIST` (or `MODE_VERBOSE_ALL` by default)
+  full status list of all pins if `#define WS_MODE_VERBOSE WS_MODE_VERBOSE_LIST` (or `WS_MODE_VERBOSE_ALL` by default)
 
 - **r**ead: `/r/{relay_id}`
   read relay state
@@ -34,10 +34,10 @@ Standard no-REST routes:
   set a relay to NO mode
 
 - save (**!**): `/!`
-  save the wiring into EEPROM, not the values ON/OFF if `#define DATA_STORAGE != DATA_STORAGE_NONE`
+  save the wiring into EEPROM, not the values ON/OFF if `#define WS_DATA_STORAGE != WS_DATA_STORAGE_NONE`
 
 - reset (**~**): `/~`
-  reset the board  if `#define ACL_ALLOW ACL_ALLOW_RESET` (or `ACL_ALLOW_RESET` by default)
+  reset the board  if `#define WS_ACL_ALLOW WS_ACL_ALLOW_RESET` (or `WS_ACL_ALLOW_RESET` by default)
 
 Read the ![swagger](./doc/swagger.yml)
 
@@ -54,18 +54,18 @@ Send `/m/7/42`
 
 ## webApp
 
-`#define MODE_SERIAL MODE_SERIAL_ETHERNET` (or `MODE_SERIAL_ALL` by default)
+`#define WS_MODE_SERIAL WS_MODE_SERIAL_ETHERNET` (or `WS_MODE_SERIAL_ALL` by default)
 
 The Arduino boots on the DHCP.
-If `#define MODE_VERBOSE MODE_VERBOSE_WEBAPP` (or `MODE_VERBOSE_ALL` by default),
+If `#define WS_MODE_VERBOSE WS_MODE_VERBOSE_WEBAPP` (or `WS_MODE_VERBOSE_ALL` by default),
 open a bowser on `http://{ip}`.
 
 
 ## USB
 
-`#define MODE_SERIAL MODE_SERIAL_USB` (or `MODE_SERIAL_ALL` by default)
+`#define WS_MODE_SERIAL WS_MODE_SERIAL_USB` (or `WS_MODE_SERIAL_ALL` by default)
 
-If `#define MODE_VERBOSE MODE_VERBOSE_HELP` (or `MODE_VERBOSE_ALL` by default),
+If `#define WS_MODE_VERBOSE WS_MODE_VERBOSE_HELP` (or `WS_MODE_VERBOSE_ALL` by default),
 write anything and the read the help
 
 
@@ -73,7 +73,7 @@ write anything and the read the help
 
 ### software
 
-- EthernetBonjour if `MODE_BONJOUR` != `MODE_BONJOUR_NONE`
+- EthernetBonjour if `WS_MODE_BONJOUR` != `WS_MODE_BONJOUR_NONE`
 
 
 ### integrations
