@@ -74,7 +74,7 @@ void loop()
 {
   const bool isTick = _timer->update();
 
-  uint8_t i = WS_MODE_SERIAL_COUNT(WS_MODE_SERIAL);
+  uint8_t i = ARRAYLEN(_engines);
 
   while (i-->0) {
     if (isTick) {
