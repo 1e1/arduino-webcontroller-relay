@@ -1,40 +1,12 @@
 #ifndef macro_H_
 #define macro_H_
 
+#include "config.h"
 
-/* mode */
-#define MODE_SERIAL_USB         1
-#define MODE_SERIAL_ETHERNET    2
-#define MODE_SERIAL_LED         4
-#define MODE_SERIAL_ALL         (MODE_SERIAL_USB + MODE_SERIAL_ETHERNET + MODE_SERIAL_LED)
-#define MODE_SERIAL_COUNT(m)    (bool(m & MODE_SERIAL_USB) + bool(m & MODE_SERIAL_ETHERNET))
-#define MODE_VERBOSE_NONE       0
-#define MODE_VERBOSE_HELP       1
-#define MODE_VERBOSE_LIST       2
-#define MODE_VERBOSE_WEBAPP     4
-#define MODE_VERBOSE_ALL        (MODE_VERBOSE_HELP + MODE_VERBOSE_LIST + MODE_VERBOSE_WEBAPP)
-#define RELAY_WIRING_NO         0
-#define RELAY_WIRING_NC         1
-#define TYPE_MAC_STATIC         0
-#define TYPE_MAC_DYNAMIC        1
-#define MODE_BONJOUR_NONE       0
-#define MODE_BONJOUR_STATIC     1
-#define MODE_BONJOUR_DYNAMIC    2
-#define ACL_ALLOW_NONE          0
-#define ACL_ALLOW_RESET         1
-#define DATA_STORAGE_NONE       0
-#define DATA_STORAGE_EEPROM     1
-
-
-/** HELP **/
-#define TEXT_HELP F("** HELP\n** /<action>\\w/(<relay>\\d+(/<extra>\\d+)?)?\n\n")
-
-
-#define DEBUG 0
 
 
 /** DEBUGGING TOOLS **/
-#if DEBUG
+#if WS_LOG_LEVEL != WS_LOG_LEVEL_OFF
   #define DEBUG_START() Serial.begin(USB_SPEED)
   #define LOG(...)      Serial.print  (__VA_ARGS__)
   #define LOGLN(...)    Serial.println(__VA_ARGS__)
@@ -126,7 +98,7 @@ FOREACH (int, p2, c2, ARRAYLEN(c2) ){
 #define STR(x) STR_HELPER(x)
 
 
-#define SOFTWARE_RESET    asm volatile ("jmp 0");
+#define SOFTWARE_RESET    asm volatile ("jmp 0")
 
 
 #endif // macro_H_

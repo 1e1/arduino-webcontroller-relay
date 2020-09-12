@@ -31,11 +31,6 @@ FastTimer::FastTimer(const Precision precision)
 
 
 
-void FastTimer::begin()
-{
-}
-
-
 /**
   *   0: same time section
   *   1: new time section

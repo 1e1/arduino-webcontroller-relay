@@ -10,12 +10,12 @@
 
 
 
-LONGBYTES(webpage)        = WEBPAGE;
-static size_t webpage_len = ARRAYLEN(webpage);
+LONGBYTES(webpage) = WEBPAGE;
+static const size_t webpage_len = ARRAYLEN(webpage);
 
 
 
-char uint8_t2hex(const uint8_t i)
+static const char uint8_t2hex(const uint8_t i)
 {  
   return "0123456789ABCDEF"[0x0F & i];
 }
@@ -32,7 +32,7 @@ char uint8_t2hex(const uint8_t i)
 
 InterfaceEthernet::InterfaceEthernet()
 {
-  #if TYPE_MAC & TYPE_MAC_DYNAMIC
+  #if WS_TYPE_MAC & WS_TYPE_MAC_DYNAMIC
   randomSeed(analogRead(0));
 
   const uint8_t deviceNumber = random(2, 253);
@@ -45,10 +45,10 @@ InterfaceEthernet::InterfaceEthernet()
   Ethernet.begin(mac, DHCP_TIMEOUT_MS);
   LOGLN(Ethernet.localIP());
 
-  #if MODE_BONJOUR == MODE_BONJOUR_STATIC
+  #if WS_MODE_BONJOUR == WS_MODE_BONJOUR_STATIC
   EthernetBonjour.begin(DEVICE_NAME);
   
-  #elif MODE_BONJOUR == MODE_BONJOUR_DYNAMIC
+  #elif WS_MODE_BONJOUR == WS_MODE_BONJOUR_DYNAMIC
   char deviceName[] = DEVICE_NAME_MDNS(DEVICE_NAME);
 
   const uint8_t deviceNameLength = ARRAYLEN(deviceName);
@@ -78,21 +78,21 @@ void InterfaceEthernet::loop()
 
   if (client.connected()) {
     if (client.available()) {
-      client.print(HEADER_START);
+      client.print(F(WS_HEADER_BEGIN_P));
 
-      #if MODE_VERBOSE & MODE_VERBOSE_WEBAPP
+      #if WS_MODE_VERBOSE & WS_MODE_VERBOSE_WEBAPP
       if (this->read()) {
-        client.print(HEADER_END_ACTION);
+        client.print(F(WS_HEADER_END_ACTION_P));
         this->process();
       } else {
-        client.print(HEADER_END_HELP);
+        client.print(F(WS_HEADER_END_HELP_P));
         for (int i = 0; i<webpage_len; i++) {
           client.write(pgm_read_byte_near(webpage + i));
         }
       }
       #else
       if (this->read()) {
-        client.print(HEADER_END_ACTION);
+        client.print(F(WS_HEADER_END_ACTION_P));
         this->process();
       }
       #endif
@@ -107,7 +107,7 @@ void InterfaceEthernet::loop()
 
 void InterfaceEthernet::raise()
 {
-  #if MODE_BONJOUR != MODE_BONJOUR_NONE
+  #if WS_MODE_BONJOUR != WS_MODE_BONJOUR_NONE
   EthernetBonjour.run();
   #endif
 }

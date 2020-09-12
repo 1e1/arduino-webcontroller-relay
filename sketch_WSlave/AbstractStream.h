@@ -12,24 +12,6 @@
 
 
 
-#define ACTION_ALL          '$'
-#define ACTION_READ         'r'
-#define ACTION_WRITE        'w'
-#define ACTION_MAP          'm'
-#define ACTION_NC           'c'
-#define ACTION_NO           'o'
-#define ACTION_SAVE         '!'
-#define ACTION_RESET        '~'
-#define PATH_SEPARATOR      '/'
-#define LF                  '\n'
-#define SEP                 ' '
-#define TEXT_NC             F(" NC ")
-#define TEXT_NO             F(" NO ")
-#define RELAY_NONE          -1
-#define BUFFER_SIZE         8
-
-
-
 
 class AbstractStream : public AbstractInterface {
 
@@ -42,8 +24,9 @@ class AbstractStream : public AbstractInterface {
   __attribute__((always_inline)) inline void setStream(Stream* inputStream) { this->_currentStream = inputStream; };
 
   protected:
-  void _showOne(const uint8_t relay);
-  void _showAll();
+  void _printData(const uint8_t data);
+  void _printOne(const uint8_t relay);
+  void _printAll();
 
   bool _findUntil(const int terminator, size_t length);
   uint8_t _parseInt();

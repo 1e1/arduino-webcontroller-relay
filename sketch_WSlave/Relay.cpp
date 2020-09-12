@@ -10,11 +10,13 @@
 
 
 
-uint8_t Relay::_options[NB_RELAYS];
+uint8_t Relay::_options[Relay::optionsLength];
 
-uint8_t _MASK_PIN       = B00111111;
-uint8_t _BIT_IS_NC      = 6;
-uint8_t _BIT_IS_ACTIVE  = 7;
+static const uint8_t _MASK_PIN       = B00111111;
+static const uint8_t _BIT_IS_NC      = 6;
+static const uint8_t _BIT_IS_ACTIVE  = 7;
+static const uint8_t _PIN_NONE       = -1;
+static const byte    _EEPROM_VOID    = -1;
 
 
 
@@ -28,12 +30,12 @@ uint8_t _BIT_IS_ACTIVE  = 7;
 
 void Relay::begin()
 {
-  #if DATA_STORAGE & DATA_STORAGE_EEPROM
+  #if WS_DATA_STORAGE & WS_DATA_STORAGE_EEPROM
   uint8_t option;
-  for (int i=0; i<NB_RELAYS && i<EEPROM.length(); i++) {
+  for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); i++) {
     option = EEPROM.read(i);
 
-    if (EEPROM_VOID != option) {
+    if (_EEPROM_VOID != option) {
         Relay::_options[i] = option;
 
         Relay::_init(i);
@@ -45,14 +47,14 @@ void Relay::begin()
 
 const bool Relay::exists(const uint8_t relayId)
 {
-    return Relay::getPinAt(relayId) != PIN_NONE & _MASK_PIN;
+    return Relay::getPinAt(relayId) != _PIN_NONE & _MASK_PIN;
 }
 
 
 void Relay::save()
 {
-  #if DATA_STORAGE & DATA_STORAGE_EEPROM
-  for (int i=0; i<NB_RELAYS && i<EEPROM.length(); i++) {
+  #if WS_DATA_STORAGE & WS_DATA_STORAGE_EEPROM
+  for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); i++) {
     Relay::_save(i);
   }
   #endif
@@ -138,7 +140,7 @@ void Relay::_digitalWrite(const uint8_t relayId)
 
 void Relay::_save(const uint8_t relayId)
 {
-    #if DATA_STORAGE & DATA_STORAGE_EEPROM
+    #if WS_DATA_STORAGE & WS_DATA_STORAGE_EEPROM
     const uint8_t data = Relay::_options[relayId] & (_MASK_PIN | (B1 << _BIT_IS_NC));
 
     EEPROM.update(relayId, data);

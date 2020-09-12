@@ -4,21 +4,17 @@
 
 
 #include <Arduino.h>
-#include <avr/pgmspace.h>
 #include <EEPROM.h>
 #include "config.h"
 #include "macro.h"
 
 
 
-#define PIN_NONE      ((uint8_t) -1)
-#define EEPROM_VOID   ((byte) -1)
-
-
-
 class Relay {
 
   public:
+  static const uint8_t optionsLength = min(NB_RELAYS_MAX, NUM_DIGITAL_PINS);
+
   static void begin();
   static const bool exists(const uint8_t relayId);
   static void save();
@@ -38,7 +34,7 @@ class Relay {
   static void _digitalWrite(const uint8_t relayId);
   static void _save(const uint8_t relayId);
 
-  static uint8_t _options[NB_RELAYS];
+  static uint8_t _options[optionsLength];
 
 };
 
