@@ -15,7 +15,7 @@ Edit `./sketch_WSlave/config.h`
 Standard no-REST routes:
 
 - **$**: `/$`
-  full status list of all pins if `#define WS_MODE_VERBOSE WS_MODE_VERBOSE_LIST` (or `WS_MODE_VERBOSE_ALL` by default)
+  full status list of all pins if `#define WS_VERBOSE WS_VERBOSE_LIST` (or `WS_VERBOSE_ALL` by default)
 
 - **r**ead: `/r/{relay_id}`
   read relay state
@@ -34,38 +34,48 @@ Standard no-REST routes:
   set a relay to NO mode
 
 - save (**!**): `/!`
-  save the wiring into EEPROM, not the values ON/OFF if `#define WS_DATA_STORAGE != WS_DATA_STORAGE_NONE`
+  save the wiring into EEPROM, not the values ON/OFF if `#define WS_STORAGE != WS_STORAGE_NONE`
 
 - reset (**~**): `/~`
   reset the board  if `#define WS_ACL_ALLOW WS_ACL_ALLOW_RESET` (or `WS_ACL_ALLOW_RESET` by default)
 
 Read the ![swagger](./doc/swagger.yml)
 
-### Example for mapping the relay #7 on the pin #42
+### Example to setup the relay #7 on the pin #42
+
+- First, map PIN -> RELAY
+- Then set the NC/NO wiring
+- Last give the default value for activation
 
 #### HTTP
 
-Go to `http://webrelay.local/m/7/42`
+- go to `http://webrelay.local/m/7/42`
+- go to `http://webrelay.local/c/7` if it's a NC wired (`http://webrelay.local/o/7` otherwise)
+- go to `http://webrelay.local/w/7/1` if you want switch ON now (`http://webrelay.local/w/7/0`otherwise)
+- go to `http://webrelay.local/r/7` to check
 
 #### Serial
 
-Send `/m/7/42`
+- Send `/m/7/42`
+- Send `/c/7` if it's a NC wired (`/o/7` otherwise)
+- Send `/w/7/1` if you want switch ON now (`/w/7/0`otherwise)
+- Send `/r/7` to check
 
 
 ## webApp
 
-`#define WS_MODE_SERIAL WS_MODE_SERIAL_ETHERNET` (or `WS_MODE_SERIAL_ALL` by default)
+`#define WS_INTERFACE WS_INTERFACE_ETHERNET` (or `WS_INTERFACE_ALL` by default)
 
 The Arduino boots on the DHCP.
-If `#define WS_MODE_VERBOSE WS_MODE_VERBOSE_WEBAPP` (or `WS_MODE_VERBOSE_ALL` by default),
+If `#define WS_VERBOSE WS_VERBOSE_WEBAPP` (or `WS_VERBOSE_ALL` by default),
 open a bowser on `http://{ip}`.
 
 
 ## USB
 
-`#define WS_MODE_SERIAL WS_MODE_SERIAL_USB` (or `WS_MODE_SERIAL_ALL` by default)
+`#define WS_INTERFACE WS_INTERFACE_USB` (or `WS_INTERFACE_ALL` by default)
 
-If `#define WS_MODE_VERBOSE WS_MODE_VERBOSE_HELP` (or `WS_MODE_VERBOSE_ALL` by default),
+If `#define WS_VERBOSE WS_VERBOSE_HELP` (or `WS_VERBOSE_ALL` by default),
 write anything and the read the help
 
 
@@ -73,7 +83,7 @@ write anything and the read the help
 
 ### software
 
-- EthernetBonjour if `WS_MODE_BONJOUR` != `WS_MODE_BONJOUR_NONE`
+- EthernetBonjour if `WS_BONJOUR_MODE` != `WS_BONJOUR_MODE_NONE`
 
 
 ### integrations

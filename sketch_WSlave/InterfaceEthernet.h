@@ -1,28 +1,27 @@
-#ifndef EngineEthernet_H_
-#define EngineEthernet_H_
+#ifndef InterfaceEthernet_H_
+#define InterfaceEthernet_H_
 
 #include <Arduino.h>
 #include <Ethernet.h>
 #include <EthernetBonjour.h>
 #include "config.h"
 #include "macro.h"
-#include "AbstractStream.h"
-#include "_webApp.h"
+#include "AbstractInterfaceWebApp.h"
 
 
 
-class InterfaceEthernet : public AbstractStream {
+class InterfaceEthernet : public AbstractInterfaceWebApp {
 
   public:
   InterfaceEthernet();
 
   void begin();
   void loop();
-  void raise();
-  void reset();
 
   protected:
-  EthernetServer* _webServer;
+  void _broadcast();
+
+  EthernetServer* _server;
 
 };
 

@@ -30,7 +30,7 @@ static const byte    _EEPROM_VOID    = -1;
 
 void Relay::begin()
 {
-  #if WS_DATA_STORAGE & WS_DATA_STORAGE_EEPROM
+  #if WS_STORAGE & WS_STORAGE_EEPROM
   uint8_t option;
   for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); i++) {
     option = EEPROM.read(i);
@@ -53,7 +53,7 @@ const bool Relay::exists(const uint8_t relayId)
 
 void Relay::save()
 {
-  #if WS_DATA_STORAGE & WS_DATA_STORAGE_EEPROM
+  #if WS_STORAGE & WS_STORAGE_EEPROM
   for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); i++) {
     Relay::_save(i);
   }
@@ -140,7 +140,7 @@ void Relay::_digitalWrite(const uint8_t relayId)
 
 void Relay::_save(const uint8_t relayId)
 {
-    #if WS_DATA_STORAGE & WS_DATA_STORAGE_EEPROM
+    #if WS_STORAGE & WS_STORAGE_EEPROM
     const uint8_t data = Relay::_options[relayId] & (_MASK_PIN | (B1 << _BIT_IS_NC));
 
     EEPROM.update(relayId, data);

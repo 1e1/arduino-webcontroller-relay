@@ -52,14 +52,14 @@ void AbstractStream::process()
     LOG("parseExtra="); LOG(extra); LOGLN(';');
     
     switch (this->_currentAction) {
-        #if WS_MODE_VERBOSE & WS_MODE_VERBOSE_LIST
+        #if WS_VERBOSE & WS_VERBOSE_LIST
         case WS_ACTION_ALL:
             LOGLN("showAll");
             this->_printAll();
             return;
         #endif
 
-        #if WS_DATA_STORAGE != WS_DATA_STORAGE_NONE
+        #if WS_STORAGE != WS_STORAGE_NONE
         case WS_ACTION_SAVE:
             LOGLN("save");
             Relay::save();

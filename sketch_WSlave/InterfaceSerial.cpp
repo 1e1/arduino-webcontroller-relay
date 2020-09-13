@@ -25,7 +25,7 @@ static const uint8_t _READ_NB_RETRY = 128;
 
 void InterfaceSerial::begin()
 {
-  Serial.begin(USB_SPEED);
+  Serial.begin(WS_USB_SPEED);
 }
 
 
@@ -38,25 +38,13 @@ void InterfaceSerial::loop()
       this->process();
       LOGLN();
     } else {
-      #if WS_MODE_VERBOSE & WS_MODE_VERBOSE_HELP
-      Serial.print(F(WS_TEXT_HELP_P));
+      #if WS_VERBOSE & WS_VERBOSE_HELP
+      Serial.print(F(WS_TEXT_HELP_F));
       #endif
     }
 
     this->terminate();
   }
-}
-
-
-void InterfaceSerial::raise()
-{
-  LOGLN(F("[raise]"));
-}
-
-
-void InterfaceSerial::reset()
-{
-  LOGLN(F("[reset]"));
 }
 
 

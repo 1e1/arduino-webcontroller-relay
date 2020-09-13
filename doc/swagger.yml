@@ -122,7 +122,7 @@ paths:
   # optional routes, depending the sketch configuration
   /$:
     get:
-      description: "list all relays (if WS_MODE_VERBOSE has WS_MODE_VERBOSE_LIST)"
+      description: "list all relays (if WS_VERBOSE has WS_VERBOSE_LIST)"
       produces:
       - "text/plain"
       responses:
@@ -132,7 +132,7 @@ paths:
             $ref: "#/definitions/Relays"
   /!:
     get:
-      description: "save configuration: relay NC/NO pin (not the state) (if WS_DATA_STORAGE != WS_DATA_STORAGE_NONE)"
+      description: "save configuration: relay NC/NO pin (not the state) (if WS_STORAGE != WS_STORAGE_NONE)"
       produces:
       - "text/plain"
       responses:

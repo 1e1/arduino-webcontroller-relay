@@ -13,8 +13,6 @@ class InterfaceSerial : public AbstractStream {
   public:
   void begin();
   void loop();
-  void raise();
-  void reset();
 
   protected:
   char _read();

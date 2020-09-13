@@ -7,7 +7,7 @@
 
 /** DEBUGGING TOOLS **/
 #if WS_LOG_LEVEL != WS_LOG_LEVEL_OFF
-  #define DEBUG_START() Serial.begin(USB_SPEED)
+  #define DEBUG_START() Serial.begin(WS_USB_SPEED)
   #define LOG(...)      Serial.print  (__VA_ARGS__)
   #define LOGLN(...)    Serial.println(__VA_ARGS__)
   #define WAIT(ms)      delay(ms)
@@ -46,7 +46,7 @@
 
 /** NETWORK **/
 #define MAC_ADDRESS(index)      { 0x40,0x6C,0x61,0x6E,0x23, index }
-#define DEVICE_NAME_MDNS(dn)    dn "_##"
+#define WS_DEVICE_NAME_MDNS(dn)    dn "_##"
 
 
 
