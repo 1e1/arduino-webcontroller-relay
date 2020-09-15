@@ -1,5 +1,5 @@
-#ifndef Core_h
-#define Core_h
+#ifndef Relay_h
+#define Relay_h
 
 
 
@@ -13,7 +13,7 @@
 class Relay {
 
   public:
-  static const uint8_t optionsLength = min(NB_RELAYS_MAX, NUM_DIGITAL_PINS);
+  static const uint8_t optionsLength = min(WS_RELAY_NB_MAX, NUM_DIGITAL_PINS);
 
   static void begin();
   static const bool exists(const uint8_t relayId);

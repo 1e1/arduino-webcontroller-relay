@@ -19,10 +19,9 @@
 #include <Arduino.h>
 #include "config.h"
 #include "macro.h"
+#include "PowerManager.h"
 #include "InterfaceEthernet.h"
 #include "InterfaceSerial.h"
-#include "FastTimer.h"
-#include "InterfaceLedBuiltIn.h"
 
 
 
@@ -30,41 +29,44 @@
 
 
 
-static FastTimer* _timer;
-static AbstractInterface* _engines[WS_MODE_SERIAL_COUNT(WS_MODE_SERIAL)];
+static PowerManager* _powerManager;
+static AbstractInterface* _engines[WS_INTERFACE_COUNT(WS_INTERFACE)];
 
 
 
 
 void setup()
 {
+  PowerManager::free();
+
+  BUSYLED_WORK;
   DEBUG_START();
   LOGLN(F("DEBUG ON"));
-
-  const FastTimer::Precision p = FastTimer::Precision::P65s_4h;
-  _timer = new FastTimer(p);
 
   Relay::begin();
 
   uint8_t i = ARRAYLEN(_engines);
 
-  #if WS_MODE_SERIAL & WS_MODE_SERIAL_ETHERNET
-  --i;
-  _engines[i] = new InterfaceEthernet();
-  _engines[i]->begin();
-  #endif
-
-  #if WS_MODE_SERIAL & WS_MODE_SERIAL_USB
+  #if WS_INTERFACE & WS_INTERFACE_USB
   --i;
   _engines[i] = new InterfaceSerial();
   _engines[i]->begin();
   #endif
 
-  #if WS_MODE_SERIAL & WS_MODE_SERIAL_LED
+  #if WS_INTERFACE & WS_INTERFACE_ETHERNET
   --i;
-  _engines[i] = new InterfaceLedBuiltIn();
+  _engines[i] = new InterfaceEthernet();
   _engines[i]->begin();
   #endif
+
+  BUSYLED_HIGH;
+  LOGLN(F("! change the Serial speed !"));
+  WAIT(5000);
+  BUSYLED_WORK;
+
+  const PowerManager::Frequency f = PowerManager::Frequency::F_2MHz;
+  _powerManager = new PowerManager(f);
+  _powerManager->begin();
 
   LOGLN(F("CONFIGURED"));
 }
@@ -72,25 +74,15 @@ void setup()
 
 void loop()
 {
-  const bool isTick = _timer->update();
-
+  BUSYLED_NONE;
   uint8_t i = ARRAYLEN(_engines);
 
   while (i-->0) {
-    if (isTick) {
-      _engines[i]->raise();
-
-      if (0 == _timer->getTime()) {
-        _engines[i]->reset();
-      }
-    } else {
-      _engines[i]->loop();
-    }
+    _engines[i]->loop();
   }
 
-  #if LOOP_SLEEP_MS > 0
-  delay(LOOP_SLEEP_MS);
-  #endif
+  BUSYLED_IDLE;
+  _powerManager->update();
 }
 
 

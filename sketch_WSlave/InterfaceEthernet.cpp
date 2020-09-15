@@ -10,10 +10,7 @@
 
 
 
-LONGBYTES(webpage) = WEBPAGE;
-static const size_t webpage_len = ARRAYLEN(webpage);
-
-
+static uint8_t _CYCLE_COUNTER = 0;
 
 static const char uint8_t2hex(const uint8_t i)
 {  
@@ -32,24 +29,24 @@ static const char uint8_t2hex(const uint8_t i)
 
 InterfaceEthernet::InterfaceEthernet()
 {
-  #if WS_TYPE_MAC & WS_TYPE_MAC_DYNAMIC
+  #if WS_MAC_TYPE & WS_MAC_TYPE_DYNAMIC
   randomSeed(analogRead(0));
 
   const uint8_t deviceNumber = random(2, 253);
   #else
-  const uint8_t deviceNumber = DEVICE_NUMBER;
+  const uint8_t deviceNumber = WS_DEVICE_NUMBER;
   #endif
 
   byte mac[] = MAC_ADDRESS(deviceNumber);
 
-  Ethernet.begin(mac, DHCP_TIMEOUT_MS);
+  Ethernet.begin(mac, WS_DHCP_TIMEOUT_MS);
   LOGLN(Ethernet.localIP());
 
-  #if WS_MODE_BONJOUR == WS_MODE_BONJOUR_STATIC
-  EthernetBonjour.begin(DEVICE_NAME);
+  #if WS_BONJOUR_MODE == WS_BONJOUR_MODE_STATIC
+  EthernetBonjour.begin(WS_DEVICE_NAME);
   
-  #elif WS_MODE_BONJOUR == WS_MODE_BONJOUR_DYNAMIC
-  char deviceName[] = DEVICE_NAME_MDNS(DEVICE_NAME);
+  #elif WS_BONJOUR_MODE == WS_BONJOUR_MODE_DYNAMIC
+  char deviceName[] = WS_DEVICE_NAME_MDNS(WS_DEVICE_NAME);
 
   const uint8_t deviceNameLength = ARRAYLEN(deviceName);
   deviceName[deviceNameLength-1] = uint8_t2hex(deviceNumber);
@@ -58,7 +55,7 @@ InterfaceEthernet::InterfaceEthernet()
   EthernetBonjour.begin(deviceName);
   #endif
 
-  this->_webServer = new EthernetServer(WEB_PORT);
+  this->_server = new EthernetServer(WS_WEB_PORT);
 }
 
 
@@ -66,54 +63,34 @@ InterfaceEthernet::InterfaceEthernet()
 
 void InterfaceEthernet::begin()
 {
-  this->_webServer->begin();
+  this->_server->begin();
 }
 
 
 void InterfaceEthernet::loop()
 {
-  EthernetClient client = this->_webServer->available();
+  EthernetClient client = this->_server->available();
 
-  this->setStream(&client);
-
-  if (client.connected()) {
-    if (client.available()) {
-      client.print(F(WS_HEADER_BEGIN_P));
-
-      #if WS_MODE_VERBOSE & WS_MODE_VERBOSE_WEBAPP
-      if (this->read()) {
-        client.print(F(WS_HEADER_END_ACTION_P));
-        this->process();
-      } else {
-        client.print(F(WS_HEADER_END_HELP_P));
-        for (int i = 0; i<webpage_len; i++) {
-          client.write(pgm_read_byte_near(webpage + i));
-        }
-      }
-      #else
-      if (this->read()) {
-        client.print(F(WS_HEADER_END_ACTION_P));
-        this->process();
-      }
-      #endif
-
-      this->terminate();
-    }
-
-    client.stop();
-  }
+  this->_listen(&client);
+  this->_broadcast();
 }
 
 
-void InterfaceEthernet::raise()
-{
-  #if WS_MODE_BONJOUR != WS_MODE_BONJOUR_NONE
-  EthernetBonjour.run();
-  #endif
-}
+
+/***********************************************************
+ *                        PROTECTED                        *
+ **********************************************************/
 
 
-void InterfaceEthernet::reset()
+
+
+void InterfaceEthernet::_broadcast()
 {
-  Ethernet.maintain();
+ if (++_CYCLE_COUNTER == 0) {
+    Ethernet.maintain();
+
+    #if WS_BONJOUR_MODE != WS_BONJOUR_MODE_NONE
+    EthernetBonjour.run();
+    #endif
+ }
 }

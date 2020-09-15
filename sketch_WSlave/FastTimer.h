@@ -33,7 +33,7 @@
 class FastTimer {
 
   public:
-  typedef enum { P1s_4m=10, P4s_15m=12, P16s_1h=14, P65s_4h=16 } Precision;
+  typedef enum { P_1s_4m=10, P_4s_15m=12, P_16s_1h=14, P_65s_4h=16 } Precision;
 
   FastTimer(const Precision precision);
 

@@ -4,54 +4,44 @@
 #include "constant.h"
 
 
-#define NB_RELAYS_MAX           32
-
-// WS_MODE_SERIAL = WS_MODE_SERIAL_USB | WS_MODE_SERIAL_ETHERNET | WS_MODE_SERIAL_LED | WS_MODE_SERIAL_ALL
-#define WS_MODE_SERIAL             WS_MODE_SERIAL_ALL
-
-// WS_MODE_VERBOSE = WS_MODE_VERBOSE_NONE | WS_MODE_VERBOSE_HELP | WS_MODE_VERBOSE_LIST | WS_MODE_VERBOSE_WEBAPP | WS_MODE_VERBOSE_ALL
-#define WS_MODE_VERBOSE            WS_MODE_VERBOSE_ALL
-
-// PIN_WS_RELAY_WIRING = PIN_WS_RELAY_WIRING_NC | PIN_WS_RELAY_WIRING_NO
-#define WS_RELAY_WIRING            WS_RELAY_WIRING_NC
-
-// WS_TYPE_MAC = WS_TYPE_MAC_STATIC | WS_TYPE_MAC_DYNAMIC
-#define WS_TYPE_MAC                WS_TYPE_MAC_STATIC
-
-// WS_MODE_BONJOUR = WS_MODE_BONJOUR_NONE | WS_MODE_BONJOUR_STATIC | WS_MODE_BONJOUR_DYNAMIC
-#define WS_MODE_BONJOUR            WS_MODE_BONJOUR_STATIC
-
-// WS_DATA_STORAGE = WS_ACL_ALLOW_NONE | WS_ACL_ALLOW_RESET
-#define WS_ACL_ALLOW               WS_ACL_ALLOW_RESET
-
-// WS_DATA_STORAGE = WS_DATA_STORAGE_NONE | WS_DATA_STORAGE_EEPROM
-#define WS_DATA_STORAGE            WS_DATA_STORAGE_EEPROM
-
-// WS_LOG_LEVEL = WS_LOG_LEVEL_OFF | WS_LOG_LEVEL_FATAL | WS_LOG_LEVEL_ERROR | WS_LOG_LEVEL_WARN | WS_LOG_LEVEL_INFO | WS_LOG_LEVEL_DEBUG | WS_LOG_LEVEL_TRACE | WS_LOG_LEVEL_ALL
-#define WS_LOG_LEVEL               WS_LOG_LEVEL_OFF
-
-
 
 // board metadata
-// =====================
+// =========================
 // a number between 2 and 253
-#define DEVICE_NUMBER   12
-#define DEVICE_NAME     "webrelay"
-#define LOOP_SLEEP_MS   250
-// =====================
+#define WS_DEVICE_NUMBER    12
+#define WS_DEVICE_NAME      "webrelay"
+#define WS_RELAY_NB_MAX     32
+#define WS_STORAGE          WS_STORAGE_EEPROM
+#define WS_LOG_LEVEL        WS_LOG_LEVEL_OFF
+#define WS_LOWPOWER         WS_LOWPOWER_ALL
+// =========================
+
+
+// ITF conf
+// =========================
+#define WS_INTERFACE        WS_INTERFACE_ALL
+#define WS_VERBOSE          WS_VERBOSE_ALL
+#define WS_ACL_ALLOW        WS_ACL_ALLOW_RESET
+// =========================
 
 
 // USB conf
-// =====================
-#define USB_SPEED       9600
-// =====================
+// =========================
+// multiply by the clock divisor (ex:9600 baud at 2MHz instead of 16Mhz is 1200 baud)
+#define WS_USB_SPEED        9600
+// =========================
 
 
-// ETH conf
-// =====================
-#define DHCP_TIMEOUT_MS 30000
-#define WEB_PORT        80
-// =====================
+// WEB conf
+// =========================
+#define WS_DHCP_TIMEOUT_MS  30000
+#define WS_WEB_PORT         80
+#define WS_MAC_TYPE         WS_MAC_TYPE_STATIC
+#define WS_BONJOUR_MODE     WS_BONJOUR_MODE_STATIC
+#define WS_WIFI_SSID        "mySSID"
+#define WS_WIFI_PASSWORD    "myPassword"
+// =========================
+
 
 
 #endif // config_H_

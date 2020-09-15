@@ -6,10 +6,7 @@ class AbstractInterface {
 
   public:
   virtual void begin() {};
-
   virtual void loop()  {};
-  virtual void raise() {};
-  virtual void reset() {};
 
 };
 

@@ -29,8 +29,8 @@ echo "" >  $OUTPUT_H
 ########################################
 
 cat <<EOT >> $OUTPUT_H
-#ifndef webApp_H_
-#define webApp_H_
+#ifndef _webApp_H_
+#define _webApp_H_
 
 #define WEBPAGE { \\
 EOT
@@ -40,7 +40,7 @@ sed -i$SED_BACKUP_EXT '$s/, $/ \}/' $OUTPUT_H
 
 cat <<EOT >> $OUTPUT_H
 
-#endif // webApp_H_
+#endif // _webApp_H_
 EOT
 
 ########################################
