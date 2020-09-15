@@ -1,4 +1,4 @@
-#include "InterfaceSerial.h"
+#include "InterfaceUsb.h"
 
 
 
@@ -23,23 +23,24 @@ static const uint8_t _READ_NB_RETRY = 128;
 
 
 
-void InterfaceSerial::begin()
+void InterfaceUsb::begin()
 {
-  WS_SERIAL.begin(WS_USB_SPEED);
-
-  this->setStream(&WS_SERIAL);
+  Serial.begin(WS_USB_SPEED);
+  
+  this->setStream(&Serial);
 }
 
 
-void InterfaceSerial::loop()
+void InterfaceUsb::loop()
 {
-  if (WS_SERIAL.available() > 0) {
+  if (Serial.available() > 0) {
     if (this->read()) {
       this->process();
+      LOGLN();
     } else {
-      if (Energy.isFirstLoop()) {
-        WS_SERIAL.print(WS_CHAR_WAKEUP_F);
-      }
+      #if WS_VERBOSE & WS_VERBOSE_HELP
+      Serial.print(F(WS_TEXT_HELP_F));
+      #endif
     }
 
     this->terminate();
@@ -55,13 +56,13 @@ void InterfaceSerial::loop()
 
 
 
-char InterfaceSerial::_read()
+char InterfaceUsb::_read()
 {
     uint8_t nbRetry = _READ_NB_RETRY;
     int c;
 
     do {
-        c = WS_SERIAL.read();
+        c = Serial.read();
         if (c>=0) {
             break;
         }

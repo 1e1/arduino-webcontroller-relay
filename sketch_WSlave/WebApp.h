@@ -2,7 +2,7 @@
 #ifndef webApp_H_
 #define webApp_H_
 
-#include "_webApp.h"
+#include "webApp-generated.h"
 #include "macro.h"
 
 

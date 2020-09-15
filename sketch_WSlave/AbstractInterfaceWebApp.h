@@ -6,6 +6,7 @@
 #include "config.h"
 #include "macro.h"
 #include "AbstractStream.h"
+#include "PowerManager.h"
 #include "WebApp.h"
 
 

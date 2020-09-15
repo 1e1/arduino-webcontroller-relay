@@ -10,12 +10,6 @@
 
 
 
-static uint8_t _CYCLE_COUNTER = 0;
-
-static const char uint8_t2hex(const uint8_t i)
-{  
-  return "0123456789ABCDEF"[0x0F & i];
-}
 
 
 
@@ -49,13 +43,15 @@ InterfaceEthernet::InterfaceEthernet()
   char deviceName[] = WS_DEVICE_NAME_MDNS(WS_DEVICE_NAME);
 
   const uint8_t deviceNameLength = ARRAYLEN(deviceName);
-  deviceName[deviceNameLength-1] = uint8_t2hex(deviceNumber);
-  deviceName[deviceNameLength-2] = uint8_t2hex(deviceNumber >> 4);
+  deviceName[deviceNameLength-1] = InterfaceEthernet::uint8_t2hex(deviceNumber);
+  deviceName[deviceNameLength-2] = InterfaceEthernet::uint8_t2hex(deviceNumber >> 4);
 
   EthernetBonjour.begin(deviceName);
   #endif
 
+  this->_cycleCounter = 0;
   this->_server = new EthernetServer(WS_WEB_PORT);
+
 }
 
 
@@ -86,11 +82,21 @@ void InterfaceEthernet::loop()
 
 void InterfaceEthernet::_broadcast()
 {
- if (++_CYCLE_COUNTER == 0) {
-    Ethernet.maintain();
+  this->_cycleCounter++;
 
-    #if WS_BONJOUR_MODE != WS_BONJOUR_MODE_NONE
+  if (this->_cycleCounter == 0) {
+    Ethernet.maintain();
+  }
+
+  #if WS_BONJOUR_MODE != WS_BONJOUR_MODE_NONE
+  if ((this->_cycleCounter & 0x1F) == 1) {
     EthernetBonjour.run();
-    #endif
- }
+  }
+  #endif
+}
+
+
+const char InterfaceEthernet::_uint8_t2hex(const uint8_t i)
+{  
+  return "0123456789ABCDEF"[0x0F & i];
 }

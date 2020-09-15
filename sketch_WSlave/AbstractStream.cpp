@@ -30,10 +30,7 @@ bool AbstractStream::read()
 {
     if (this->_findUntil(WS_PATH_SEPARATOR, _BUFFER_SIZE)) {
         this->_currentAction = this->_read();
-        this->_currentRelay = this->_parseInt();
-
         LOG("readAction="); LOG(this->_currentAction); LOGLN(';');
-        LOG("parseRelay="); LOG(this->_currentRelay); LOGLN(';');
 
         // ignore LF=10, CR=13, SP=32
         return this->_currentAction > ' ';
@@ -46,11 +43,7 @@ bool AbstractStream::read()
 
 
 void AbstractStream::process()
-{
-    const uint8_t extra = this->_parseInt();
-
-    LOG("parseExtra="); LOG(extra); LOGLN(';');
-    
+{   
     switch (this->_currentAction) {
         #if WS_VERBOSE & WS_VERBOSE_LIST
         case WS_ACTION_ALL:
@@ -62,7 +55,14 @@ void AbstractStream::process()
         #if WS_STORAGE != WS_STORAGE_NONE
         case WS_ACTION_SAVE:
             LOGLN("save");
-            Relay::save();
+            Relayboard.save();
+            return;
+        #endif
+
+        #if WS_ACL_ALLOW == WS_ACL_ALLOW_SLEEP
+        case WS_ACTION_SLEEP:
+            LOGLN("sleep");
+            Energy.sleep();
             return;
         #endif
 
@@ -72,23 +72,42 @@ void AbstractStream::process()
             SOFTWARE_RESET;
             return;
         #endif
+    }
 
+    this->_currentRelay = this->_parseInt();
+    LOG("parseRelay="); LOG(this->_currentRelay); LOGLN(';');
+
+    switch (this->_currentAction) {
         case WS_ACTION_WRITE:
             LOGLN("write");
-            Relay::setStateAt(this->_currentRelay, extra);
+            Relayboard.setStateAt(this->_currentRelay, this->_parseInt(), this->_currentAction == WS_ACTION_WRITE_LOCK);
             break;
+        
+        #if WS_ACL_ALLOW == WS_ACL_ALLOW_LOCK  
+        case WS_ACTION_WRITE_LOCK:
+            LOGLN("WRITE");
+            Relayboard.isLocked(this->_currentRelay, true);
+            Relayboard.setStateAt(this->_currentRelay, this->_parseInt(), this->_currentAction == WS_ACTION_WRITE_LOCK);
+            break;
+        #endif
 
         case WS_ACTION_NC:
         case WS_ACTION_NO:
             LOGLN("NC/NO");
-            Relay::isNcAt(this->_currentRelay, this->_currentAction == WS_ACTION_NC);
+            Relayboard.isNcAt(this->_currentRelay, this->_currentAction == WS_ACTION_NC);
             break;
 
         case WS_ACTION_MAP:
             LOGLN("map");
-            Relay::setPinAt(this->_currentRelay, extra);
+            Relayboard.setPinAt(this->_currentRelay, this->_parseInt());
             break;
 
+        #if WS_ACL_ALLOW == WS_ACL_ALLOW_LOCK  
+        case WS_ACTION_READ_UNLOCK:
+            LOGLN("READ");
+            Relayboard.isLocked(this->_currentRelay, false);
+            break;
+        #endif
 
         case WS_ACTION_READ:
             LOGLN("read");
@@ -121,24 +140,24 @@ void AbstractStream::_printData(const uint8_t data)
 }
 
 
-void AbstractStream::_printOne(const uint8_t relay)
+void AbstractStream::_printOne(const uint8_t relayId)
 {
-    this->_printData(Relay::getStateAt(relay));
-    this->_printData(relay);
-    this->_printData(Relay::isNcAt(relay));
-    this->_printData(Relay::getPinAt(relay));
+    this->_printData(Relayboard.getStateAt(relayId));
+    this->_printData(relayId);
+    this->_printData(Relayboard.isLocked(relayId));
+    this->_printData(Relayboard.isNcAt(relayId));
+    this->_printData(Relayboard.getPinAt(relayId));
     this->_currentStream->print(WS_LF);
 }
 
 
 void AbstractStream::_printAll()
 {
-   uint8_t i = Relay::optionsLength;
-   while (i-->0) {
-        if (Relay::exists(i)) {
-            this->_printOne(i);
-        }
-   }
+    uint8_t i = Relayboard.optionsLength;
+
+    while (i-->0) {
+        this->_printOne(i);
+    }
 }
 
 

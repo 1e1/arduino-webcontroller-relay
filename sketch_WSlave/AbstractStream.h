@@ -8,6 +8,7 @@
 #include "config.h"
 #include "macro.h"
 #include "AbstractInterface.h"
+#include "PowerManager.h"
 #include "Relay.h"
 
 
