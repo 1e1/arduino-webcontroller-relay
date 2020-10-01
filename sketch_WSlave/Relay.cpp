@@ -14,8 +14,10 @@ uint8_t Relay::_options[Relay::optionsLength];
 
 static const uint8_t _MASK_PIN       = B00111111;
 static const uint8_t _BIT_IS_NC      = 6;
-static const uint8_t _BIT_IS_ACTIVE  = 7;
+static const uint8_t _BIT_IS_LOCK    = 7;
+//static const uint8_t _BIT_IS_ACTIVE  = 7;
 static const uint8_t _PIN_NONE       = -1;
+static const uint8_t _PIN_MAX        = _MASK_PIN & _PIN_NONE;
 static const byte    _EEPROM_VOID    = -1;
 
 
@@ -42,12 +44,6 @@ void Relay::begin()
     }
   }
   #endif
-}
-
-
-const bool Relay::exists(const uint8_t relayId)
-{
-    return Relay::getPinAt(relayId) != _PIN_NONE & _MASK_PIN;
 }
 
 
@@ -87,21 +83,34 @@ void Relay::isNcAt(const uint8_t relayId, const bool isNc)
 }
 
 
-const bool Relay::getStateAt(const uint8_t relayId)
+const bool Relay::isLocked(const uint8_t relayId)
 {
-    return Relay::isNcAt(relayId) ^ Relay::_isActive(relayId);
+    return bitRead_boolean(Relay::_options[relayId], _BIT_IS_LOCK);
 }
 
 
-void Relay::setStateAt(const uint8_t relayId, const bool state)
+void Relay::isLocked(const uint8_t relayId, const bool isLocked)
 {
-    bitWrite_boolean(
-        Relay::_options[relayId],
-        _BIT_IS_ACTIVE,
-        Relay::isNcAt(relayId) ^ state
-    );
+    bitWrite_boolean(Relay::_options[relayId], _BIT_IS_LOCK, isLocked);
+}
 
-    Relay::_digitalWrite(relayId);
+
+const bool Relay::getStateAt(const uint8_t relayId)
+{
+    const uint8_t pinId = Relay::getPinAt(relayId);
+
+    return Relay::isNcAt(relayId) ^ digitalRead(pinId);
+}
+
+
+void Relay::setStateAt(const uint8_t relayId, const bool state, const bool force)
+{
+    if (Relay::isLocked(relayId) <= force) {
+        const uint8_t pin = Relay::getPinAt(relayId);
+        const bool isActive = Relay::isNcAt(relayId) ^ state;
+
+        digitalWrite(pin, isActive ? HIGH : LOW);
+    }
 }
 
 
@@ -115,7 +124,7 @@ void Relay::setStateAt(const uint8_t relayId, const bool state)
 
 void Relay::_init(const uint8_t relayId)
 {
-    if (Relay::exists(relayId)) {
+    if (Relay::_exists(relayId)) {
         const uint8_t pin = Relay::getPinAt(relayId);
 
         pinMode(pin, OUTPUT);
@@ -123,18 +132,9 @@ void Relay::_init(const uint8_t relayId)
 }
 
 
-bool Relay::_isActive(const uint8_t relayId)
+const bool Relay::_exists(const uint8_t relayId)
 {
-    return bitRead_boolean(Relay::_options[relayId], _BIT_IS_ACTIVE);
-}
-
-
-void Relay::_digitalWrite(const uint8_t relayId)
-{
-    const uint8_t pin = Relay::getPinAt(relayId);
-    const bool isActive = Relay::_isActive(relayId);
-
-    digitalWrite(pin, isActive ? HIGH : LOW);
+    return Relay::getPinAt(relayId) != _PIN_NONE & _MASK_PIN;
 }
 
 

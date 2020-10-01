@@ -21,7 +21,10 @@ class InterfaceEthernet : public AbstractInterfaceWebApp {
   protected:
   void _broadcast();
 
+  uint8_t _cycleCounter;
   EthernetServer* _server;
+
+  static const char _uint8_t2hex(const uint8_t i);
 
 };
 

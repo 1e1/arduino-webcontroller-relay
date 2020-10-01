@@ -7,7 +7,7 @@ readonly BASE_DIR=$( dirname $BIN_DIR)
 readonly INPUT_HTML="$BIN_DIR/html/index.html"
 readonly TEMP_HTML="$BIN_DIR/html/_.html"
 readonly TEMP_GZ="$BIN_DIR/html/_.gz"
-readonly OUTPUT_H="$BASE_DIR/sketch_WSlave/_webApp.h"
+readonly OUTPUT_H="$BASE_DIR/sketch_WSlave/webApp-generated.h"
 
 readonly SED_BACKUP_EXT=".sed"
 
@@ -17,9 +17,14 @@ ls -l $INPUT_HTML
 sed -E 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\/all.txt/\/\$/' $INPUT_HTML \
     | tr -d '\r\n' > $TEMP_HTML
 
+# force the modification date to prevent this diff only (date embed into the zip)
+touch -t 200404040200 $TEMP_HTML
+
 echo "minify HTML"
 ls -l $TEMP_HTML
 gzip -c -9 $TEMP_HTML > $TEMP_GZ
+
+#touch -t 200404040200 $TEMP_GZ
 
 echo "compressed GZ"
 ls -l $TEMP_GZ

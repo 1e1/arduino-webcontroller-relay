@@ -1,5 +1,5 @@
-#ifndef InterfaceSerial_H_
-#define InterfaceSerial_H_
+#ifndef InterfaceUsb_H_
+#define InterfaceUsb_H_
 
 #include <Arduino.h>
 #include "config.h"
@@ -9,7 +9,7 @@
 
 
 
-class InterfaceSerial : public AbstractStream {
+class InterfaceUsb : public AbstractStream {
 
   public:
   void begin();
