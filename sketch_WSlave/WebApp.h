@@ -2,7 +2,7 @@
 #ifndef webApp_H_
 #define webApp_H_
 
-#include "webApp-generated.h"
+#include "webApp-generated-brotli.h"
 #include "macro.h"
 
 

@@ -1,0 +1,132 @@
+<html>
+<head>
+<link rel="shortcut icon" type="image/svg" href="favicon">
+<link rel="shortcut icon" sizes="512x512" href="favicon">
+<link rel="apple-touch-icon" href="favicon">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>WebController Relay</title>
+<style>
+body{
+    background:#222;
+    color:#fff;
+    font-family:sans-serif;
+    font-size:1.2em;
+    text-align:center;
+    text-overflow:ellipsis;
+    display:flex;
+    flex-wrap: wrap;
+}
+
+label{
+    flex:auto;
+    width:200px;
+}
+
+input{
+    margin:10px;
+    position:relative;
+    width:120px;
+    height:40px;
+    appearance:none;
+    outline:none;
+    border-radius:20px;
+    background:linear-gradient(0,#333,#000);
+    box-shadow:0 0 0 4px #353535,0 0 0 5px #3e3e3e,inset 0 0 10px rgba(0,0,0,1);
+  }
+  
+  input:checked{
+    background:linear-gradient(0deg,#70a1ff,#1e90ff);
+    box-shadow:0 0 0 4px #353535,0 0 0 5px #3e3e3e,inset 0 0 10px rgba(0,0,0,1);
+  }
+  
+  input:before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    width:80px;
+    height:40px;
+    border-radius:20px;
+    transform:scale(.98,.96);
+    transition:.5s;
+    background:linear-gradient(0,#000,#6b6b6b);
+    box-shadow:0 0 0 1px #232323;
+  }
+  
+  input:checked:before{
+    left:40px;
+  }
+  
+  input:after{
+    content:'';
+    position:absolute;
+    top:calc(50%-2px);
+    left:70px;
+    width:4px;
+    height:4px;
+    border-radius:50%;
+    transition:.5s;
+    background:linear-gradient(0,#6b6b6b,#000);
+  }
+  
+  input:checked:after{
+    left:110px;
+  }
+</style>
+<script>
+f=(a,b,c)=>{
+    x=new XMLHttpRequest();
+    x.open(a,`/api/${b}.json`,0);
+    x.send(c);
+    if(200==x.status)
+        return JSON.parse(x.response)
+};
+w=(a,b,c)=>{
+    a.forEach((a,b,c)=>
+        document.body.innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT',${a.i},JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
+    );
+    a.forEach((a,b,c)=>
+        document.getElementById(`r${a.i}`).checked=(f('GET',a.i)).s
+    );
+    window.setInterval(()=>a.forEach((a,b,c)=>
+        document.getElementById(`r${a.i}`).checked=(f('GET',a.i)).s
+    ),10000);
+
+    window.scrollTo(0,1);
+    document.querySelectorAll(`[href="favicon"]`).forEach((a,b,c)=>
+        a.href=`data:image/svg+xml;utf8,
+        <svg width="512" height="512" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="m19 59a1 1 0 0 0 2 0v-6h-2z"/>
+        <path d="m31 59a1 1 0 0 0 2 0v-6h-2z"/>
+        <path d="m4 32a1 1 0 0 0 1 1h6v-2h-6a1 1 0 0 0-1 1z"/>
+        <path d="m43 59a1 1 0 0 0 2 0v-6h-2z"/>
+        <path d="M30.78,31.38a1,1,0,0,1,.18.85l-2.18,8.75L37.44,33H34a1,1,0,0,1-.98-1.16L34.5,22.91,26.41,31H30A1,1,0,0,1,30.78,31.38Z"/>
+        <path d="m51 48v-32a3 3 0 0 0-3-3h-32a3 3 0 0 0-3 3v32a3 3 0 0 0 3 3h32a3 3 0 0 0 3-3zm-36 0v-32a1 1 0 0 1 1-1h32a1 1 0 0 1 1 1v32a1 1 0 0 1-1 1h-32a1 1 0 0 1-1-1z"/>
+        <path d="M17,47H47V17H17Zm6.29-15.7,12-12a1,1,0,0,1,1.69.87L35.18,31H40a1,1,0,0,1,.67,1.73l-13,12a1,1,0,0,1-1.64-.97L28.71,33H24a1,1,0,0,1-.7-1.7Z"/>
+        <path d="M5,45h6V43H5a1,1,0,0,0,0,2Z"/>
+        <path d="m59 19h-6v2h6a1 1 0 0 0 0-2z"/>
+        <path d="m60 44a1 1 0 0 0-1-1h-6v2h6a1 1 0 0 0 1-1z"/>
+        <path d="m53 31v2h6a1 1 0 0 0 0-2z"/>
+        <path d="m33 5a1 1 0 0 0-2 0v6h2z"/>
+        <path d="m4 20a1 1 0 0 0 1 1h6v-2h-6a1 1 0 0 0-1 1z"/>
+        <path d="m21 5a1 1 0 0 0-2 0v6h2z"/>
+        <path d="m45 5a1 1 0 0 0-2 0v6h2z"/>
+        <path d="m27 8h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2z"/>
+        <path d="m6 28a1 1 0 0 1-1-1v-2a1 1 0 0 1 2 0v2a1 1 0 0 1-1 1z"/>
+        <path d="m15 58a9.01 9.01 0 0 1-9-9 1 1 0 0 1 2 0 7 7 0 0 0 7 7 1 1 0 0 1 0 2z"/>
+        <path d="m39 58h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2z"/>
+        <path d="m57 28a1 1 0 0 1-1-1v-2a1 1 0 0 1 2 0v2a1 1 0 0 1-1 1z"/>
+        <path d="m57 16a1 1 0 0 1-1-1 7 7 0 0 0-7-7 1 1 0 0 1 0-2 9.01 9.01 0 0 1 9 9 1 1 0 0 1-1 1z"/>
+        <path d="m49 58a1 1 0 0 1 0-2 7 7 0 0 0 7-7 1 1 0 0 1 2 0 9.01 9.01 0 0 1-9 9z"/>
+        <path d="m57 40a1 1 0 0 1-1-1v-2a1 1 0 0 1 2 0v2a1 1 0 0 1-1 1z"/>
+        <path d="m27 58h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2z"/>
+        <path d="m6 40a1 1 0 0 1-1-1v-2a1 1 0 0 1 2 0v2a1 1 0 0 1-1 1z"/>
+        <path d="m7 16a1 1 0 0 1-1-1 9.01 9.01 0 0 1 9-9 1 1 0 0 1 0 2 7 7 0 0 0-7 7 1 1 0 0 1-1 1z"/>
+        <path d="m39 8h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2z"/>
+        </svg>`
+    );
+};
+</script>
+</head>
+<body onload="w(f('GET','r'))">

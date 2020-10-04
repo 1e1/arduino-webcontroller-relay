@@ -46,8 +46,8 @@ void AbstractInterfaceWebApp::_listen(Client* client)
         client->print(F(WS_HEADER_END_ACTION_F));
         this->process();
       } else {
-        client->print(F(WS_HEADER_END_HELP_F));
-        for (int i = 0; i<WebApp::WEBPAGE_LENGTH; i++) {
+        client->print(F(WS_HEADER_END_HELP_BR_F));
+        for (int i = 0; i<WebApp::WEBPAGE_LENGTH; ++i) {
           client->write(pgm_read_byte_near(WebApp::WEBPAGE_P + i));
         }
       }

@@ -90,12 +90,13 @@
 
 
 /** HELP **/
-#define WS_TEXT_HELP_F         "** HELP\n** > /action/relay/extra\n** < state relay pin isNc\n\n"
-#define WS_CHAR_WAKEUP_F       '?'
-#define WS_HEADER_BEGIN_F      "HTTP/1.0 200" WS_CRLF "Content-Type: text/"
-#define WS_HEADER_END_ACTION_F "plain" WS_CRLF WS_CRLF
-#define WS_HEADER_END_HELP_F   "html" WS_CRLF "Content-Encoding: gzip" WS_CRLF WS_CRLF
-#define WS_HEADER_WAKEUP_F     "HTTP/1.0 204" WS_CRLF WS_CRLF
+#define WS_TEXT_HELP_F              "** HELP\n** > /action/relay/extra\n** < state relay pin isNc\n\n"
+#define WS_CHAR_WAKEUP_F            '?'
+#define WS_HEADER_BEGIN_F           "HTTP/1.0 200" WS_CRLF "Content-Type: text/"
+#define WS_HEADER_END_ACTION_F      "plain" WS_CRLF WS_CRLF
+#define WS_HEADER_END_HELP_GZ_F     "html" WS_CRLF "Content-Encoding: gzip" WS_CRLF WS_CRLF
+#define WS_HEADER_END_HELP_BR_F     "html" WS_CRLF "Content-Encoding: br" WS_CRLF WS_CRLF
+#define WS_HEADER_WAKEUP_F          "HTTP/1.0 204" WS_CRLF WS_CRLF
  
 
 #endif // constants_H_

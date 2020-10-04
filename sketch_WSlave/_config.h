@@ -12,7 +12,7 @@
 #define WS_DEVICE_NAME      "webrelay"
 #define WS_RELAY_NB_MAX     32
 #define WS_STORAGE          WS_STORAGE_EEPROM
-#define WS_LOG_LEVEL        WS_LOG_LEVEL_OFF
+#define WS_LOG_LEVEL        WS_LOG_LEVEL_ALL
 #define WS_LOWPOWER         ( WS_LOWPOWER_ALL - WS_LOWPOWER_NO_LED )
 #define WS_SLEEP_TIME       WS_SLEEP_TIME_MAX
 // =========================

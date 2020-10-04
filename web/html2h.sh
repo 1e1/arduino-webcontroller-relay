@@ -4,10 +4,12 @@
 readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
 readonly BASE_DIR=$( dirname $BIN_DIR)
 
-readonly INPUT_HTML="$BIN_DIR/html/index.html"
-readonly TEMP_HTML="$BIN_DIR/html/_.html"
-readonly TEMP_GZ="$BIN_DIR/html/_.gz"
-readonly OUTPUT_H="$BASE_DIR/sketch_WSlave/webApp-generated.h"
+readonly INPUT_HTML="$BIN_DIR/html/slave.html"
+readonly TEMP_HTML="$BIN_DIR/html/_slave.html"
+readonly TEMP_GZ="$BIN_DIR/html/_slave.gz"
+readonly TEMP_BR="$BIN_DIR/html/_slave.br"
+readonly OUTPUT_GZ_H="$BASE_DIR/sketch_WSlave/webApp-generated-gzip.h"
+readonly OUTPUT_BR_H="$BASE_DIR/sketch_WSlave/webApp-generated-brotli.h"
 
 readonly SED_BACKUP_EXT=".sed"
 
@@ -23,34 +25,63 @@ touch -t 200404040200 $TEMP_HTML
 echo "minify HTML"
 ls -l $TEMP_HTML
 gzip -c -9 $TEMP_HTML > $TEMP_GZ
+brotli -c -Z $TEMP_HTML > $TEMP_BR
 
 #touch -t 200404040200 $TEMP_GZ
+#touch -t 200404040200 $TEMP_BR
 
 echo "compressed GZ"
 ls -l $TEMP_GZ
 
+echo "compressed BR"
+ls -l $TEMP_BR
+
 echo "write .h"
-echo "" >  $OUTPUT_H
+echo "" >  $OUTPUT_GZ_H
 ########################################
 
-cat <<EOT >> $OUTPUT_H
+cat <<EOT >> $OUTPUT_GZ_H
 #ifndef _webApp_H_
 #define _webApp_H_
 
 #define WEBPAGE { \\
 EOT
 
-hexdump -v -e '/1 "0x%02X, "' $TEMP_GZ >> $OUTPUT_H
-sed -i$SED_BACKUP_EXT '$s/, $/ \}/' $OUTPUT_H
+hexdump -v -e '/1 "0x%02X, "' $TEMP_GZ >> $OUTPUT_GZ_H
+sed -i$SED_BACKUP_EXT '$s/, $/ \}/' $OUTPUT_GZ_H
 
-cat <<EOT >> $OUTPUT_H
+cat <<EOT >> $OUTPUT_GZ_H
 
 #endif // _webApp_H_
 EOT
 
 ########################################
-ls -l $OUTPUT_H
+ls -l $OUTPUT_GZ_H
 
-rm "$OUTPUT_H$SED_BACKUP_EXT"
+echo "write .h"
+echo "" >  $OUTPUT_BR_H
+########################################
+
+cat <<EOT >> $OUTPUT_BR_H
+#ifndef _webApp_H_
+#define _webApp_H_
+
+#define WEBPAGE { \\
+EOT
+
+hexdump -v -e '/1 "0x%02X, "' $TEMP_BR >> $OUTPUT_BR_H
+sed -i$SED_BACKUP_EXT '$s/, $/ \}/' $OUTPUT_BR_H
+
+cat <<EOT >> $OUTPUT_BR_H
+
+#endif // _webApp_H_
+EOT
+
+########################################
+ls -l $OUTPUT_BR_H
+
+rm "$OUTPUT_GZ_H$SED_BACKUP_EXT"
+rm "$OUTPUT_BR_H$SED_BACKUP_EXT"
 rm "$TEMP_GZ"
+rm "$TEMP_BR"
 # rm "$TEMP_HTML"

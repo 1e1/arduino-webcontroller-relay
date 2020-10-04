@@ -93,7 +93,7 @@ uint8_t PowerManager::_cycleCounter = 0;
 
 void PowerManager::begin()
 {
-  for (uint8_t pin; pin<NUM_DIGITAL_PINS; pin++) {
+  for (uint8_t pin; pin<NUM_DIGITAL_PINS; ++pin) {
     pinMode(pin, INPUT_PULLUP);
   }
   

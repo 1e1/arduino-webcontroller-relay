@@ -49,7 +49,7 @@ Standard no-REST routes:
 - sleep (**.**): `/.`
   sleep the board  if `WS_ACL_ALLOW = WS_ACL_ALLOW_SLEEP`
 
-Read the ![swagger](./doc/swagger.yml)
+Read the ![swagger](./doc/swagger-slave.yml)
 
 ### Example to setup the relay #7 on the pin #42
 
@@ -200,8 +200,8 @@ Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`
 
 #### custom HTML
 
-- edit ./web/html/index.html
-- export to ./sketch_WSlave/webApp-generated.h by `./web/html2h.h`
+- edit ./web/html/slave.html
+- export to ./sketch_WSlave/webApp-generated-brotli.h by `./web/html2h.h`
 - run `./web/docker-compose up` for testing
 
 #### docker-compose
