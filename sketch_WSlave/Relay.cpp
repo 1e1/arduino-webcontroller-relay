@@ -34,7 +34,7 @@ void Relay::begin()
 {
   #if WS_STORAGE & WS_STORAGE_EEPROM
   uint8_t option;
-  for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); i++) {
+  for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); ++i) {
     option = EEPROM.read(i);
 
     if (_EEPROM_VOID != option) {
@@ -50,7 +50,7 @@ void Relay::begin()
 void Relay::save()
 {
   #if WS_STORAGE & WS_STORAGE_EEPROM
-  for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); i++) {
+  for (int i=0; i<Relay::optionsLength && i<EEPROM.length(); ++i) {
     Relay::_save(i);
   }
   #endif

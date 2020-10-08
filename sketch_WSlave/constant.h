@@ -65,6 +65,9 @@
 #define WS_SLEEP_TIME_MAX           T_8S
 #define WS_SLEEP_TIME_INFINITE      T_INFINITE
 
+#define WS_HTML_COMPRESSION_GZ      0
+#define WS_HTML_COMPRESSION_BR      1
+
 
 
 #define WS_ACTION_ALL          '$'
@@ -90,12 +93,13 @@
 
 
 /** HELP **/
-#define WS_TEXT_HELP_F         "** HELP\n** > /action/relay/extra\n** < state relay pin isNc\n\n"
-#define WS_CHAR_WAKEUP_F       '?'
-#define WS_HEADER_BEGIN_F      "HTTP/1.0 200" WS_CRLF "Content-Type: text/"
-#define WS_HEADER_END_ACTION_F "plain" WS_CRLF WS_CRLF
-#define WS_HEADER_END_HELP_F   "html" WS_CRLF "Content-Encoding: gzip" WS_CRLF WS_CRLF
-#define WS_HEADER_WAKEUP_F     "HTTP/1.0 204" WS_CRLF WS_CRLF
+#define WS_TEXT_HELP_F              "** HELP\n** > /action/relay/extra\n** < state relay pin isNc\n\n"
+#define WS_CHAR_WAKEUP_F            '?'
+#define WS_HEADER_BEGIN_F           "HTTP/1.0 200" WS_CRLF "Content-Type: text/"
+#define WS_HEADER_END_ACTION_F      "plain" WS_CRLF WS_CRLF
+#define WM_HEADER_END_HELP_GZ_F     "html" WM_CRLF "Content-Encoding: gzip" WM_CRLF WM_CRLF
+#define WM_HEADER_END_HELP_BR_F     "html" WM_CRLF "Content-Encoding: br" WM_CRLF WM_CRLF
+#define WS_HEADER_WAKEUP_F          "HTTP/1.0 204" WS_CRLF WS_CRLF
  
 
 #endif // constants_H_

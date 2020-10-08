@@ -41,6 +41,7 @@
 #define WS_BONJOUR_MODE     WS_BONJOUR_MODE_NONE
 #define WS_WIFI_SSID        "mySSID"
 #define WS_WIFI_PASSWORD    "myPassword"
+#define WS_HTML_COMPRESSION WS_HTML_COMPRESSION_BR
 // =========================
 
 
