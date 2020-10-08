@@ -41,6 +41,7 @@
 #define WS_WEB_PORT         80
 #define WS_MAC_TYPE         WS_MAC_TYPE_STATIC
 #define WS_BONJOUR_MODE     WS_BONJOUR_MODE_STATIC
+#define WS_HTML_COMPRESSION WS_HTML_COMPRESSION_BR
 // =========================
 
 
