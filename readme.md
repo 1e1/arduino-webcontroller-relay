@@ -49,7 +49,7 @@ Standard no-REST routes:
 - sleep (**.**): `/.`
   sleep the board  if `WS_ACL_ALLOW = WS_ACL_ALLOW_SLEEP`
 
-Read the ![swagger](./doc/swagger.yml)
+Read the ![swagger](./doc/swagger-slave.yml)
 
 ### Example to setup the relay #7 on the pin #42
 
