@@ -97,6 +97,9 @@
 #ifndef WS_BONJOUR_MODE
 #define WS_BONJOUR_MODE     WS_BONJOUR_MODE_STATIC
 #endif
+#ifndef WS_HTML_COMPRESSION
+#define WS_HTML_COMPRESSION WS_HTML_COMPRESSION_GZ
+#endif
 // =========================
 
 

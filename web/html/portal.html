@@ -30,14 +30,14 @@ f=(a,u)=>{
         o[u]=JSON.parse(x.response);
 };
 f('GET','mac');f('GET','g');f('GET','w');f('GET','d');f('GET','r');
-g=()=>{
+g=(a,u)=>{
     document.querySelectorAll('[data-o]').forEach((a,u)=>{
         a.value=a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o.substr(2)][a.dataset.o[1]]:o[a.dataset.o[0]][a.dataset.o[1]];
         a.onchange=()=>a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o.substr(2)][a.dataset.o[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value):o[a.dataset.o[0]][a.dataset.o[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value);
         a.checked=0<a.value;
     });
 };
-w=()=>{
+w=(a,u)=>{
     h='';
     u=o.w.length;
     o.w.forEach((a,u)=>{
@@ -47,7 +47,7 @@ w=()=>{
     document.getElementById('w').innerHTML=h;
     g();
 };
-d=()=>{
+d=(a,u)=>{
     h='';
     u=o.d.length;
     o.d.forEach((a,u)=>{
@@ -57,7 +57,7 @@ d=()=>{
     document.getElementById('d').innerHTML=h;
     g();
 };
-r=()=>{
+r=(a,u)=>{
     h='';
     u=o.r.length;
     o.r.forEach((a,u)=>{
@@ -74,7 +74,7 @@ s=(a,u)=>{
 x=(a,u)=>{
     f('DELETE',a);
     o.mac=0;
-    window.setInterval(()=>{
+    window.setInterval((a,u)=>{
         f('GET','mac');
         if(o.mac)
             window.location.reload();
@@ -108,7 +108,7 @@ x=(a,u)=>{
     </tbody>
 </table>
 
-<h2>wifis<button onclick="s('w',w)">save</button></h2>
+<h2>stations<button onclick="s('w',w)">save</button></h2>
 <table>
     <thead>
         <tr>
