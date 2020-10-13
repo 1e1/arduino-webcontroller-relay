@@ -1,0 +1,198 @@
+openapi: "3.0.3"
+
+info:
+  description: "
+  Webcontroller Relay (Arduino) \n
+  https://github.com/1e1/arduino-webcontroller-relay
+  "
+  version: "1.0.0"
+  title: "WebController-Relay"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "2.71828183E0+github@gmail.com"
+
+servers:
+  - url: "http://webrelay.local:{port}/{basePath}"
+    variables:
+      port:
+        default: "80"
+      basePath:
+        default: "/"
+
+paths:
+  /cfg/g:
+    get:
+      description: "read AP configuration"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CfgGlobal"
+  /cfg/w:
+    get:
+      description: "read Wifi STAtions configuration"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CfgWifis"
+  /cfg/d:
+    get:
+      description: "read allowed devices configuration"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CfgDevices"
+  /cfg/r:
+    get:
+      description: "read relay configuration"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CfgRelays"
+
+components:
+  responses:
+    204:
+      description: "no content, usually because the request was lost while the device was waking up"
+  schemas:
+    CfgGlobal:
+      type: "object"
+      description: "main configuration as Access Point"
+      properties:
+        u:
+          description: "username"
+          type: "string"
+          minLength: 8
+          maxLength: 63
+        w:
+          description: "user password"
+          type: "string"
+          format: "password"
+          minLength: 8
+          maxLength: 63
+        n:
+          description: "wifi ssid"
+          type: "string"
+          minLength: 8
+          maxLength: 63
+        p:
+          description: "wifi password"
+          type: "string"
+          format: "password"
+          minLength: 8
+          maxLength: 63
+        c:
+          description: "wifi channel"
+          type: "integer"
+          minimum: 1
+          maximum: 13
+        h:
+          description: "is hidden wifi"
+          type: "boolean"
+        r:
+          description: "ESP can auto restart"
+          type: "boolean"
+      example:
+        u: "myUsername"
+        w: "myPassword"
+        n: "myWifiSsid"
+        p: "myWifiPassword"
+        c: 13
+        h: 0
+        r: 1
+    CfgWifi:
+      type: "object"
+      description: "a Wifi STAtion configuration"
+      properties:
+        n:
+          description: "wifi ssid"
+          type: "string"
+          minLength: 8
+          maxLength: 63
+        p:
+          description: "wifi password"
+          type: "string"
+          format: "password"
+          minLength: 8
+          maxLength: 63
+    CfgWifis:
+      type: "array"
+      description: "list of Wifi STAtion configurations"
+      items:
+        $ref: "#/components/schemas/CfgWifi"
+      example: 
+        - n: "wifi_ssid1"
+          p: "password1"
+        - n: "wifi_ssid2"
+          p: "password2"
+        - n: "wifi_ssid3"
+          p: "password3"
+    CfgDevice:
+      type: "object"
+      description: "a allowed device configuration"
+      properties:
+        n:
+          description: "device name"
+          type: "string"
+          minLength: 8
+          maxLength: 63
+        m:
+          description: "device MAC address"
+          type: "string"
+          pattern: "/([0-9A-F]{2}:){5}[0-9A-F]{2}/"
+        c:
+          description: "serial command"
+          type: "string"
+          maxLength: 8
+    CfgDevices:
+      type: "array"
+      description: "list of allowed device configurations"
+      items:
+        $ref: "#/components/schemas/CfgDevice"
+      example: 
+        - n: "device_1"
+          m: "00:11:22:AA:BB:CC"
+          c: "/w/0/1"
+        - n: "device_2"
+          m: "00:11:22:AA:BB:DD"
+          c: "/w/3/1"
+        - n: "device_3"
+          m: "00:11:22:AA:BB:EE"
+          c: "/r/5"
+    CfgRelay:
+      type: "object"
+      description: "a relay configuration"
+      properties:
+        i:
+          description: "relay id"
+          type: "integer"
+          minimum: 0
+          maximum: 127
+        n:
+          description: "relay name"
+          type: "string"
+          minLength: 8
+          maxLength: 63
+    CfgRelays:
+      type: "array"
+      description: "list of allowed device configurations"
+      items:
+        $ref: "#/components/schemas/CfgDevice"
+      example: 
+        - i: 8
+          n: "relay 8"
+        - i: 3
+          n: "garage"
+        - i: 22
+          n: "living room"
