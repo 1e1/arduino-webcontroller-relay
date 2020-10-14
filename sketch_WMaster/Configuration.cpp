@@ -21,61 +21,88 @@
 
 
 
+Configuration::Configuration(FS &fs)
+{
+  this->_fs = &fs;
+}
+
+
 void Configuration::begin()
 {
-  LittleFS.begin();
-
   this->_loadGlobal();
 }
 
 
-const bool Configuration::exists()
+void Configuration::setSafeMode(const bool isSafeMode)
 {
- return LittleFS.exists(WM_CONFIG_GLOBAL_PATH);
+  if (isSafeMode) {
+    Configuration::Global g {
+      .acl = {
+        .username = NULL,
+        .password = NULL,
+        .isSafeMode = true,
+        .canAutoRestart = false
+      },
+      .wifiAp = {
+        .ssid = new char[strlen(WM_WIFI_SSID)],
+        .password = NULL,
+        .channel = 1,
+        .isHidden = false
+      }
+    };
+
+    strcpy(g.wifiAp.ssid, WM_WIFI_SSID);
+
+    this->_global = g;
+  }
 }
 
 
-void Configuration::erase()
+const std::list<Configuration::WifiStation> Configuration::getWifiStationList()
 {
-  LittleFS.remove(WM_CONFIG_GLOBAL_PATH);
-}
+  std::list<Configuration::WifiStation> wifiStationList;
+  if (_fs->exists(WM_CONFIG_WIFI_PATH)) {
+    DynamicJsonDocument doc = this->_open(WM_CONFIG_WIFI_PATH);
+    JsonArray root = doc.as<JsonArray>();
 
+    for (JsonObject o : root) {
+      Configuration::WifiStation wifi {
+        .ssid = new char[strlen(o["n"])],
+        .password = new char[strlen(o["p"])]
+      };
+    
+      strcpy(wifi.ssid, o["n"]);
+      strcpy(wifi.password, o["p"]);
 
-const Vector<Configuration::Wifi> Configuration::getWifiList()
-{
-  DynamicJsonDocument doc = this->_open(WM_CONFIG_WIFI_PATH);
-  JsonArray root = doc.as<JsonArray>();
-  Vector<Configuration::Wifi> vector;
-
-  for (JsonObject o : root) {
-    Configuration::Wifi wifi;
-
-    wifi.ssid = o["n"].as<const char*>();
-    wifi.password = o["p"].as<const char*>();
-
-    vector.push_back(wifi);
+      wifiStationList.emplace_back(wifi);
+    }
   }
 
-  return vector;
+  return wifiStationList;
 }
 
 
-const Vector<Configuration::Device> Configuration::getDeviceList()
+const std::list<Configuration::Relay> Configuration::getRelayList()
 {
-  DynamicJsonDocument doc = this->_open(WM_CONFIG_DEVICE_PATH);
-  JsonArray root = doc.as<JsonArray>();
-  Vector<Configuration::Device> vector;
+  std::list<Configuration::Relay> relayList;
+  if (_fs->exists(WM_CONFIG_RELAY_PATH)) {
+    DynamicJsonDocument doc = this->_open(WM_CONFIG_RELAY_PATH);
+    JsonArray root = doc.as<JsonArray>();
 
-  for (JsonObject o  : root) {
-    Configuration::Device device;
+    for (JsonObject o : root) {
+      Configuration::Relay relay {
+        .id = o["i"].as<uint8_t>(),
+        .onConnect = static_cast<TriState>(o["a"].as<int>()),
+        .name = new char[strlen(o["n"])]
+      };
 
-    device.mac = o["m"].as<const char*>();
-    device.command = o["c"].as<const char*>();
-
-    vector.push_back(device);
+      strcpy(relay.name, o["n"]);
+      
+      relayList.emplace_back(relay);
+    }
   }
-  
-  return vector;
+
+  return relayList;
 }
 
 
@@ -89,9 +116,9 @@ const Vector<Configuration::Device> Configuration::getDeviceList()
 
 DynamicJsonDocument Configuration::_open(const char* filename)
 {
-  File file = LittleFS.open(filename, "r");
+  File file = _fs->open(filename, "r"); // "w+"
   DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
-  deserializeJson(doc, file, DeserializationOption::NestingLimit(1));
+  deserializeJson(doc, file, DeserializationOption::NestingLimit(2));
   file.close();
 
   return doc;
@@ -100,24 +127,31 @@ DynamicJsonDocument Configuration::_open(const char* filename)
 
 void Configuration::_loadGlobal()
 {
-  if (LittleFS.exists(WM_CONFIG_GLOBAL_PATH)) {
+  if (_fs->exists(WM_CONFIG_GLOBAL_PATH)) {
     DynamicJsonDocument doc = this->_open(WM_CONFIG_GLOBAL_PATH);
     JsonObject root = doc.as<JsonObject>();
+    
+    Configuration::Global g {
+      .acl = {
+        .username = new char[strlen(root["u"])],
+        .password = new char[strlen(root["w"])],
+        .isSafeMode = false,
+        .canAutoRestart = root["r"].as<bool>()
+      },
+      .wifiAp = {
+        .ssid = new char[strlen(root["n"])],
+        .password = new char[strlen(root["p"])],
+        .channel = root["c"].as<uint8_t>(),
+        .isHidden = root["h"].as<bool>()
+      }
+    };
 
-    this->_global.wwwUsername = root["u"].as<const char*>();
-    this->_global.wwwPassword = root["w"].as<const char*>();
-    this->_global.wifiSsid = root["n"].as<const char*>();
-    this->_global.wifiPassword = root["p"].as<const char*>();
-    this->_global.wifiChannel = root["c"].as<uint8_t>();
-    this->_global.wifiIsHidden = root["h"].as<bool>();
-    this->_global.autoRestart = root["r"].as<bool>();
-  } else {
-    this->_global.wwwUsername = NULL;
-    this->_global.wwwPassword = NULL;
-    this->_global.wifiSsid = WM_WIFI_SSID;
-    this->_global.wifiPassword = NULL;
-    this->_global.wifiChannel = 1;
-    this->_global.wifiIsHidden = false;
-    this->_global.autoRestart = false;
+    strcpy(g.acl.username, root["u"]);
+    strcpy(g.acl.password, root["w"]);
+    strcpy(g.wifiAp.ssid, root["n"]);
+    strcpy(g.wifiAp.password, root["p"]);
+
+    this->_global = g;
+    /* */
   }
 }

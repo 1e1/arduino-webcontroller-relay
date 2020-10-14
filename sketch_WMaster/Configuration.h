@@ -5,8 +5,8 @@
 
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
-#include <LittleFS.h>
-#include <Vector.h>
+#include <FS.h>
+#include <list>
 #include "config.h"
 #include "macro.h"
 
@@ -15,34 +15,48 @@
 class Configuration {
 
   public:
+  typedef enum { T_false=0, T_true=1, T_indeterminate=-1 } TriState;
+
+  struct Acl {
+    char* username;
+    char* password;
+    bool isSafeMode;
+    bool canAutoRestart;
+  };
+
+  struct WifiAp {
+    char* ssid;
+    char* password;
+    uint8_t channel: 4;
+    bool isHidden;
+  };
+
   struct Global {
-    const char* wwwUsername;
-    const char* wwwPassword;
-    const char* wifiSsid;
-    const char* wifiPassword;
-    uint8_t wifiChannel: 4;
-    bool wifiIsHidden;
-    bool autoRestart;
+    Acl acl;
+    WifiAp wifiAp;
   };
 
-  struct Wifi {
-    const char* ssid;
-    const char* password;
+  struct WifiStation {
+    char* ssid;
+    char* password;
   };
 
-  struct Device {
-    const char* mac; // char mac[18]
-    const char* command;
+  struct Relay {
+    uint8_t id;
+    TriState onConnect;
+    char* name;
   };
+
+  Configuration(FS &fs);
 
   void begin();
-  const bool exists();
-  void erase();
+  void setSafeMode(const bool isSafeMode=true);
   Global* getGlobal() { return &this->_global; };
-  const Vector<Wifi> getWifiList();
-  const Vector<Device> getDeviceList();
+  const std::list<WifiStation> getWifiStationList();
+  const std::list<Relay> getRelayList();
 
   protected:
+  fs::FS* _fs = nullptr;
   Global _global;
 
   DynamicJsonDocument _open(const char* filename);

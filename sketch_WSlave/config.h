@@ -59,6 +59,9 @@
 #ifndef WS_SERIAL_ID    
 #define WS_SERIAL_ID        0
 #endif
+#ifndef WS_SERIAL_TIMEOUT    
+#define WS_SERIAL_TIMEOUT   63
+#endif
 #ifndef WS_SERIAL_SPEED
 #define WS_SERIAL_SPEED     9600
 #endif

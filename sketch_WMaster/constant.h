@@ -51,12 +51,20 @@
 
 
 
-#define WM_CONFIG_GLOBAL_PATH   "cfg/g.json"
-#define WM_CONFIG_WIFI_PATH     "cfg/w.json"
-#define WM_CONFIG_DEVICE_PATH   "cfg/d.json"
-#define WM_CONFIG_RELAY_PATH    "cfg/r.json"
+#define WM_CONFIG_KEY_PATH      "_KEY.txt"
+#define WM_CONFIG_CERT_PATH     "_CSR.txt"
+#define WM_CONFIG_GLOBAL_PATH   "global.json"
+#define WM_CONFIG_WIFI_PATH     "wifis.json"
+#define WM_CONFIG_RELAY_PATH    "relays.json"
+#define WM_WEB_INDEX_PATH       "index.br"
+#define WM_WEB_PORTAL_PATH      "portal.br"
 
-#define WM_CONFIG_BUFFER_SIZE     512
+#define WM_CONFIG_BUFFER_SIZE   512
+
+
+#define WM_SERIAL_TX_LOOP_DELAY     10
+#define WM_SERIAL_TX_TIMEOUT        200
+#define WM_SERIAL_TX_NB_TRY         50
 
 
 
@@ -64,8 +72,7 @@
 #define WM_ACTION_READ         'r'
 #define WM_ACTION_WRITE        'w'
 #define WM_ACTION_MAP          'm'
-#define WM_ACTION_NC           'c'
-#define WM_ACTION_NO           'o'
+#define WM_ACTION_ISNC         'c'
 #define WM_ACTION_WRITE_LOCK   'W'
 #define WM_ACTION_READ_UNLOCK  'R'
 #define WM_ACTION_SAVE         '!'
@@ -84,7 +91,9 @@
 
 /** HELP **/
 #define WM_TEXT_HELP_F              "** HELP\n** > /action/relay/extra\n** < state relay pin isNc\n\n"
-#define WM_CHAR_WAKEUP_F            '?'
+#define WM_CHAR_RX_BEGIN            '\n'
+#define WM_CHAR_RX_END              '-'
+#define WM_CHAR_RX_UNKNOWN          '?'
 #define WM_HEADER_BEGIN_F           "HTTP/1.0 200" WM_CRLF "Content-Type: text/"
 #define WM_HEADER_END_ACTION_F      "plain" WM_CRLF WM_CRLF
 #define WM_HEADER_END_HELP_GZ_F     "html" WM_CRLF "Content-Encoding: gzip" WM_CRLF WM_CRLF

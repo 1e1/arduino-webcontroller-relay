@@ -9,13 +9,18 @@
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
-#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
+#include <LittleFS.h>
 #include <Vector.h>
+#include <time.h>
+#include <sys/time.h>
 #include "config.h"
 #include "macro.h"
+#include "certificate-generated.h"
+#include "Bridge.h"
 #include "Configuration.h"
+#include "WebServer.h"
 
 
 
@@ -70,42 +75,6 @@
     * end
     * 
     * 
-    * EXEC(cmd)
-    * ------
-    * do
-    *  Serial.print(cmd)
-    * while (Serial.read() == '?')
-    * return Serial.read()
-    * 
-    * 
-    * PORTAL:
-    * -------
-    * GET /portal
-    * GET /cfg/mac
-    * GET /cfg/reset
-    * GET /cfg/{cat}
-    * POST /cfg/{cat} {object}
-    * if time > lockedTime && BASIC_AUTH
-    * then
-    *   portal:
-    *   form: BASIC_AUTH - password[8-63] - save
-    *   form: AP - ssid[0-32] - password[8-63] - save
-    *   form: - reboot
-    *   wifis:
-    *   form: ssid1[0-32] - *********[8-63] - delete
-    *   form: ssid2[0-32] - *********[8-63] - delete
-    *   form: ssid3[0-32] - password3[8-63] - add
-    *   devices:
-    *   form: MAC1[17] - deviceName1[0-32] - command[0-8] - delete
-    *   form: MAC2[17] - deviceName2[0-32] - command[0-8] - add
-    *   relays:
-    *   form: 0[2] - NC[1] - name0[0-32] - delete
-    *   form: 5[2] - NO[1] - name5[0-32] - delete
-    *   form: 42[2] - NC[1] - name42[0-32] - add
-    * end
-    * lockedTime = time + 2s
-    * 
-    * 
     * WEBAPP:
     * -------
     * GET /
@@ -123,115 +92,141 @@
 
 
 
-ESP8266WebServer server(80); // TODO constantize
-bool canAutoRestart = false;
-
-
-void send(const char* command)
-{
-  do {
-    Serial.print(command);
-    Serial.flush();
-
-    while (!Serial.available());
-
-  } while (Serial.peek() == '?'); // TODO constantize
-}
+Configuration::Acl acl;
+WebServer* server;
 
 
 void setup()
 {
   BUSYLED_WORK;
   Serial.begin(WM_USB_SPEED);
-  LOGLN(F("DEBUG ON"));
+  WAIT(1000);
+  LOGLN(PSTR("DEBUG ON"));
+
+  LOG("reset reason: "); LOGLN(ESP.getResetReason());
   
   /**
    * init
    */
-  Configuration* configuration = new Configuration();
+  LittleFS.begin();
+  Bridge* bridge = new Bridge(WM_SERIAL);
+  Configuration* configuration = new Configuration(LittleFS);
 
-  pinMode(WM_PIN_ERASE, INPUT_PULLUP);
   pinMode(WM_PIN_CONFIG, INPUT_PULLUP);
+  pinMode(WM_PIN_SAFEMODE, INPUT_PULLUP);
 
-  if (digitalRead(WM_PIN_ERASE) == LOW) {
-    configuration->erase();
-  }
+  bool isUnlocked = digitalRead(WM_PIN_CONFIG) == LOW;
+  bool isSafeMode = digitalRead(WM_PIN_SAFEMODE) == LOW;
+  bool externalReset = ESP.getResetInfoPtr()->reason == rst_reason::REASON_EXT_SYS_RST;
 
-  bool isUnlocked = digitalRead(WM_PIN_CONFIG) == LOW);
-
+  LOGLN(PSTR("-- load Configuration"));
   configuration->begin();
+  configuration->setSafeMode(isSafeMode);
 
-  if (!isUnlocked) {
-    canAutoRestart = configuration->getGlobal()->autoRestart;
+  acl = configuration->getGlobal()->acl;
+
+  if (isUnlocked) {
+    acl.canAutoRestart = false;
   }
+  LOGLN(PSTR("---"));
 
-  if (configuration->exists()) {
+  if (!acl.isSafeMode && !externalReset) {
     /**
      * set mode Home Assistant
      * (Configuration*)
      */
+    BUSYLED_IDLE;
+    LOGLN(PSTR("-- trying to connect to STA:"));
+
     WiFi.mode(WIFI_STA);
-    Vector<Configuration::Wifi> wifis = configuration->getWifiList();
-    for (Configuration::Wifi wifi : wifis) {
+    std::list<Configuration::WifiStation> wifiList = configuration->getWifiStationList();
+    for (Configuration::WifiStation wifi : wifiList) {
+        LOGLN(wifi.ssid);
         WiFi.begin(wifi.ssid, wifi.password);
-        WiFi.waitForConnectResult(30000); // TODO constantize
         
-        if (WiFi.status() == WL_CONNECTED) {
+        if (WiFi.waitForConnectResult(30000) == WL_CONNECTED) { // TODO constantize
           break;
         }
     }
+
+    LOGLN(PSTR("---"));
   }
 
-  WiFi.setSleepMode(WIFI_LIGHT_SLEEP, 3); // TODO constantize
+  //WiFi.setSleepMode(WIFI_LIGHT_SLEEP, 3); // TODO constantize
 
   if (WiFi.status() != WL_CONNECTED) {
     /**
      * set mode Guardian
      * (Configuration*, Configuration::Global*)
      */
+    LOGLN(PSTR("-- trying to create AP:"));
+    LOG("AP ssid: ");LOGLN(configuration->getGlobal()->wifiAp.ssid);
+    LOG("AP password: ");LOGLN(configuration->getGlobal()->wifiAp.password);
+    
     WiFi.mode(WIFI_AP);
     WiFi.softAP(
-      configuration->getGlobal()->wifiSsid, 
-      configuration->getGlobal()->wifiPassword, 
-      configuration->getGlobal()->wifiChannel, 
-      configuration->getGlobal()->wifiIsHidden
+      configuration->getGlobal()->wifiAp.ssid, 
+      configuration->getGlobal()->wifiAp.password, 
+      configuration->getGlobal()->wifiAp.channel, 
+      configuration->getGlobal()->wifiAp.isHidden
     );
+    
+    LOGLN(PSTR("---"));
     
     if (!isUnlocked) {
       /**
-       * stalk connected devices and exec their relative command
+       * stalk connected devices and switch sensitive relays
        */
-      delay(30000);
-      Vector<Configuration::Device> devices = configuration->getDeviceList(); 
-      struct station_info* station_list = wifi_softap_get_station_info();
-      while (station_list != NULL) {
-        char station_mac[18] = {0}; 
-        sprintf(station_mac, "%02X:%02X:%02X:%02X:%02X:%02X", MAC2STR(station_list->bssid));
-        // match
-        for (Configuration::Device d : devices) {
-          if (memcmp(d.mac, station_mac, 18) == 0) {
-            send(d.command);
+      BUSYLED_IDLE;
+      LOGLN(PSTR("trying to detect connected devices"));
+
+      delay(30); // TODO 30s = 30000
+      if (WiFi.softAPgetStationNum()) {
+        LOGLN(PSTR("OK, run Relay commands:"));
+
+        std::list<Configuration::Relay> relayList = configuration->getRelayList();
+        for (Configuration::Relay relay : relayList) {
+          if (relay.onConnect != Configuration::T_indeterminate) {
+            LOG(relay.name); LOG(" -> "); LOGLN(relay.onConnect);
+            bridge->setRelay(relay.id, static_cast<bool>(relay.onConnect));
           }
         }
-
-        station_list = STAILQ_NEXT(station_list, next);
       }
-    }
 
-    wifi_softap_free_station_info();
-    ESP.deepSleepInstant(30E6, WAKE_RF_DISABLED);
+      LOGLN(PSTR("---"));
+    }
   }
+
+  LOGLN(PSTR("-- setup WebServer"));
+  WebServer::setFs(LittleFS);
+  WebServer::setBridge(bridge);
+  WebServer::setAuthentication(acl.username, acl.password);
+
+  server = new WebServer();
+  server->begin();
+  
+  LOGLN(PSTR("---"));
+
+  LOGLN(PSTR("-- setup mDNS"));
+  MDNS.begin(certificate::dname);
+  MDNS.addService("https", "tcp", WM_WEB_PORT);
+  LOGLN(PSTR("---"));
+
+  BUSYLED_NONE;
 }
 
 
 void loop()
 {
-  if (canAutoRestart) {
+  if (acl.canAutoRestart) {
     if (WiFi.status() != WL_CONNECTED) {
+      LOGLN(PSTR("** RESTART **"));
+
+      ESP.deepSleepInstant(30E6, WAKE_RF_DISABLED);
       ESP.restart();
     }
   }
 
-  LOGLN("waiting");
-  WAIT(1000);
+  server->loop();
+  MDNS.update();
 }

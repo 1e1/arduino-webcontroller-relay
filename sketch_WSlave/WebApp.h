@@ -2,7 +2,11 @@
 #ifndef webApp_H_
 #define webApp_H_
 
+#if WS_HTML_COMPRESSION == WS_HTML_COMPRESSION_BR
 #include "webApp-generated-brotli.h"
+#else
+#include "webApp-generated-gzip.h"
+#endif
 #include "macro.h"
 
 

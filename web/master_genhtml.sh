@@ -5,20 +5,22 @@ readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
 readonly BASE_DIR=$( dirname ${BIN_DIR})
 
 function seal {
-file=$1
+filename=$(basename -- "$1")
+extension="${filename##*.}"
+filename="${filename%.*}"
 
-INPUT_HTML="${BIN_DIR}/html/${file}.html"
-TEMP_HTML="${BIN_DIR}/html/_${file}.html"
-TEMP_GZ="${BIN_DIR}/html/_${file}.gz"
-TEMP_BR="${BIN_DIR}/html/_${file}.br"
-OUTPUT_DATA="$BASE_DIR/sketch_WMaster/data/${file}.htz"
+INPUT_HTML="${BIN_DIR}/html/${filename}.${extension}"
+TEMP_HTML="${BIN_DIR}/html/_${filename}.${extension}"
+TEMP_GZ="${BIN_DIR}/html/_${filename}.gz"
+TEMP_BR="${BIN_DIR}/html/_${filename}.br"
+OUTPUT_DATA="$BASE_DIR/sketch_WMaster/data/${filename}.br"
 
 SED_BACKUP_EXT=".sed"
 
 
 echo "original HTML"
 ls -l $INPUT_HTML
-sed -E 's/^[[:space:]]*//;s/[[:space:]]*$//;s/(\/\$\{u\})\.json/\1/' $INPUT_HTML \
+sed -E 's/^[[:space:]]*//;s/[[:space:]]*$//;s/(\/\$\{.\})\.json/\1/' $INPUT_HTML \
     | tr -d '\r\n' > $TEMP_HTML
 
 # force the modification date to prevent this diff only (date embed into the zip)
@@ -42,7 +44,7 @@ cp $TEMP_BR $OUTPUT_DATA
 
 rm "$TEMP_GZ"
 rm "$TEMP_BR"
-rm "$TEMP_HTML"
+#rm "$TEMP_HTML"
 }
 
 
@@ -51,7 +53,7 @@ cat <<EOT
 portal
 ######
 EOT
-seal portal
+seal portal.html
 
 
 cat <<EOT
@@ -59,4 +61,6 @@ cat <<EOT
 master
 ######
 EOT
-seal master
+seal master.html
+
+mv "$BASE_DIR/sketch_WMaster/data/master.br" "$BASE_DIR/sketch_WMaster/data/index.br"
