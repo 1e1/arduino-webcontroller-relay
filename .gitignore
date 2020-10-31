@@ -1,7 +1,9 @@
 !**/.keep
 **/__pycache__
 
-_.html
+web/html/_*.txt
+web/html/_*.html
 web/nodered
 web/hass
 
+sketch_WMaster/dump

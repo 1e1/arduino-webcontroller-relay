@@ -25,9 +25,11 @@ static const uint8_t _READ_NB_RETRY = 128;
 
 void InterfaceSerial::begin()
 {
-  WS_SERIAL.begin(WS_USB_SPEED);
+  WS_SERIAL.begin(WS_SERIAL_SPEED);
 
   this->setStream(&WS_SERIAL);
+
+  this->_currentStream->setTimeout(WS_SERIAL_TIMEOUT);
 }
 
 
@@ -35,11 +37,11 @@ void InterfaceSerial::loop()
 {
   if (WS_SERIAL.available() > 0) {
     if (this->read()) {
+      WS_SERIAL.print(WS_CHAR_TX_BEGIN);
       this->process();
+      WS_SERIAL.print(WS_CHAR_TX_END);
     } else {
-      if (Energy.isFirstLoop()) {
-        WS_SERIAL.print(WS_CHAR_WAKEUP_F);
-      }
+      WS_SERIAL.print(WS_CHAR_RX_UNKNOWN);
     }
 
     this->terminate();

@@ -42,24 +42,28 @@ void setup()
   uint8_t i = ARRAYLEN(_engines);
 
   #if WS_INTERFACE & WS_INTERFACE_USB
+  LOGLN(F("start USB"));
   --i;
   _engines[i] = new InterfaceUsb();
   _engines[i]->begin();
   #endif
 
   #if WS_INTERFACE & WS_INTERFACE_SERIAL
+  LOGLN(F("start Serial"));
   --i;
   _engines[i] = new InterfaceSerial();
   _engines[i]->begin();
   #endif
 
   #if WS_INTERFACE & WS_INTERFACE_ETHERNET
+  LOGLN(F("start Ethernet"));
   --i;
   _engines[i] = new InterfaceEthernet();
   _engines[i]->begin();
   #endif
 
   #if WS_INTERFACE & WS_INTERFACE_WIFI
+  LOGLN(F("start Wifi"));
   --i;
   _engines[i] = new InterfaceWifi();
   _engines[i]->begin();

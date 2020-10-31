@@ -1,0 +1,95 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🔌 WCRelay</title>
+<style>
+body{
+    background:#222;
+    color:#fff;
+    font-family:sans-serif;
+    font-size:1.2em;
+    text-align:center;
+    text-overflow:ellipsis;
+    display:flex;
+    flex-wrap:wrap;
+}
+
+label{
+    flex:auto;
+    width:120px;
+}
+
+input{
+    margin:10px;
+    position:relative;
+    width:120px;
+    height:40px;
+    appearance:none;
+    outline:none;
+    border-radius:20px;
+    background:linear-gradient(0,#333,#000);
+    box-shadow:0 0 0 4px #353535,inset 0 0 10px rgba(0,0,0,1);
+  }
+  
+  input:checked{
+    background:linear-gradient(0deg,#70a1ff,#1e90ff);
+    box-shadow:0 0 0 4px #353535,inset 0 0 10px rgba(0,0,0,1);
+  }
+  
+  input:before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    width:80px;
+    height:40px;
+    border-radius:20px;
+    transform:scale(.98,.96);
+    transition:.5s;
+    background:linear-gradient(0,#000,#777);
+    box-shadow:0 0 0 1px #232323;
+  }
+  
+  input:checked:before{
+    left:40px;
+  }
+  
+  input:after{
+    content:'';
+    position:absolute;
+    top:calc(50%-2px);
+    left:70px;
+    width:4px;
+    height:4px;
+    border-radius:50%;
+    transition:.5s;
+    background:linear-gradient(0,#777,#000);
+  }
+  
+  input:checked:after{
+    left:110px;
+  }
+</style>
+<script>
+f=(a,b,c)=>{
+    let x=new XMLHttpRequest();
+    x.open(a,`/api/${b}.json`);
+    x.onload=()=>c(JSON.parse(x.response));
+    x.send(c);
+};
+w=(a,b,c)=>{
+    a.forEach((a,b,c)=>
+        document.body.innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT',${a.i},JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
+    );
+    index = 0;
+    cb=x=>document.getElementById(`r${a[index].i}`).checked=x.s;
+    lp=()=>f('GET',a[index].i,x=>{cb(x);if(++index<a.length){lp()}else{index=0;window.setTimeout(lp,30000)}});
+    lp();
+
+    window.scrollTo(0,1);
+};
+</script>
+</head>
+<body onload="f('GET','r',w)">

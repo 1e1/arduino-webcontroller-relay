@@ -59,6 +59,9 @@
 #ifndef WS_SERIAL_ID    
 #define WS_SERIAL_ID        0
 #endif
+#ifndef WS_SERIAL_TIMEOUT    
+#define WS_SERIAL_TIMEOUT   63
+#endif
 #ifndef WS_SERIAL_SPEED
 #define WS_SERIAL_SPEED     9600
 #endif
@@ -96,6 +99,9 @@
 #endif
 #ifndef WS_BONJOUR_MODE
 #define WS_BONJOUR_MODE     WS_BONJOUR_MODE_STATIC
+#endif
+#ifndef WS_HTML_COMPRESSION
+#define WS_HTML_COMPRESSION WS_HTML_COMPRESSION_GZ
 #endif
 // =========================
 

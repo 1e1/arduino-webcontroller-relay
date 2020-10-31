@@ -1,4 +1,5 @@
 swagger: "3.0"
+
 info:
   description: "
   Webcontroller Relay (Arduino) \n
@@ -9,10 +10,14 @@ info:
   termsOfService: "http://swagger.io/terms/"
   contact:
     email: "2.71828183E0+github@gmail.com"
-host: "webrelay.local"
-basePath: "/"
-schemes:
-- "http"
+
+servers:
+  - url: "http://webrelay.local:{port}/{basePath}"
+    variables:
+      port:
+        default: "80"
+      basePath:
+        default: ""
 
 paths:
   /r/{relay_id}:
@@ -126,9 +131,9 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Relay"
-  /o/{relay_id}:
+  /c/{relay_id}/{is_nc}:
     get:
-      description: "define the relay wired as NO (Normally Opened)"
+      description: "define if the relay wired as NC (Normally Opened)"
       produces:
       - "text/plain"
       parameters:
@@ -139,23 +144,12 @@ paths:
         minimum: 0
         description: "relay id"
         required: true
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Relay"
-  /c/{relay_id}:
-    get:
-      description: "define the relay wired as NC (Normally Closed)"
-      produces:
-      - "text/plain"
-      parameters:
       - in: "path"
-        name: "relay_id"
+        name: "is_nc"
         type: "integer"
-        maximum: 127
+        maximum: 1
         minimum: 0
-        description: "relay id"
+        description: "is the relative relay is wired as NC"
         required: true
       responses:
         200:

@@ -11,7 +11,7 @@
 
 static const bool _USE_ADC = !(WS_LOWPOWER & WS_LOWPOWER_NO_ADC);
 static const bool _USE_SPI = !(WS_LOWPOWER & WS_LOWPOWER_NO_SPI) || (WS_INTERFACE & WS_INTERFACE_ETHERNET) || (WS_INTERFACE & WS_INTERFACE_WIFI);
-static const bool _USE_MILLIS = !(WS_LOWPOWER & WS_LOWPOWER_DOWNCLOCK);
+static const bool _USE_MILLIS = !(WS_LOWPOWER & WS_LOWPOWER_DOWNCLOCK) || (WS_INTERFACE & WS_INTERFACE_ETHERNET) || (WS_INTERFACE & WS_INTERFACE_WIFI) || (WS_INTERFACE & WS_INTERFACE_USB) || (WS_INTERFACE & WS_INTERFACE_SERIAL) || (WS_LOG_LEVEL != WS_LOG_LEVEL_OFF);
 static const bool _USE_TWI = !(WS_LOWPOWER & WS_LOWPOWER_NO_TWI);
 static const bool _USE_USART = !(WS_LOWPOWER & WS_LOWPOWER_NO_USART) || (WS_INTERFACE & WS_INTERFACE_USB) || (WS_INTERFACE & WS_INTERFACE_SERIAL) || (WS_LOG_LEVEL != WS_LOG_LEVEL_OFF);
 
@@ -38,19 +38,24 @@ ISR(PCINT0_vect)
 void attachDefaultInterrupts(const uint8_t mode = RISING)
 {
   bitSet(PCICR,1);
-  #if (WS_INTERFACE & WS_INTERFACE_SERIAL) || (WS_INTERFACE & WS_INTERFACE_USB)
+  #if ((WS_INTERFACE & WS_INTERFACE_SERIAL) && (WS_SERIAL_ID == 0)) || (WS_INTERFACE & WS_INTERFACE_USB)
     #ifdef PCINT8 // RX0
       bitSet(PCMSK1, PCINT8);
     #endif
   #endif
-  #if WS_INTERFACE & WS_INTERFACE_SERIAL
+  #if (WS_INTERFACE & WS_INTERFACE_SERIAL) && (WS_SERIAL_ID == 1)
+    #ifdef PCINT9 // RX1
+      bitSet(PCMSK1, PCINT8);
+    #endif
+  #endif
+  #if (WS_INTERFACE & WS_INTERFACE_SERIAL) && (WS_SERIAL_ID == 3)
     #ifdef PCINT9 // RX3
       bitSet(PCMSK1, PCINT9);
     #endif
   #endif
   #if WS_INTERFACE & WS_INTERFACE_ETHERNET
     #ifdef PCINT3  // MISO
-      bitSet(PCMSK0, PCINT3);
+      // bitSet(PCMSK0, PCINT3);
     #endif
   #endif
 }
@@ -93,7 +98,7 @@ uint8_t PowerManager::_cycleCounter = 0;
 
 void PowerManager::begin()
 {
-  for (uint8_t pin; pin<NUM_DIGITAL_PINS; pin++) {
+  for (uint8_t pin; pin<NUM_DIGITAL_PINS; ++pin) {
     pinMode(pin, INPUT_PULLUP);
   }
   

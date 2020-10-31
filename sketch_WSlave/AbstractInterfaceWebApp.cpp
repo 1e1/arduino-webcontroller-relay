@@ -37,7 +37,6 @@ void AbstractInterfaceWebApp::_listen(Client* client)
 
   if (client->connected()) {
     if (client->available()) {
-      Energy.highCpu();
 
       client->print(F(WS_HEADER_BEGIN_F));
 
@@ -46,8 +45,12 @@ void AbstractInterfaceWebApp::_listen(Client* client)
         client->print(F(WS_HEADER_END_ACTION_F));
         this->process();
       } else {
-        client->print(F(WS_HEADER_END_HELP_F));
-        for (int i = 0; i<WebApp::WEBPAGE_LENGTH; i++) {
+        #if WS_HTML_COMPRESSION == WS_HTML_COMPRESSION_BR
+        client->print(F(WM_HEADER_END_HELP_BR_F));
+        #else
+        client->print(F(WM_HEADER_END_HELP_GZ_F));
+        #endif
+        for (int i = 0; i<WebApp::WEBPAGE_LENGTH; ++i) {
           client->write(pgm_read_byte_near(WebApp::WEBPAGE_P + i));
         }
       }
@@ -59,7 +62,6 @@ void AbstractInterfaceWebApp::_listen(Client* client)
       #endif
 
       this->terminate();
-      Energy.lowCpu();
     }
 
     client->stop();
