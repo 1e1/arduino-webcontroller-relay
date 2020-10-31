@@ -107,7 +107,6 @@ write anything and the read the help
 
 - Arduino for the required Slave sketch
 - EthernetBonjour if `WS_BONJOUR_MODE` != `WS_BONJOUR_MODE_NONE`
-- Esp8266 for the optional Master sketch
 
 
 ### upload Sketch
@@ -117,7 +116,7 @@ Open the folder ./sketch_WSlave/ with your favorite IDE (Arduino?)
 Example with a Wemos Mega Wifi, a board with a Arduino Mega and an Esp8266 linked by a Serial. 
 First, upload the Slave sketch on the Arduino Mega part. 
 
-<ins>/!\</ins> First I have to update my USB driver for this board: 
+<ins>/!\\</ins> First I have to update my USB driver for this board: 
 ![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)
 
 
@@ -226,9 +225,55 @@ switch:
 Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`)
 
 
-### tools
+## Slave sketh
 
-#### custom HTML
+
+### Setup
+
+Edit `./sketch_WMaster/config.h`
+
+
+### Commands
+
+
+### webApp
+
+Open a bowser on `https://{ip}`.
+
+
+### dependancies
+
+#### software
+
+- Esp8266 for the optional Master sketch
+
+
+### upload Sketch
+
+Open the folder ./sketch_WMaster/ with your favorite IDE (Arduino?)
+
+Example with a Wemos Mega Wifi, a board with a Arduino Mega and an Esp8266 linked by a Serial. 
+Then, upload the Master sketch on the Arduino ESP part. 
+
+<ins>/!\\</ins> First I have to update my USB driver for this board: 
+![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)
+
+
+Set the switches 5-6-7 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))
+
+![ide-config-master](./doc/ide-config-master.png)
+
+Press the MODE button while the sketch is uploading. 
+Close the Serial Monitor window to upload the LittleFS data. 
+
+For the final run, 
+set the switches 1-2 ON, the others ones OFF. 
+It will connect the Arduino Mega part to the Arduino ESP part.
+
+
+## tools
+
+### custom HTML
 
 - edit ./web/html/slave.html
 - export to ./sketch_WSlave/webApp-generated-*.h by `./web/slave_genhtml.sh`
@@ -236,7 +281,7 @@ Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`
 - export to ./sketch_WMaster/certificate-generated.h/* by `./web/master_gencertificate.sh`
 - run `./web/docker-compose up` for testing
 
-#### docker-compose
+### docker-compose
 
 ```bash
 $ ./web
@@ -248,10 +293,10 @@ $ docker-compose up
 - test NodeRed on http://{docker-machine}:1880
 
 
-#### Suggestions
+### Suggestions
 
-TODO: read states from calendar
-TODO: ESP as master controller: ESP interrupts the sleeping Arduino on Serial (RX3=PCINT[9] on Mega)
-TODO: ESP has no preconfigured credentials (from the firmware)
-TODO: if the ESP cannot join a known network, it starts as hotspot during a # seconds
-TODO: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)
+- ☐ TODO: read states from calendar
+- ☑︎ TODO: ESP as master controller: ESP interrupts the sleeping Arduino on Serial (RX3=PCINT[9] on Mega)
+- ☑︎ TODO: ESP has no preconfigured credentials (from the firmware)
+- ☑︎ TODO: if the ESP cannot join a known network, it starts as hotspot during a # seconds
+- ☑︎ TODO: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)

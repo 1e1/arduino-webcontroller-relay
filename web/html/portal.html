@@ -52,7 +52,7 @@ s=(a,u)=>{
     p[a]();
 };
 x=(a,u)=>{
-    f('DELETE','x');
+    f('DELETE',a);
 };
 c=(a,u)=>{
     a.indeterminate=0>a.value;
@@ -102,7 +102,7 @@ p={
         h+=`<tr><td><input type=number min=0 id=pi value=${u}></td><td><input type=checkbox onclick="this.value=1*this.checked" id=pn></td><td><input type=number min=0 id=pp></td><td><button onclick="a('p',{'i':parseInt(document.getElementById('pi').value),'p':parseInt(document.getElementById('pp').value),'n':parseInt(document.getElementById('pn').value)})">+</button></td></tr>`;
         d('p',h);
     },
-    x:(a,u)=>{
+    reboot:(a,u)=>{
         o.g=0;
         window.setInterval((a,u)=>{
             f('GET','g');

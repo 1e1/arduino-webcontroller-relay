@@ -77,6 +77,11 @@ EOT
 upload_config p.json
 
 
+cat <<EOT
+
+reboot
+######
+EOT
 curl \
     --request DELETE \
     --url "https://${INPUT_HOST}/cfg/reboot" \

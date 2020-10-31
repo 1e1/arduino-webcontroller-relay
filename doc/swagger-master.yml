@@ -124,7 +124,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CfgRelays"
-  /api/r{relayId}: # TODO
+  /api/r/{relayId}: # TODO
     parameters:
     - name: relayId
       in: path

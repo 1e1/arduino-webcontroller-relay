@@ -10,7 +10,7 @@
 #define WM_PIN_SAFEMODE     0 /* RXD */
 #define WM_PIN_CONFIG       0 /* GPIO12 */
 #define WM_STORAGE          WM_STORAGE_NONE
-#define WM_LOG_LEVEL        WM_LOG_LEVEL_ALL
+#define WM_LOG_LEVEL        WM_LOG_LEVEL_OFF
 // =========================
 
 
@@ -32,7 +32,7 @@
 
 // WEB conf
 // =========================
-#define WM_DHCP_TIMEOUT_MS  30000
+#define WM_DHCP_TIMEOUT_MS  10000
 #define WM_WEB_PORT         443
 // =========================
 

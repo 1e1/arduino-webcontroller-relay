@@ -212,17 +212,13 @@ const Bridge::RelayMessage Bridge::_read()
   */
   Bridge::RelayMessage response {};
 
-  response.isOk = this->_currentStream->read() == WM_CHAR_RX_BEGIN;
+  response.state    = this->_currentStream->parseInt();
+  response.relayId  = this->_currentStream->parseInt();
+  response.isLocked = this->_currentStream->parseInt();
+  response.isNc     = this->_currentStream->parseInt();
+  response.pinId    = this->_currentStream->parseInt();
 
-  if (response.isOk) {
-    response.state    = this->_currentStream->parseInt();
-    response.relayId  = this->_currentStream->parseInt();
-    response.isLocked = this->_currentStream->parseInt();
-    response.isNc     = this->_currentStream->parseInt();
-    response.pinId    = this->_currentStream->parseInt();
-
-    response.isOk = this->_currentStream->read() == WM_LF;
-  }
+  response.isOk     = this->_currentStream->read() == WM_LF;
 
   LOG("relay: "); LOGLN(response.relayId);
   LOG("state: "); LOGLN(response.state); 

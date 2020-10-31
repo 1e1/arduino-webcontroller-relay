@@ -29,7 +29,11 @@ Configuration::Configuration(FS &fs)
 
 void Configuration::begin()
 {
-  this->_loadGlobal();
+  if (_fs->exists(WM_CONFIG_GLOBAL_PATH)) {
+    this->_loadGlobal();
+  } else {
+    this->setSafeMode();
+  }
 }
 
 
@@ -127,31 +131,28 @@ DynamicJsonDocument Configuration::_open(const char* filename)
 
 void Configuration::_loadGlobal()
 {
-  if (_fs->exists(WM_CONFIG_GLOBAL_PATH)) {
-    DynamicJsonDocument doc = this->_open(WM_CONFIG_GLOBAL_PATH);
-    JsonObject root = doc.as<JsonObject>();
-    
-    Configuration::Global g {
-      .acl = {
-        .username = new char[strlen(root["u"])],
-        .password = new char[strlen(root["w"])],
-        .isSafeMode = false,
-        .canAutoRestart = root["r"].as<bool>()
-      },
-      .wifiAp = {
-        .ssid = new char[strlen(root["n"])],
-        .password = new char[strlen(root["p"])],
-        .channel = root["c"].as<uint8_t>(),
-        .isHidden = root["h"].as<bool>()
-      }
-    };
+  DynamicJsonDocument doc = this->_open(WM_CONFIG_GLOBAL_PATH);
+  JsonObject root = doc.as<JsonObject>();
+  
+  Configuration::Global g {
+    .acl = {
+      .username = new char[strlen(root["u"])],
+      .password = new char[strlen(root["w"])],
+      .isSafeMode = false,
+      .canAutoRestart = root["r"].as<bool>()
+    },
+    .wifiAp = {
+      .ssid = new char[strlen(root["n"])],
+      .password = new char[strlen(root["p"])],
+      .channel = root["c"].as<uint8_t>(),
+      .isHidden = root["h"].as<bool>()
+    }
+  };
 
-    strcpy(g.acl.username, root["u"]);
-    strcpy(g.acl.password, root["w"]);
-    strcpy(g.wifiAp.ssid, root["n"]);
-    strcpy(g.wifiAp.password, root["p"]);
+  strcpy(g.acl.username, root["u"]);
+  strcpy(g.acl.password, root["w"]);
+  strcpy(g.wifiAp.ssid, root["n"]);
+  strcpy(g.wifiAp.password, root["p"]);
 
-    this->_global = g;
-    /* */
-  }
+  this->_global = g;
 }

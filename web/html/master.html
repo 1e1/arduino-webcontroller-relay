@@ -75,21 +75,21 @@ input{
 <script>
 f=(a,b,c)=>{
     let x=new XMLHttpRequest();
-    x.open(a,`/api/${b}.json`);
+    x.open(a,`/api/r${b}.json`);
     x.onload=()=>c(JSON.parse(x.response));
     x.send(c);
 };
 w=(a,b,c)=>{
     a.forEach((a,b,c)=>
-        document.body.innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT',${a.i},JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
+        document.body.innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT','/${a.i}',JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
     );
     index = 0;
     cb=x=>document.getElementById(`r${a[index].i}`).checked=x.s;
-    lp=()=>f('GET',a[index].i,x=>{cb(x);if(++index<a.length){lp()}else{index=0;window.setTimeout(lp,30000)}});
+    lp=()=>f('GET',`/${a[index].i}`,x=>{cb(x);if(++index<a.length){lp()}else{index=0;window.setTimeout(lp,30000)}});
     lp();
 
     window.scrollTo(0,1);
 };
 </script>
 </head>
-<body onload="f('GET','r',w)">
+<body onload="f('GET','',w)">

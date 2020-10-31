@@ -104,7 +104,7 @@ void WebServer::_setup()
   });
 
   _server.on("/cfg/r", HTTP_GET, []() { 
-    WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", true);
+    WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", false);
   });
 
   _server.on("/cfg/r", HTTP_POST, []() {
@@ -121,7 +121,7 @@ void WebServer::_setup()
   
   _server.on("/cfg/reboot", HTTP_DELETE, []() {
     if (WebServer::_isAllowed()) {
-      _server.send(200, "text/json", "reboot");
+      _server.send(200, "text/json", "\"reboot\"");
       LOGLN(F("** RESTART **"));
       ESP.restart();
     }
@@ -143,7 +143,7 @@ void WebServer::_setup()
 void WebServer::_handleAll()
 {
   const char *uri = _server.uri().c_str();
-  const char *prefixUrl = PSTR("/api/r");
+  const char *prefixUrl = PSTR("/api/r/");
 
   if (strcmp_P(uri, prefixUrl)) {
     uri += strlen_P(prefixUrl); // skip the prefixUrl and get to the relayId
