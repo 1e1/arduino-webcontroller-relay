@@ -32,9 +32,9 @@ class WebServer {
 
   protected:
   void _setup();
-  void _handleAll();
 
   static const bool _isAllowed();
+  static void _handleAll();
   static void _streamBrotli(const char* path, const bool isPublic=true);
   static void _streamJson(const char* path, const char* defaultValue, const bool isPublic=true);
   static void _sendRelayMessage(const Bridge::RelayMessage relay);

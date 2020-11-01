@@ -79,10 +79,6 @@ void WebServer::_setup()
     WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", true); 
   });
 
-  _server.on("/api/r", HTTP_PUT, []() { 
-    WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", true); // TODO
-  });
-
   _server.on("/portal", HTTP_GET, []() {
     WebServer::_streamBrotli(WM_WEB_PORTAL_PATH, false);
   });
@@ -134,42 +130,15 @@ void WebServer::_setup()
   */
   //WebServer::_getFileContents(WM_CONFIG_KEY_PATH, _serverKey);
   //WebServer::_getFileContents(WM_CONFIG_CERT_PATH, _serverCert);
+  
+  _server.onNotFound([](){
+    LOGLN("handle NotFound");
+    WebServer::_handleAll();
+    //_server.send(404, "text/plain", "It is not the page your are looking for");
+  });
 
   _server.getServer().setRSACert(new BearSSL::X509List(certificate::serverCert), new BearSSL::PrivateKey(certificate::serverKey));
   _server.begin();
-}
-
-
-void WebServer::_handleAll()
-{
-  const char *uri = _server.uri().c_str();
-  const char *prefixUrl = PSTR("/api/r/");
-
-  if (strcmp_P(uri, prefixUrl)) {
-    uri += strlen_P(prefixUrl); // skip the prefixUrl and get to the relayId
-    uint8_t relayId = atoi(uri);
-    
-    switch (_server.method()) {
-      case HTTP_GET:
-        return WebServer::_sendRelayMessage(_bridge->getRelay(relayId));
-
-      case HTTP_PUT:
-        if (_server.hasArg("plain")) {
-          String payload = _server.arg("plain") + '\0';
-          DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
-          auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
-          LOGLN(payload);
-          
-          if (!error) {
-            const bool state = doc["s"].as<bool>();
-            
-            return WebServer::_sendRelayMessage(_bridge->setRelay(relayId, state));
-          }
-        }
-    }
-  }
-
-  return _server.send(404);
 }
 
 
@@ -184,6 +153,44 @@ const bool WebServer::_isAllowed()
   }
 
   return true;
+}
+
+
+void WebServer::_handleAll()
+{
+  const char *uri = _server.uri().c_str();
+  const char *prefixUrl = PSTR("/api/r/");
+
+  LOG("uri='");LOG(uri);LOGLN("'");
+  LOG("prefixUrl='");LOG(prefixUrl);LOGLN("'");
+
+  if (strcmp_P(uri, prefixUrl)) {
+    Serial.println("good prefix");
+    uri += strlen_P(prefixUrl); // skip the prefixUrl and get to the relayId
+    const uint8_t relayId = atoi(uri);
+    LOG("relayId='");LOG(relayId);LOGLN("'");
+    
+    switch (_server.method()) {
+      case HTTP_GET:
+        return WebServer::_sendRelayMessage(_bridge->getRelay(relayId));
+
+      case HTTP_PUT:
+        if (_server.hasArg("plain")) {
+          String payload = _server.arg("plain");
+          DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
+          auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
+          LOGLN(payload);
+          
+          if (!error) {
+            const bool state = doc["s"].as<bool>();
+            
+            return WebServer::_sendRelayMessage(_bridge->setRelay(relayId, state));
+          }
+        }
+    }
+  }
+
+  return _server.send(404, "text/plain", String(PSTR("It is not the page your are looking for")));
 }
 
 
@@ -226,7 +233,7 @@ void WebServer::_uploadJson(const char* path)
 {
   if (WebServer::_isAllowed()) {
     if (_server.hasArg("plain")) {
-      String payload = _server.arg("plain") + '\0';
+      String payload = _server.arg("plain");
       DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
       auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
       LOGLN(payload);

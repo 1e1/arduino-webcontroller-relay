@@ -99,7 +99,7 @@ WebServer* server;
 void setup()
 {
   BUSYLED_WORK;
-  Serial.begin(WM_USB_SPEED);
+  Serial.begin(WM_SERIAL_SPEED);
   WAIT(1000);
   LOGLN(PSTR("DEBUG ON"));
 

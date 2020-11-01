@@ -3,11 +3,6 @@
 
 
 /* mode */
-#define WM_VERBOSE_NONE             0
-#define WM_VERBOSE_PORTAL           1
-#define WM_VERBOSE_WEBAPP           2
-#define WM_VERBOSE_ALL              ( WM_VERBOSE_PORTAL + WM_VERBOSE_WEBAPP )
-
 #define WM_BONJOUR_MODE_NONE        0
 #define WM_BONJOUR_MODE_STATIC      1
 #define WM_BONJOUR_MODE_DYNAMIC     2
@@ -15,9 +10,6 @@
 #define WM_ACL_ALLOW_NONE           0
 #define WM_ACL_ALLOW_REBOOT         1
 #define WM_ACL_ALLOW_ALL            ( WM_ACL_ALLOW_REBOOT )
-
-#define WM_STORAGE_NONE             0
-#define WM_STORAGE_SPIFFS           1
 
 #define WM_LOG_LEVEL_OFF            0
 #define WM_LOG_LEVEL_FATAL          10
