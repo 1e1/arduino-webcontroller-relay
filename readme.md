@@ -16,7 +16,7 @@ This project has 2 parts:
 ![landscape](./doc/hardware.jpg)
 
 
-## Slave sketh
+## Slave sketch
 
 
 ### Setup
@@ -225,7 +225,7 @@ switch:
 Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`)
 
 
-## Slave sketh
+## Mater sketch
 
 
 ### Setup
