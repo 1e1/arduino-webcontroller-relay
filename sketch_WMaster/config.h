@@ -10,15 +10,7 @@
 #define WM_PIN_SAFEMODE     0 /* RXD */
 #define WM_PIN_CONFIG       0 /* GPIO12 */
 #define WM_RELAY_NB_MAX     32
-#define WM_STORAGE          WM_STORAGE_NONE
 #define WM_LOG_LEVEL        WM_LOG_LEVEL_OFF
-// =========================
-
-
-// ITF conf
-// =========================
-#define WM_VERBOSE          WM_VERBOSE_ALL
-#define WM_ACL_ALLOW        WM_ACL_ALLOW_NONE
 // =========================
 
 
@@ -33,7 +25,6 @@
 
 // WEB conf
 // =========================
-#define WM_DHCP_TIMEOUT_MS  10000
 #define WM_WEB_PORT         443
 // =========================
 
@@ -41,7 +32,6 @@
 // Wifi conf
 // =========================
 #define WM_WIFI_SSID        "HelloWorld"
-#define WM_WIFI_PASSWORD    "Open Sesame!"
 // =========================
 
 

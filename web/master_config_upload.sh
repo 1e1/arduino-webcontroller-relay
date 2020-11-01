@@ -33,8 +33,6 @@ curl \
     --request POST \
     --url "https://${INPUT_HOST}/cfg/${filename}" \
     --insecure \
-    --basic \
-    --user "${INPUT_USER}:${INPUT_PASSWORD}" \
     --header 'Content-Type: application/json' \
     --data @"${INPUT_DIR}/$1" \
     --silent \

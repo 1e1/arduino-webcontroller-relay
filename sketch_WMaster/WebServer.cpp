@@ -79,10 +79,6 @@ void WebServer::_setup()
     WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", true); 
   });
 
-  _server.on("/api/r", HTTP_PUT, []() { 
-    WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", true); // TODO
-  });
-
   _server.on("/portal", HTTP_GET, []() {
     WebServer::_streamBrotli(WM_WEB_PORTAL_PATH, false);
   });
@@ -155,7 +151,7 @@ void WebServer::_handleAll()
 
       case HTTP_PUT:
         if (_server.hasArg("plain")) {
-          String payload = _server.arg("plain") + '\0';
+          String payload = _server.arg("plain");
           DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
           auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
           LOGLN(payload);
@@ -226,7 +222,7 @@ void WebServer::_uploadJson(const char* path)
 {
   if (WebServer::_isAllowed()) {
     if (_server.hasArg("plain")) {
-      String payload = _server.arg("plain") + '\0';
+      String payload = _server.arg("plain");
       DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
       auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
       LOGLN(payload);
