@@ -249,7 +249,8 @@ void WebServer::_readSerialJson()
       bool hasComa = false;
       std::list<Bridge::RelayMessage> relayList = _bridge->getRelays();
 
-      _server.send(200, "text/json");
+      _server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+      _server.send(200, "text/json", "");
       _server.sendContent("[");
 
       for (Bridge::RelayMessage relay : relayList) {
@@ -257,18 +258,18 @@ void WebServer::_readSerialJson()
           String relayJson;
 
           if (hasComa) {
-            relayJson += ",";
+            relayJson = ',';
           }
 
-          relayJson += "{\"relayId\":";
+          relayJson += "{\"i\":";
           relayJson += String(relay.relayId);
-          relayJson += "\"state\":";
+          relayJson += ",\"s\":";
           relayJson += String(relay.state);
-          relayJson += "\"isLocked\":";
+          relayJson += ",\"l\":";
           relayJson += String(relay.isLocked);
-          relayJson += "\"pinId\":";
+          relayJson += ",\"p\":";
           relayJson += String(relay.pinId);
-          relayJson += "\"isNc\":";
+          relayJson += ",\"n\":";
           relayJson += String(relay.isNc);
           relayJson += "}";
 
@@ -289,9 +290,14 @@ void WebServer::_writeSerialJson()
     if (_server.hasArg("plain")) {
       _bridge->wakeup();
 
+      StaticJsonDocument<64> filter;
+      filter[0]["i"] = true;
+      filter[0]["p"] = true;
+      filter[0]["n"] = true;
+
       String payload = _server.arg("plain");
-      DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
-      auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
+      DynamicJsonDocument doc(JSON_ARRAY_SIZE(WM_RELAY_NB_MAX+1)*4);
+      auto error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
       
       JsonArray root = doc.as<JsonArray>();
 

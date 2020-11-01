@@ -238,7 +238,9 @@ Edit `./sketch_WMaster/config.h`
 
 ### webApp
 
+Connect to "HelloWorld" Wifi (* you could change)
 Open a bowser on `https://{ip}`.
+The config portal os on `https://{ip}/portal`.
 
 
 ### dependancies
@@ -291,6 +293,12 @@ $ docker-compose up
 - test custom HTML on http://{docker-machine}:8080
 - test Home Assistant on http://{docker-machine}:8123
 - test NodeRed on http://{docker-machine}:1880
+
+### debug
+
+You can watch the communication between an Arduino Mega slave and a ESP master with SerialTools.
+
+![app SerialTools](./doc/serialtools.png)
 
 
 ### Suggestions

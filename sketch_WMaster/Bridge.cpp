@@ -134,7 +134,7 @@ const std::list<Bridge::RelayMessage> Bridge::_executeAll(String command)
   if (this->_write(command)) {
     do {
       relayList.emplace_back(this->_read());
-    } while(this->_currentStream->available() && !this->_hasMessageEnd());
+    } while(!this->_hasMessageEnd());
   }
 
   return relayList;
@@ -212,13 +212,39 @@ const Bridge::RelayMessage Bridge::_read()
   */
   Bridge::RelayMessage response {};
 
-  response.state    = this->_currentStream->parseInt();
-  response.relayId  = this->_currentStream->parseInt();
-  response.isLocked = this->_currentStream->parseInt();
-  response.isNc     = this->_currentStream->parseInt();
-  response.pinId    = this->_currentStream->parseInt();
+  if (!this->_hasMessageEnd()) {
 
-  response.isOk     = this->_currentStream->read() == WM_LF;
+    int maxTime = WM_SERIAL_TX_TIMEOUT;
+
+    // message min size is: 5 (1int + 1space) = 5*2chars 
+    while (10 > this->_currentStream->available()) { // TODO constantize
+      delay(WM_SERIAL_TX_LOOP_DELAY);
+      maxTime -= WM_SERIAL_TX_LOOP_DELAY;
+
+      if (maxTime <= 0) {
+        return response;
+      }
+    }
+
+    response.state    = this->_currentStream->parseInt();
+    response.relayId  = this->_currentStream->parseInt();
+    response.isLocked = this->_currentStream->parseInt();
+    response.isNc     = this->_currentStream->parseInt();
+    response.pinId    = this->_currentStream->parseInt();
+
+    // .isOk will read/check 2 chars
+    while (2 > this->_currentStream->available()) {
+      delay(WM_SERIAL_TX_LOOP_DELAY);
+      maxTime -= WM_SERIAL_TX_LOOP_DELAY;
+
+      if (maxTime <= 0) {
+        return response;
+      }
+    }
+
+    response.isOk     = (WM_DATA_SEPARATOR == this->_currentStream->read())
+      && (WM_LF == this->_currentStream->read());
+  }
 
   LOG("relay: "); LOGLN(response.relayId);
   LOG("state: "); LOGLN(response.state); 

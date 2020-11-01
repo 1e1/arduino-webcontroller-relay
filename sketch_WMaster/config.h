@@ -9,6 +9,7 @@
 // =========================
 #define WM_PIN_SAFEMODE     0 /* RXD */
 #define WM_PIN_CONFIG       0 /* GPIO12 */
+#define WM_RELAY_NB_MAX     32
 #define WM_STORAGE          WM_STORAGE_NONE
 #define WM_LOG_LEVEL        WM_LOG_LEVEL_OFF
 // =========================
