@@ -12,16 +12,18 @@ info:
     email: "2.71828183E0+github@gmail.com"
 
 servers:
-  - url: "http://webrelay.local:{port}/{basePath}"
+  - url: "https://webrelay.local:{port}/{basePath}"
     variables:
       port:
         default: "80"
       basePath:
-        default: "/"
+        default: ""
 
 paths:
-  /cfg/g:
+  /cfg/g:      
     get:
+      security:
+        - basicAuth: []
       description: "read AP configuration"
       responses:
         200:
@@ -30,8 +32,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CfgGlobal"
+    post:
+      security:
+        - basicAuth: []
+      description: "write AP configuration"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CfgGlobal"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CfgGlobal"
+
   /cfg/w:
     get:
+      security:
+        - basicAuth: []
       description: "read Wifi STAtions configuration"
       responses:
         200:
@@ -40,16 +62,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CfgWifis"
-  /cfg/d:
-    get:
-      description: "read allowed devices configuration"
+    post:
+      security:
+        - basicAuth: []
+      description: "write AP configuration"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CfgWifis"
       responses:
         200:
           description: "successful operation"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CfgDevices"
+                $ref: "#/components/schemas/CfgWifis"
   /cfg/r:
     get:
       description: "read relay configuration"
@@ -60,21 +89,99 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CfgRelays"
+    post:
+      security:
+        - basicAuth: []
+      description: "write AP configuration"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CfgRelays"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CfgRelays"
+  /cfg/reboot:
+    delete:
+      security:
+        - basicAuth: []
+      description: "trigger a reboot"
+      responses:
+        204:
+          description: "successful operation"
+  /api/r:
+    get:
+      description: "read relay configuration"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CfgRelays"
+  /api/r/{relayId}: # TODO
+    parameters:
+    - name: relayId
+      in: path
+      description: ID of the relay
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 127
+    get:
+      description: "read relay state"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImplRelay"
+    put:
+      description: "update relay state"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImplRelay"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImplRelay"
 
 components:
   responses:
     204:
       description: "no content, usually because the request was lost while the device was waking up"
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
   schemas:
     CfgGlobal:
       type: "object"
       description: "main configuration as Access Point"
       properties:
+        d:
+          description: "mDNS name"
+          type: "string"
+          minLength: 1
+          maxLength: 32
         u:
           description: "username"
           type: "string"
-          minLength: 8
-          maxLength: 63
+          minLength: 1
+          maxLength: 32
         w:
           description: "user password"
           type: "string"
@@ -84,8 +191,8 @@ components:
         n:
           description: "wifi ssid"
           type: "string"
-          minLength: 8
-          maxLength: 63
+          minLength: 1
+          maxLength: 32
         p:
           description: "wifi password"
           type: "string"
@@ -104,6 +211,7 @@ components:
           description: "ESP can auto restart"
           type: "boolean"
       example:
+        d: "mDNS name"
         u: "myUsername"
         w: "myPassword"
         n: "myWifiSsid"
@@ -118,8 +226,8 @@ components:
         n:
           description: "wifi ssid"
           type: "string"
-          minLength: 8
-          maxLength: 63
+          minLength: 1
+          maxLength: 32
         p:
           description: "wifi password"
           type: "string"
@@ -138,38 +246,6 @@ components:
           p: "password2"
         - n: "wifi_ssid3"
           p: "password3"
-    CfgDevice:
-      type: "object"
-      description: "a allowed device configuration"
-      properties:
-        n:
-          description: "device name"
-          type: "string"
-          minLength: 8
-          maxLength: 63
-        m:
-          description: "device MAC address"
-          type: "string"
-          pattern: "/([0-9A-F]{2}:){5}[0-9A-F]{2}/"
-        c:
-          description: "serial command"
-          type: "string"
-          maxLength: 8
-    CfgDevices:
-      type: "array"
-      description: "list of allowed device configurations"
-      items:
-        $ref: "#/components/schemas/CfgDevice"
-      example: 
-        - n: "device_1"
-          m: "00:11:22:AA:BB:CC"
-          c: "/w/0/1"
-        - n: "device_2"
-          m: "00:11:22:AA:BB:DD"
-          c: "/w/3/1"
-        - n: "device_3"
-          m: "00:11:22:AA:BB:EE"
-          c: "/r/5"
     CfgRelay:
       type: "object"
       description: "a relay configuration"
@@ -182,17 +258,34 @@ components:
         n:
           description: "relay name"
           type: "string"
-          minLength: 8
-          maxLength: 63
+          minLength: 1
+          maxLength: 32
+        a:
+          description: "action triggered when a Client joins the AP"
+          type: "integer"
+          minimum: -1
+          maximum: 1
     CfgRelays:
       type: "array"
       description: "list of allowed device configurations"
       items:
-        $ref: "#/components/schemas/CfgDevice"
+        $ref: "#/components/schemas/CfgRelay"
       example: 
         - i: 8
           n: "relay 8"
+          a: 1
         - i: 3
           n: "garage"
+          a: 0
         - i: 22
           n: "living room"
+          a: -1
+    ImplRelay:
+      type: "object"
+      description: "a relay state"
+      properties:
+        s:
+          description: "relay state"
+          type: "integer"
+          minimum: 0
+          maximum: 1

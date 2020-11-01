@@ -10,7 +10,7 @@
 // a number between 2 and 253
 #define WS_RELAY_NB_MAX     32
 #define WS_STORAGE          WS_STORAGE_EEPROM
-#define WS_LOG_LEVEL        WS_LOG_LEVEL_OFF
+#define WS_LOG_LEVEL        WS_LOG_LEVEL_ALL
 #define WS_LOWPOWER         ( WS_LOWPOWER_ALL - WS_LOWPOWER_NO_LED - WS_LOWPOWER_DOWNCLOCK )
 // =========================
 

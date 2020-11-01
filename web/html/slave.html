@@ -19,11 +19,11 @@ label{
         if(200==x.status)
             return x.responseText
     };
-    x=a=>{
+    x=(a,u)=>{
         a.split('\n').forEach(a=>{
             if(a){
                 x=a.split(' ');
-                document.body.innerHTML+=`<label><input type=checkbox ${x[0]>0?'checked':' '} onchange="f('GET','/w/${x[1]}/'+1*this.checked)">${x[1]}</label>`
+                document.body.innerHTML+=`<label><input type=checkbox onclick="f('GET','/w/${x[1]}/'+1*this.checked)" ${x[0]>0?'checked':''}>${x[1]}</label>`
             }
         })
     };

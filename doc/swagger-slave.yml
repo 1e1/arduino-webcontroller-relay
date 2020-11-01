@@ -1,4 +1,4 @@
-openapi: "3.0.3"
+swagger: "3.0"
 
 info:
   description: "
@@ -17,186 +17,169 @@ servers:
       port:
         default: "80"
       basePath:
-        default: "/"
+        default: ""
 
 paths:
   /r/{relay_id}:
     get:
       description: "read state"
+      produces:
+      - "text/plain"
       parameters:
-        - name: "relay_id"
-          in: "path"
-          description: "relay id"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 127
+      - in: "path"
+        name: "relay_id"
+        type: "integer"
+        maximum: 127
+        minimum: 0
+        description: "relay id"
+        required: true
       responses:
         200:
           description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relay"
+          schema:
+            $ref: "#/definitions/Relay"
   /w/{relay_id}/{state}:
     get:
       description: "write state"
+      produces:
+      - "text/plain"
       parameters:
-        - name: "relay_id"
-          in: "path"
-          description: "relay id"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 127
-        - name: "state"
-          in: "path"
-          description: "targeted state"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 1
+      - in: "path"
+        name: "relay_id"
+        type: "integer"
+        maximum: 127
+        minimum: 0
+        description: "relay id"
+        required: true
+      - in: "path"
+        name: "state"
+        type: "integer"
+        maximum: 1
+        minimum: 0
+        description: "targeted state"
+        required: true
       responses:
         200:
           description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relay"
+          schema:
+            $ref: "#/definitions/Relay"
   /R/{relay_id}:
     get:
       description: "unlock the relay and read state"
+      produces:
+      - "text/plain"
       parameters:
-        - name: "relay_id"
-          in: "path"
-          description: "relay id"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 127
+      - in: "path"
+        name: "relay_id"
+        type: "integer"
+        maximum: 127
+        minimum: 0
+        description: "relay id"
+        required: true
       responses:
         200:
           description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relay"
+          schema:
+            $ref: "#/definitions/Relay"
   /W/{relay_id}/{state}:
     get:
       description: "lock the relay and force write state"
+      produces:
+      - "text/plain"
       parameters:
-        - name: "relay_id"
-          in: "path"
-          description: "relay id"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 127
-        - name: "state"
-          in: "path"
-          description: "targeted state"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 1
+      - in: "path"
+        name: "relay_id"
+        type: "integer"
+        maximum: 127
+        minimum: 0
+        description: "relay id"
+        required: true
+      - in: "path"
+        name: "state"
+        type: "integer"
+        maximum: 1
+        minimum: 0
+        description: "targeted state"
+        required: true
       responses:
         200:
           description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relay"
+          schema:
+            $ref: "#/definitions/Relay"
   /m/{relay_id}/{pin_id}:
     get:
       description: "map a relay to a pin"
+      produces:
+      - "text/plain"
       parameters:
-        - name: "relay_id"
-          in: "path"
-          description: "relay id"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 127
-        - name: "pin_id"
-          in: "path"
-          description: "define on which pin is wired the relay"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 63
+      - in: "path"
+        name: "relay_id"
+        type: "integer"
+        maximum: 127
+        minimum: 0
+        description: "relay id"
+        required: true
+      - in: "path"
+        name: "pin_id"
+        type: "integer"
+        maximum: 63
+        minimum: 0
+        description: "define on which pin is wired the relay"
+        required: true
       responses:
         200:
           description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relay"
-  /o/{relay_id}:
+          schema:
+            $ref: "#/definitions/Relay"
+  /c/{relay_id}/{is_nc}:
     get:
-      description: "define the relay wired as NO (Normally Opened)"
+      description: "define if the relay wired as NC (Normally Opened)"
+      produces:
+      - "text/plain"
       parameters:
-        - name: "relay_id"
-          in: "path"
-          description: "relay id"
-          required: true
-          schema:
-            type: "integer"
-            minimum: 0
-            maximum: 127
+      - in: "path"
+        name: "relay_id"
+        type: "integer"
+        maximum: 127
+        minimum: 0
+        description: "relay id"
+        required: true
+      - in: "path"
+        name: "is_nc"
+        type: "integer"
+        maximum: 1
+        minimum: 0
+        description: "is the relative relay is wired as NC"
+        required: true
       responses:
         200:
           description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relay"
-  /c/{relay_id}:
-    get:
-      description: "define the relay wired as NC (Normally Closed)"
-      parameters:
-        - name: "relay_id"
-          in: "path"
-          description: "relay id"
-          required: true
           schema:
-            type: "integer"
-            minimum: 0
-            maximum: 127
-      responses:
-        200:
-          description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relay"
+            $ref: "#/definitions/Relay"
   # optional routes, depending the sketch configuration
   /$:
     get:
       description: "list all relays (if WS_VERBOSE has WS_VERBOSE_LIST)"
+      produces:
+      - "text/plain"
       responses:
         200:
           description: "successful operation"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Relays"
+          schema:
+            $ref: "#/definitions/Relays"
   /!:
     get:
       description: "save configuration: relay NC/NO pin (not the state) (if WS_STORAGE != WS_STORAGE_NONE)"
+      produces:
+      - "text/plain"
       responses:
         200:
           description: "successful operation"
   /~:
     get:
       description: "soft reset (if WS_ACL_ALLOW has WS_ACL_ALLOW_RESET)"
+      produces:
+      - "text/plain"
       responses:
         200:
           description: "successful operation"
@@ -204,26 +187,28 @@ paths:
   /.:
     get:
       description: "sleep (if WS_ACL_ALLOW has WS_ACL_ALLOW_SLEEP)"
+      produces:
+      - "text/plain"
       responses:
         200:
           description: "successful operation"
 
-components:
-  responses:
-    204:
-      description: "no content, usually because the request was lost while the device was waking up"
-  schemas:
-    Relay:
-      type: "string"
-      pattern: '^[01] \d{1,3} [01] \d{1,3}$'
-      description: "{state} {relay_id} {is_locked} {is_nc} {pin_id}"
-      example: "1 42 0 1 13"
-    Relays:
-      type: "string"
-      pattern: '^([01] \d{1,3} [01] [01] \d{1,3}\n)*$'
-      description: "({state} {relay_id} {is_locked} {is_nc} {pin_id}\n)*"
-      example: |+
-        1 42 0 1 13
-        1 3 0 0 14
-        1 4 1 1 22
-        0 6 0 1 23
+responses:
+  204:
+    description: "no content, usually because the request was lost while the device was waking up"
+
+definitions:
+  Relay:
+    type: "string"
+    pattern: '^[01] \d{1,3} [01] \d{1,3}$'
+    description: "{state} {relay_id} {is_locked} {is_nc} {pin_id}"
+    example: "1 42 0 1 13"
+  Relays:
+    type: "string"
+    pattern: '^([01] \d{1,3} [01] [01] \d{1,3}\n)*$'
+    description: "({state} {relay_id} {is_locked} {is_nc} {pin_id}\n)*"
+    example: |+
+      1 42 0 1 13
+      1 3 0 0 14
+      1 4 1 1 22
+      0 6 0 1 23

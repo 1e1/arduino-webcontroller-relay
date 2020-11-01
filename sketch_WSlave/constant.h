@@ -74,8 +74,7 @@
 #define WS_ACTION_READ         'r'
 #define WS_ACTION_WRITE        'w'
 #define WS_ACTION_MAP          'm'
-#define WS_ACTION_NC           'c'
-#define WS_ACTION_NO           'o'
+#define WS_ACTION_ISNC         'c'
 #define WS_ACTION_WRITE_LOCK   'W'
 #define WS_ACTION_READ_UNLOCK  'R'
 #define WS_ACTION_SAVE         '!'
@@ -93,12 +92,14 @@
 
 
 /** HELP **/
-#define WS_TEXT_HELP_F              "** HELP\n** > /action/relay/extra\n** < state relay pin isNc\n\n"
-#define WS_CHAR_WAKEUP_F            '?'
+#define WS_TEXT_HELP_F              "** HELP\n** > /action/relay/extra\n** < state relay locked isNc pin\n\n"
+#define WS_CHAR_RX_UNKNOWN          '?'
+#define WS_CHAR_TX_BEGIN            '\n'
+#define WS_CHAR_TX_END              '-'
 #define WS_HEADER_BEGIN_F           "HTTP/1.0 200" WS_CRLF "Content-Type: text/"
 #define WS_HEADER_END_ACTION_F      "plain" WS_CRLF WS_CRLF
-#define WM_HEADER_END_HELP_GZ_F     "html" WM_CRLF "Content-Encoding: gzip" WM_CRLF WM_CRLF
-#define WM_HEADER_END_HELP_BR_F     "html" WM_CRLF "Content-Encoding: br" WM_CRLF WM_CRLF
+#define WM_HEADER_END_HELP_GZ_F     "html" WS_CRLF "Content-Encoding: gzip" WS_CRLF WS_CRLF
+#define WM_HEADER_END_HELP_BR_F     "html" WS_CRLF "Content-Encoding: br" WS_CRLF WS_CRLF
 #define WS_HEADER_WAKEUP_F          "HTTP/1.0 204" WS_CRLF WS_CRLF
  
 

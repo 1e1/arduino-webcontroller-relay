@@ -59,10 +59,15 @@
 #ifndef WS_SERIAL_ID    
 #define WS_SERIAL_ID        0
 #endif
+#ifndef WS_SERIAL_TIMEOUT    
+#define WS_SERIAL_TIMEOUT   63
+#endif
 #ifndef WS_SERIAL_SPEED
 #define WS_SERIAL_SPEED     9600
 #endif
-#if WS_SERIAL_ID == 1
+#if WS_SERIAL_ID == 0
+#define WS_SERIAL Serial
+#elif WS_SERIAL_ID == 1
 #define WS_SERIAL Serial1
 #elif WS_SERIAL_ID == 2
 #define WS_SERIAL Serial2

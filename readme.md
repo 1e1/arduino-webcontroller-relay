@@ -2,15 +2,29 @@
 
 A single controller connected by Web or USB.
 
+This project has 2 parts:
+- a required Slave sketch to control the relay with optional interfaces:
+  - CLI
+    - USB (CLI)
+    - Serial (CLI)
+  - API/html
+    - Ethernet
+    - Wifi
+
+- an optional Master sketch for some powerful features driven by an ESP
+
 ![landscape](./doc/hardware.jpg)
 
 
-## Setup
+## Slave sketh
+
+
+### Setup
 
 Edit `./sketch_WSlave/_config.h`
 
 
-## Commands
+### Commands
 
 Standard no-REST routes:
 
@@ -34,11 +48,8 @@ Standard no-REST routes:
 - **m**ap: `/m/{relay_id}/{pin_id}`
   map a relay to a pin controller
 
-- N**o**: `/c/{relay_id}`
-  set a relay to NC mode
-
-- N**c**: `/o/{relay_id}`
-  set a relay to NO mode
+- **n**c: `/c/{relay_id}/{is_nc}`
+  set a relay to NC mode (is_nc=1) or NO mode (is_nc=0)
 
 - save (**!**): `/!`
   save the wiring into EEPROM, not the values ON/OFF if `WS_STORAGE = !WS_STORAGE_NONE`
@@ -51,28 +62,29 @@ Standard no-REST routes:
 
 Read the ![swagger](./doc/swagger-slave.yml)
 
-### Example to setup the relay #7 on the pin #42
+#### Example to setup the relay #7 on the pin #42
 
 - First, map PIN -> RELAY
 - Then set the NC/NO wiring
 - Last give the default value for activation
 
-#### HTTP
+##### HTTP
 
 - go to `http://webrelay.local/m/7/42`
 - go to `http://webrelay.local/c/7` if it's a NC wired (`http://webrelay.local/o/7` otherwise)
 - go to `http://webrelay.local/w/7/1` if you want switch ON now (`http://webrelay.local/w/7/0`otherwise)
 - go to `http://webrelay.local/r/7` to check
 
-#### Serial
+##### Serial
 
 - Send `/m/7/42`
 - Send `/c/7` if it's a NC wired (`/o/7` otherwise)
 - Send `/w/7/1` if you want switch ON now (`/w/7/0`otherwise)
 - Send `/r/7` to check
+- Tips: use `/` to wakeup
 
 
-## webApp
+### webApp
 
 `#define WS_INTERFACE WS_INTERFACE_ETHERNET` (or `WS_INTERFACE_ALL` by default)
 
@@ -81,7 +93,7 @@ If `#define WS_VERBOSE WS_VERBOSE_WEBAPP` (or `WS_VERBOSE_ALL` by default),
 open a bowser on `http://{ip}`.
 
 
-## USB
+### USB
 
 `#define WS_INTERFACE WS_INTERFACE_USB` (or `WS_INTERFACE_ALL` by default)
 
@@ -89,11 +101,28 @@ If `#define WS_VERBOSE WS_VERBOSE_HELP` (or `WS_VERBOSE_ALL` by default),
 write anything and the read the help
 
 
-## dependancies
+### dependancies
 
-### software
+#### software
 
+- Arduino for the required Slave sketch
 - EthernetBonjour if `WS_BONJOUR_MODE` != `WS_BONJOUR_MODE_NONE`
+
+
+### upload Sketch
+
+Open the folder ./sketch_WSlave/ with your favorite IDE (Arduino?)
+
+Example with a Wemos Mega Wifi, a board with a Arduino Mega and an Esp8266 linked by a Serial. 
+First, upload the Slave sketch on the Arduino Mega part. 
+
+<ins>/!\\</ins> First I have to update my USB driver for this board: 
+![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)
+
+
+Set the switches 3-4 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))
+
+![ide-config-slave](./doc/ide-config-slave.png)
 
 
 ### integrations
@@ -189,22 +218,72 @@ switch:
         friendly_name: "Relay #42"
 ```
 
-#### NodeRed
+##### NodeRed
 
 ![hass](./doc/nodered/preview.png)
 
 Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`)
 
 
-### tools
+## Slave sketh
 
-#### custom HTML
 
-- edit ./web/html/index.html
-- export to ./sketch_WSlave/webApp-generated.h by `./web/html2h.h`
+### Setup
+
+Edit `./sketch_WMaster/config.h`
+
+
+### Commands
+
+
+### webApp
+
+Connect to "HelloWorld" Wifi (* you could change)
+Open a bowser on `https://{ip}`.
+The config portal os on `https://{ip}/portal`.
+
+
+### dependancies
+
+#### software
+
+- Esp8266 for the optional Master sketch
+
+
+### upload Sketch
+
+Open the folder ./sketch_WMaster/ with your favorite IDE (Arduino?)
+
+Example with a Wemos Mega Wifi, a board with a Arduino Mega and an Esp8266 linked by a Serial. 
+Then, upload the Master sketch on the Arduino ESP part. 
+
+<ins>/!\\</ins> First I have to update my USB driver for this board: 
+![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)
+
+
+Set the switches 5-6-7 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))
+
+![ide-config-master](./doc/ide-config-master.png)
+
+Press the MODE button while the sketch is uploading. 
+Close the Serial Monitor window to upload the LittleFS data. 
+
+For the final run, 
+set the switches 1-2 ON, the others ones OFF. 
+It will connect the Arduino Mega part to the Arduino ESP part.
+
+
+## tools
+
+### custom HTML
+
+- edit ./web/html/slave.html
+- export to ./sketch_WSlave/webApp-generated-*.h by `./web/slave_genhtml.sh`
+- export to ./sketch_WMaster/data/* by `./web/master_genhtml.sh`
+- export to ./sketch_WMaster/certificate-generated.h/* by `./web/master_gencertificate.sh`
 - run `./web/docker-compose up` for testing
 
-#### docker-compose
+### docker-compose
 
 ```bash
 $ ./web
@@ -215,11 +294,17 @@ $ docker-compose up
 - test Home Assistant on http://{docker-machine}:8123
 - test NodeRed on http://{docker-machine}:1880
 
+### debug
 
-#### Suggestions
+You can watch the communication between an Arduino Mega slave and a ESP master with SerialTools.
 
-TODO: read states from calendar
-TODO: ESP as master controller: ESP interrupts the sleeping Arduino on Serial (RX3=PCINT[9] on Mega)
-TODO: ESP has no preconfigured credentials (from the firmware)
-TODO: if the ESP cannot join a known network, it starts as hotspot during a # seconds
-TODO: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)
+![app SerialTools](./doc/serialtools.png)
+
+
+### Suggestions
+
+- ☐ TODO: read states from calendar
+- ☑︎ TODO: ESP as master controller: ESP interrupts the sleeping Arduino on Serial (RX3=PCINT[9] on Mega)
+- ☑︎ TODO: ESP has no preconfigured credentials (from the firmware)
+- ☑︎ TODO: if the ESP cannot join a known network, it starts as hotspot during a # seconds
+- ☑︎ TODO: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)

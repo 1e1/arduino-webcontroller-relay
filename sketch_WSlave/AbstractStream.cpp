@@ -44,6 +44,8 @@ bool AbstractStream::read()
 
 void AbstractStream::process()
 {   
+    PowerManager::hold();
+    
     switch (this->_currentAction) {
         #if WS_VERBOSE & WS_VERBOSE_LIST
         case WS_ACTION_ALL:
@@ -77,41 +79,42 @@ void AbstractStream::process()
     this->_currentRelay = this->_parseInt();
     LOG("parseRelay="); LOG(this->_currentRelay); LOGLN(';');
 
-    switch (this->_currentAction) {
-        case WS_ACTION_WRITE:
-            LOGLN("write");
-            Relayboard.setStateAt(this->_currentRelay, this->_parseInt(), this->_currentAction == WS_ACTION_WRITE_LOCK);
-            break;
-        
-        #if WS_ACL_ALLOW == WS_ACL_ALLOW_LOCK  
-        case WS_ACTION_WRITE_LOCK:
-            LOGLN("WRITE");
-            Relayboard.isLocked(this->_currentRelay, true);
-            Relayboard.setStateAt(this->_currentRelay, this->_parseInt(), this->_currentAction == WS_ACTION_WRITE_LOCK);
-            break;
-        #endif
+    #if WS_ACL_ALLOW == WS_ACL_ALLOW_LOCK
+    if (WS_ACTION_READ_UNLOCK == this->_currentAction) {
+        LOGLN("READ");
+        Relayboard.isLocked(this->_currentRelay, false);
+    } else
+    #endif
 
-        case WS_ACTION_NC:
-        case WS_ACTION_NO:
-            LOGLN("NC/NO");
-            Relayboard.isNcAt(this->_currentRelay, this->_currentAction == WS_ACTION_NC);
-            break;
+    if (WS_ACTION_READ != this->_currentAction) {
+        const uint8_t extra = this->_parseInt();
 
-        case WS_ACTION_MAP:
-            LOGLN("map");
-            Relayboard.setPinAt(this->_currentRelay, this->_parseInt());
-            break;
+        switch (this->_currentAction) {
+            case WS_ACTION_WRITE:
+                LOGLN("write");
+                Relayboard.setStateAt(this->_currentRelay, extra, false);
+                break;
+            
+            #if WS_ACL_ALLOW == WS_ACL_ALLOW_LOCK  
+            case WS_ACTION_WRITE_LOCK:
+                LOGLN("WRITE");
+                Relayboard.isLocked(this->_currentRelay, true);
+                Relayboard.setStateAt(this->_currentRelay, extra, true);
+                break;
+            #endif
 
-        #if WS_ACL_ALLOW == WS_ACL_ALLOW_LOCK  
-        case WS_ACTION_READ_UNLOCK:
-            LOGLN("READ");
-            Relayboard.isLocked(this->_currentRelay, false);
-            break;
-        #endif
+            case WS_ACTION_ISNC:
+                LOGLN("NC/NO");
+                Relayboard.isNcAt(this->_currentRelay, extra);
+                break;
 
-        case WS_ACTION_READ:
-            LOGLN("read");
-            break;
+            case WS_ACTION_MAP:
+                LOGLN("map");
+                Relayboard.setPinAt(this->_currentRelay, extra);
+                break;
+        }
+    } else {
+        LOGLN("read");
     }
 
     this->_printOne(this->_currentRelay);

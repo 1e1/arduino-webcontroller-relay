@@ -4,10 +4,10 @@
 readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
 readonly BASE_DIR=$( dirname $BIN_DIR)
 
-readonly INPUT_HTML="$BIN_DIR/html/index.html"
-readonly TEMP_HTML="$BIN_DIR/html/_.html"
-readonly TEMP_GZ="$BIN_DIR/html/_.gz"
-readonly TEMP_BR="$BIN_DIR/html/_.br"
+readonly INPUT_HTML="$BIN_DIR/html/slave.html"
+readonly TEMP_HTML="$BIN_DIR/html/_slave.html"
+readonly TEMP_GZ="$BIN_DIR/html/_slave.gz"
+readonly TEMP_BR="$BIN_DIR/html/_slave.br"
 readonly OUTPUT_GZ_H="$BASE_DIR/sketch_WSlave/webApp-generated-gzip.h"
 readonly OUTPUT_BR_H="$BASE_DIR/sketch_WSlave/webApp-generated-brotli.h"
 

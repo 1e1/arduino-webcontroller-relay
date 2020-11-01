@@ -37,7 +37,6 @@ void AbstractInterfaceWebApp::_listen(Client* client)
 
   if (client->connected()) {
     if (client->available()) {
-      Energy.highCpu();
 
       client->print(F(WS_HEADER_BEGIN_F));
 
@@ -63,7 +62,6 @@ void AbstractInterfaceWebApp::_listen(Client* client)
       #endif
 
       this->terminate();
-      Energy.lowCpu();
     }
 
     client->stop();

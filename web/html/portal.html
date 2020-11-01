@@ -2,89 +2,144 @@
 <head>
 <style>
 h2{
-    background:#333;
-    color:#ddd;
-    padding:0 1em
+    background:peru;
+    padding:0 1em;
 }
 
 input{
     width:280px;
-    font-family:monospace
+    font-family:monospace;
 }
 
-button{
-    float:right
+[min],[onclick]{
+    width:60px;
+}
+
+[onclick^=s]{
+    display:none;
+}
+h2 button{
+    float:right;
 }
 </style>
 <script>
 o={};
 f=(a,u)=>{
-    x=new XMLHttpRequest();
+    let x=new XMLHttpRequest;
     x.open(a,`/cfg/${u}.json`,0);
-    x.send(o[u]);
-    if(200==x.status)
-        o[u]=JSON.parse(x.response)
+    x.send(JSON.stringify(o[u]));
+    if(200==x.status){
+        o[u]=JSON.parse(x.response);
+        p[u]()
+    }
 };
-f('GET','mac');f('GET','g');f('GET','w');f('GET','d');f('GET','r');
-g=()=>{
-    document.querySelectorAll('[data-o]').forEach((a,u)=>{
-        a.value=a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o[2]][a.dataset.o[1]]:o[a.dataset.o[0]][a.dataset.o[1]];
-        a.onchange=()=>a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o[2]][a.dataset.o[1]]=a.value:o[a.dataset.o[0]][a.dataset.o[1]]=a.value;
-    });
+b=(a,u)=>{
+    document.querySelector(`[onclick*="('${a}')"]`).style.display=u?"block":"none";
 };
-w=()=>{
-    h='';
-    u=o.w.length;
-    o.w.forEach((a,u)=>{
-        h+=`<tr><td><input type=text maxlength=32 data-o=wn${u}></td><td><input type=password minlength=8 maxlength=63 data-o=wp${u}></td><td><button onclick="o.w.splice(${u},1);w()">-</button></td></tr>`;
-    });
-    h+=`<tr><td><input type=text maxlength=32 id=wn></td><td><input type=password minlength=8 maxlength=63 id=wp></td><td><button onclick="o.w[${u}]={'n':document.getElementById('wn').value,'p':document.getElementById('wp').value};w()">+</button></td></tr>`;
-    document.getElementById('w').innerHTML=h;
+a=(a,u)=>{
+    o[a].push(u);
+    p[a]();
+    b(a,1);
 };
-d=()=>{
-    h='';
-    u=o.d.length;
-    o.d.forEach((a,u)=>{
-        h+=`<tr><td><input type=text maxlength=32 data-o=dn${u}></td><td><input type=text pattern="([0-9A-F]{2}:){5}[0-9A-F]{2}" data-o=dm${u}></td><td><input maxlength=8 type=text data-o=dc${u}></td><td><button onclick="o.d.splice(${u},1);d()">-</button></td></tr>`;
-    });
-    h+=`<tr><td><input type=text maxlength=32 id=dn></td><td><input type=text pattern="([0-9A-F]{2}:){5}[0-9A-F]{2}" value="${o.mac}" id=dm></td><td><input maxlength=8 type=text id=dc></td><td><button onclick="o.d[${u}]={'n':document.getElementById('dn').value,'m':document.getElementById('dm').value};,'c':document.getElementById('dc').value};d()">+</button></td></tr>`;
-    document.getElementById('d').innerHTML=h;
-};
-r=()=>{
-    h='';
-    u=o.r.length;
-    o.r.forEach((a,u)=>{
-        h+=`<tr><td><input type=text maxlength=32 data-o=rn${u}></td><td><input type=number data-o=ri${u}></td><td><input type=checkbox onclick="this.value=1*this.checked" ${a.c?"checked":''} data-o=rc${u}></td><td><button onclick="o.r.splice(${u},1);r()">-</button></td></tr>`;
-    });
-    h+=`<tr><td><input type=text maxlength=32 id=rn></td><td><input type=number id=ri></td><td><input type=checkbox onclick="this.value=1*this.checked" id=rc></td><td><button onclick="o.r[${u}]={'n':document.getElementById('rn').value,'i':document.getElementById('ri').value};,'c':document.getElementById('rc').value};r()">+</button></td></tr>`;
-    document.getElementById('r').innerHTML=h;
+r=(a,u)=>{
+    o[a].splice(u,1);
+    p[a]();
+    b(a,1);
 };
 s=(a,u)=>{
+    b(a,0);
     f('POST',a);
-    u()
+    p[a]();
+};
+x=(a,u)=>{
+    f('DELETE',a);
+};
+c=(a,u)=>{
+    a.indeterminate=0>a.value;
+    a.checked=0<a.value;
+};
+d=(a,u)=>{
+    document.getElementById(a).innerHTML=u;
+    p.g();
+};
+p={
+    g:(a,u)=>{
+        document.querySelectorAll('[data-o]').forEach((a,u)=>{
+            a.value=a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o.substr(2)][a.dataset.o[1]]:o[a.dataset.o[0]][a.dataset.o[1]];
+            a.onchange=()=>{
+                b(a.dataset.o[0],1);
+                a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o.substr(2)][a.dataset.o[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value):o[a.dataset.o[0]][a.dataset.o[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value);
+                c(a);
+            };
+            c(a);
+        });  
+    },
+    w:(a,u)=>{
+        h='';
+        u=o.w.length;
+        o.w.forEach((a,u)=>{
+            h+=`<tr><td><input type=text minlength=1 maxlength=32 data-o=wn${u}></td><td><input type=password minlength=8 maxlength=63 data-o=wp${u}></td><td><button onclick="r('w',${u})">-</button></td></tr>`;
+        });
+        h+=`<tr><td><input type=text minlength=1 maxlength=32 id=wn></td><td><input type=password minlength=8 maxlength=63 id=wp></td><td><button onclick="a('w',{'n':document.getElementById('wn').value,'p':document.getElementById('wp').value})">+</button></td></tr>`;
+        d('w',h);
+    },
+    r:(a,u)=>{
+        h='';
+        u=o.r.length;
+        o.r.forEach((a,u)=>{
+            h+=`<tr><td><input type=text minlength=1 maxlength=32 data-o=rn${u}></td><td><input type=number min=0 data-o=ri${u}></td><td><input type=checkbox onclick="this.value=((1*this.value+2)%3)-1" data-o=ra${u}></td><td><button onclick="r('r',${u})">-</button></td></tr>`;
+        });
+        h+=`<tr><td><input type=text minlength=1 maxlength=32 id=rn></td><td><input type=number min=0 id=ri value=${u}></td><td><input type=checkbox onclick="this.value=((1*this.value+2)%3)-1;c(this)" value=-1 id=ra></td><td><button onclick="a('r',{'n':document.getElementById('rn').value,'i':parseInt(document.getElementById('ri').value),'a':parseInt(document.getElementById('ra').value)})">+</button></td></tr>`;
+        d('r',h);
+        document.getElementById('ra').indeterminate=1;
+    },
+    p:(a,u)=>{
+        h='';
+        u=o.p.length;
+        o.p.forEach((a,u)=>{
+            h+=`<tr><td><input type=number min=0 data-o=pi${u}></td><td><input type=checkbox onclick="this.value=1*this.checked" data-o=pn${u}></td><td><input type=number min=0 data-o=pp${u}></td><td><button onclick="r('p',${u})">-</button></td></tr>`;
+        });
+        h+=`<tr><td><input type=number min=0 id=pi value=${u}></td><td><input type=checkbox onclick="this.value=1*this.checked" id=pn></td><td><input type=number min=0 id=pp></td><td><button onclick="a('p',{'i':parseInt(document.getElementById('pi').value),'p':parseInt(document.getElementById('pp').value),'n':parseInt(document.getElementById('pn').value)})">+</button></td></tr>`;
+        d('p',h);
+    },
+    reboot:(a,u)=>{
+        o.g=0;
+        window.setInterval((a,u)=>{
+            f('GET','g');
+            if(o.g)
+                window.location.reload();
+        }, 2000);
+    }
 };
 </script>
 </head>
-<body onload="w();d();r();g()">
-<h2>access point <button onclick="s('g',g)">save</button></h2>
+<body onload="f('GET','g');f('GET','w');f('GET','r');f('GET','p')">
+<h2>access point<button onclick="x('reboot')">reboot</button><button onclick="s('g')">save</button></h2>
 <table>
-    <tbody id=g>
+    <tbody>
         <tr>
-            <td>BasicAuth</td>
-            <td><input type=password minlength=8 maxlength=63 data-o=ga></td>
+            <td>basicAuth</td>
+            <td><input type=text minlength=1 maxlength=32 placeholder=login data-o=gu></td>
+            <td><input type=text minlength=8 maxlength=63 placeholder=password data-o=gw></td>
         </tr>
         <tr>
             <td>SSID</td>
-            <td><input type=text maxlength=32 data-o=gn></td>
+            <td><input type=text minlength=1 maxlength=32 placeholder=ssid data-o=gn></td>
+            <td><input type=text minlength=8 maxlength=63 placeholder=password data-o=gp></td>
         </tr>
         <tr>
-            <td>password</td>
-            <td><input type=password minlength=8 maxlength=63 data-o=gp></td>
+            <td>channel</td>
+            <td><input type=number min=1 max=13 data-o=gc></td>
+            <td><label><input type=checkbox onclick="this.value=1*this.checked" data-o=gh>hidden</label></td>
+        </tr>
+        <tr>
+            <td>auto reboot</td>
+            <td><input type=checkbox onclick="this.value=1*this.checked" data-o=gr></td>
         </tr>
     </tbody>
 </table>
 
-<h2>wifis <button onclick="s('w',w)">save</button></h2>
+<h2>stations<button onclick="s('w')">save</button></h2>
 <table>
     <thead>
         <tr>
@@ -93,34 +148,34 @@ s=(a,u)=>{
             <td></td>
         </tr>
     </thead>
-<tbody id=w>
-</tbody>
+    <tbody id=w>
+    </tbody>
 </table>
 
-<h2>devices <button onclick="s('d',d)">save</button></h2>
-<table>
-    <thead>
-        <tr>
-            <td>name</td>
-            <td>MAC</td>
-            <td>serial command</td>
-            <td></td>
-        </tr>
-    </thead>
-<tbody id=d>
-</tbody>
-</table>
-
-<h2>relays <button onclick="s('r',r)">save</button></h2>
+<h2>relays<button onclick="s('r')">save</button></h2>
 <table>
     <thead>
         <tr>
             <td>name</td>
             <td>id</td>
-            <td>isNC</td>
+            <td>onConnect</td>
             <td></td>
         </tr>
     </thead>
-<tbody id=r>
-</tbody>
+    <tbody id=r>
+    </tbody>
+</table>
+
+<h2>wiring<button onclick="s('p')">save</button></h2>
+<table>
+    <thead>
+        <tr>
+            <td>id</td>
+            <td>isNc</td>
+            <td>pin</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody id=p>
+    </tbody>
 </table>
