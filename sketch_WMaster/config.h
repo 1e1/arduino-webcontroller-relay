@@ -25,7 +25,9 @@
 
 // WEB conf
 // =========================
-#define WM_WEB_PORT         443
+#define WM_WEB_PORT             WM_WEB_PORT_DEFAULT   
+#define WM_WEB_SERVER_SECURE    WM_WEB_SERVER_SECURE_NO
+#define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_GZ
 // =========================
 
 

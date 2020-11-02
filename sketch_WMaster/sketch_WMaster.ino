@@ -13,8 +13,9 @@
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 #include <Vector.h>
-#include <time.h>
+//#include <fauxmoESP.h>
 #include <sys/time.h>
+#include <time.h>
 #include "config.h"
 #include "macro.h"
 #include "certificate-generated.h"
@@ -93,6 +94,7 @@
 
 
 Configuration::Acl acl;
+//fauxmoESP fauxmo;
 WebServer* server;
 
 
@@ -152,6 +154,7 @@ void setup()
     LOGLN(PSTR("---"));
   }
 
+  std::list<Configuration::Relay> relayList = configuration->getRelayList();
   //WiFi.setSleepMode(WIFI_LIGHT_SLEEP, 3); // TODO constantize
 
   if (WiFi.status() != WL_CONNECTED) {
@@ -184,7 +187,6 @@ void setup()
       if (WiFi.softAPgetStationNum()) {
         LOGLN(PSTR("OK, run Relay commands:"));
 
-        std::list<Configuration::Relay> relayList = configuration->getRelayList();
         for (Configuration::Relay relay : relayList) {
           if (relay.onConnect != Configuration::T_indeterminate) {
             LOG(relay.name); LOG(" -> "); LOGLN(relay.onConnect);
@@ -196,6 +198,17 @@ void setup()
       LOGLN(PSTR("---"));
     }
   }
+  /*
+  LOGLN(PSTR("-- setup Alexa"));
+  fauxmo.createServer(true);
+  fauxmo.setPort(88);
+  fauxmo.enable(true);
+
+  for (Configuration::Relay relay : relayList) {
+    fauxmo.addDevice(relay.name);
+  }
+  */
+  LOGLN(PSTR("---"));
 
   LOGLN(PSTR("-- setup WebServer"));
   WebServer::setFs(LittleFS);
@@ -204,12 +217,12 @@ void setup()
 
   server = new WebServer();
   server->begin();
-  
+
   LOGLN(PSTR("---"));
 
   LOGLN(PSTR("-- setup mDNS"));
   MDNS.begin(certificate::dname);
-  MDNS.addService("https", "tcp", WM_WEB_PORT);
+  MDNS.addService(WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES ? "https" : "http", "tcp", WM_WEB_PORT);
   LOGLN(PSTR("---"));
 
   BUSYLED_NONE;
@@ -229,4 +242,5 @@ void loop()
 
   server->loop();
   MDNS.update();
+  //fauxmo.handle();
 }

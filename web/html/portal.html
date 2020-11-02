@@ -99,7 +99,7 @@ p={
         o.p.forEach((a,u)=>{
             h+=`<tr><td><input type=number min=0 data-o=pi${u}></td><td><input type=checkbox onclick="this.value=1*this.checked" data-o=pn${u}></td><td><input type=number min=0 data-o=pp${u}></td><td><button onclick="r('p',${u})">-</button></td></tr>`;
         });
-        h+=`<tr><td><input type=number min=0 id=pi value=${u}></td><td><input type=checkbox onclick="this.value=1*this.checked" id=pn></td><td><input type=number min=0 id=pp></td><td><button onclick="a('p',{'i':parseInt(document.getElementById('pi').value),'p':parseInt(document.getElementById('pp').value),'n':parseInt(document.getElementById('pn').value)})">+</button></td></tr>`;
+        h+=`<tr><td><input type=number min=0 id=pi value=${u}></td><td><input type=checkbox onclick="this.value=1*this.checked" value=0 id=pn></td><td><input type=number min=0 id=pp></td><td><button onclick="a('p',{'i':parseInt(document.getElementById('pi').value),'p':parseInt(document.getElementById('pp').value),'n':parseInt(document.getElementById('pn').value)})">+</button></td></tr>`;
         d('p',h);
     },
     reboot:(a,u)=>{
