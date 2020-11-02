@@ -36,6 +36,7 @@ class Relay {
   static void _save(const uint8_t relayId);
 
   static uint8_t _options[optionsLength];
+  static bool _states[optionsLength];
 
 };
 
