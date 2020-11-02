@@ -294,11 +294,19 @@ $ docker-compose up
 - test Home Assistant on http://{docker-machine}:8123
 - test NodeRed on http://{docker-machine}:1880
 
-### debug
+### help
 
 You can watch the communication between an Arduino Mega slave and a ESP master with SerialTools.
+Use a separate Wemos D1 mini and a standard Arduino Mega. 
 
 ![app SerialTools](./doc/serialtools.png)
+
+
+A video explain how to upload the sketches on an Arduino Mega ESP8266
+[![HOWTO on YouTube](https://i.ytimg.com/vi_webp/7OckOeyoso8/maxresdefault.webp)](https://www.youtube.com/watch?v=7OckOeyoso8)
+
+Backup a configuration into `./sketch_WMaster/dump/` with `./web/master_config_download.sh`, 
+then upload it on a fresh install with `./web/master_config_upload.sh`.
 
 
 ### Suggestions
