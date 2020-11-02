@@ -161,14 +161,9 @@ void WebServer::_handleAll()
   const char *uri = _server.uri().c_str();
   const char *prefixUrl = PSTR("/api/r/");
 
-  LOG("uri='");LOG(uri);LOGLN("'");
-  LOG("prefixUrl='");LOG(prefixUrl);LOGLN("'");
-
   if (strcmp_P(uri, prefixUrl)) {
-    Serial.println("good prefix");
     uri += strlen_P(prefixUrl); // skip the prefixUrl and get to the relayId
     const uint8_t relayId = atoi(uri);
-    LOG("relayId='");LOG(relayId);LOGLN("'");
     
     switch (_server.method()) {
       case HTTP_GET:

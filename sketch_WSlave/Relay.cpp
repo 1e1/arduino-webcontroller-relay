@@ -11,6 +11,7 @@
 
 
 uint8_t Relay::_options[Relay::optionsLength];
+bool Relay::_states[Relay::optionsLength];
 
 static const uint8_t _MASK_PIN       = B00111111;
 static const uint8_t _BIT_IS_NC      = 6;
@@ -97,9 +98,7 @@ void Relay::isLocked(const uint8_t relayId, const bool isLocked)
 
 const bool Relay::getStateAt(const uint8_t relayId)
 {
-    const uint8_t pinId = Relay::getPinAt(relayId);
-
-    return Relay::isNcAt(relayId) ^ digitalRead(pinId);
+    return Relay::_states[relayId];
 }
 
 
@@ -110,6 +109,7 @@ void Relay::setStateAt(const uint8_t relayId, const bool state, const bool force
         const bool isActive = Relay::isNcAt(relayId) ^ state;
 
         digitalWrite(pin, isActive ? HIGH : LOW);
+        Relay::_states[relayId] = state;
     }
 }
 
@@ -128,6 +128,7 @@ void Relay::_init(const uint8_t relayId)
         const uint8_t pin = Relay::getPinAt(relayId);
 
         pinMode(pin, OUTPUT);
+        Relay::_states[relayId] = Relay::isNcAt(relayId);
     }
 }
 
