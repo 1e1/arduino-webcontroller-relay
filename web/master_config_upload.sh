@@ -10,7 +10,7 @@ readonly DEFAULT_BASEURL="/cfg/"
 
 readonly INPUT_DIR="$BASE_DIR/sketch_WMaster/dump/"
 
-INPUT_HOST="esp8266"
+INPUT_HOST="http://esp8266"
 INPUT_USER=""
 INPUT_PASSWORD=""
 
@@ -29,9 +29,11 @@ filename=$(basename -- "$1")
 extension="${filename##*.}"
 filename="${filename%.*}"
 
+echo "POST ${INPUT_HOST}/cfg/${filename}"
+
 curl \
     --request POST \
-    --url "https://${INPUT_HOST}/cfg/${filename}" \
+    --url "${INPUT_HOST}/cfg/${filename}" \
     --insecure \
     --header 'Content-Type: application/json' \
     --data @"${INPUT_DIR}/$1" \
@@ -79,10 +81,11 @@ cat <<EOT
 
 reboot
 ######
+DELETE ${INPUT_HOST}/cfg/reboot
 EOT
 curl \
     --request DELETE \
-    --url "https://${INPUT_HOST}/cfg/reboot" \
+    --url "${INPUT_HOST}/cfg/reboot" \
     --insecure \
     --basic \
     --user "${INPUT_USER}:${INPUT_PASSWORD}" \

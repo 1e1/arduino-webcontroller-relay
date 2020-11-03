@@ -34,10 +34,9 @@ void setup()
   LOG_START();
   LOGLN(F("DEBUG ON"));
 
-  Relayboard.begin();
-
   delay(2000);
   Energy.begin();
+  Relayboard.begin();
 
   uint8_t i = ARRAYLEN(_engines);
 
@@ -93,5 +92,5 @@ void loop()
   }
 
   BUSYLED_NONE;
-  Energy.loop();
+  //Energy.loop();
 }

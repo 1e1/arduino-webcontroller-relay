@@ -10,7 +10,7 @@ readonly DEFAULT_BASEURL="/cfg/"
 
 readonly OUTPUT_DIR="$BASE_DIR/sketch_WMaster/dump/"
 
-INPUT_HOST="esp8266"
+INPUT_HOST="http://esp8266"
 INPUT_USER=""
 INPUT_PASSWORD=""
 
@@ -29,9 +29,11 @@ filename=$(basename -- "$1")
 extension="${filename##*.}"
 filename="${filename%.*}"
 
+echo "GET ${INPUT_HOST}/cfg/${filename}"
+
 curl \
     --request GET \
-    --url "https://${INPUT_HOST}/cfg/${filename}" \
+    --url "${INPUT_HOST}/cfg/${filename}" \
     --insecure \
     --basic \
     --user "${INPUT_USER}:${INPUT_PASSWORD}" \
@@ -72,4 +74,6 @@ download wiring.json
 EOT
 download_config p.json
 
+
+echo ls -lh $OUTPUT_DIR
 ls -lh $OUTPUT_DIR

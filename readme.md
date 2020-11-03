@@ -248,6 +248,8 @@ The config portal os on `https://{ip}/portal`.
 #### software
 
 - Esp8266 for the optional Master sketch
+- fauxmoESP (for Alexa)
+- ESP AsyncTCP (for Alexa, required by fauxmoESP)
 
 
 ### upload Sketch
@@ -279,8 +281,8 @@ It will connect the Arduino Mega part to the Arduino ESP part.
 
 - edit ./web/html/slave.html
 - export to ./sketch_WSlave/webApp-generated-*.h by `./web/slave_genhtml.sh`
-- export to ./sketch_WMaster/data/* by `./web/master_genhtml.sh`
-- export to ./sketch_WMaster/certificate-generated.h/* by `./web/master_gencertificate.sh`
+- export to ./sketch_WMaster/data/* by `./web/master_html_generate.sh`
+- export to ./sketch_WMaster/certificate-generated.h/* by `./web/master_certificate_generate.sh`
 - run `./web/docker-compose up` for testing
 
 ### docker-compose

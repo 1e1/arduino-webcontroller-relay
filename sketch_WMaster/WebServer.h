@@ -9,13 +9,15 @@ extern "C" {
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
 #include <ESP8266WebServerSecure.h>
+#include "certificate-generated.h"
+#endif
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <list>
 #include "config.h"
 #include "macro.h"
-#include "certificate-generated.h"
 #include "Bridge.h"
 
 

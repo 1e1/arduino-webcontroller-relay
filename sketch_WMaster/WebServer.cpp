@@ -9,14 +9,20 @@
 
 
 
+#if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
 static BearSSL::ESP8266WebServerSecure _server(WM_WEB_PORT);
+//static char* _serverKey;
+//static char* _serverCert;
+
+#else
+static ESP8266WebServer _server(WM_WEB_PORT);
+#endif
+
 
 static Bridge* _bridge;
 static fs::FS* _fs = nullptr;
 static const char* _username = NULL;
 static const char* _password = NULL;
-//static char* _serverKey;
-//static char* _serverCert;
 
 
 
@@ -72,7 +78,7 @@ void WebServer::setFs(FS &fs)
 void WebServer::_setup()
 {
   _server.on("/", HTTP_GET, []() {
-    WebServer::_streamBrotli(WM_WEB_INDEX_PATH, true);
+    WebServer::_streamBrotli(WM_WEB_INDEX_BASENAME "." WM_WEB_FILE_EXT, true);
   }); 
 
   _server.on("/api/r", HTTP_GET, []() { 
@@ -80,7 +86,7 @@ void WebServer::_setup()
   });
 
   _server.on("/portal", HTTP_GET, []() {
-    WebServer::_streamBrotli(WM_WEB_PORTAL_PATH, false);
+    WebServer::_streamBrotli(WM_WEB_PORTAL_BASENAME "." WM_WEB_FILE_EXT, false);
   });
 
   _server.on("/cfg/g", HTTP_GET, []() {
@@ -122,14 +128,6 @@ void WebServer::_setup()
       ESP.restart();
     }
   });
-  /*
-  _server.onNotFound([](){
-    LOGLN("handle NotFound");
-    _server.send(404, "text/plain", "It is not the page your are looking for");
-  });
-  */
-  //WebServer::_getFileContents(WM_CONFIG_KEY_PATH, _serverKey);
-  //WebServer::_getFileContents(WM_CONFIG_CERT_PATH, _serverCert);
   
   _server.onNotFound([](){
     LOGLN("handle NotFound");
@@ -137,7 +135,14 @@ void WebServer::_setup()
     //_server.send(404, "text/plain", "It is not the page your are looking for");
   });
 
+  #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
+  LOGLN("configure Certificate");
+  //WebServer::_getFileContents(WM_CONFIG_KEY_PATH, _serverKey);
+  //WebServer::_getFileContents(WM_CONFIG_CERT_PATH, _serverCert);
+
   _server.getServer().setRSACert(new BearSSL::X509List(certificate::serverCert), new BearSSL::PrivateKey(certificate::serverKey));
+  #endif
+
   _server.begin();
 }
 
@@ -192,7 +197,7 @@ void WebServer::_handleAll()
 void WebServer::_streamBrotli(const char* path, const bool isPublic)
 {
   if (isPublic || WebServer::_isAllowed()) {
-    _server.sendHeader(String(PSTR("Content-Encoding")), String(PSTR("br")));
+    _server.sendHeader(String(PSTR("Content-Encoding")), String(PSTR(WM_WEB_FILE_EXT)));
     _server.sendHeader(String(PSTR("Cache-Control")), String(PSTR("max-age=86400")));
 
     File file = _fs->open(path, "r");
@@ -292,14 +297,9 @@ void WebServer::_writeSerialJson()
     if (_server.hasArg("plain")) {
       _bridge->wakeup();
 
-      StaticJsonDocument<64> filter;
-      filter[0]["i"] = true;
-      filter[0]["p"] = true;
-      filter[0]["n"] = true;
-
       String payload = _server.arg("plain");
-      DynamicJsonDocument doc(JSON_ARRAY_SIZE(WM_RELAY_NB_MAX+1)*4);
-      auto error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
+      DynamicJsonDocument doc(JSON_ARRAY_SIZE(WM_RELAY_NB_MAX+1)*6);
+      auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
       
       JsonArray root = doc.as<JsonArray>();
 
