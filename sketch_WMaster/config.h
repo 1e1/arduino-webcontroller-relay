@@ -1,39 +1,65 @@
 #ifndef config_H_
 #define config_H_
 
-#include "constant.h"
+#include "_config.h"
 
 
 
 // board metadata
 // =========================
-#define WM_PIN_SAFEMODE     0 /* RXD */
-#define WM_PIN_CONFIG       0 /* GPIO12 */
-#define WM_RELAY_NB_MAX     32
-#define WM_LOG_LEVEL        WM_LOG_LEVEL_OFF
+// a number between 2 and 253
+#ifndef WM_PIN_SAFEMODE
+#define WM_PIN_SAFEMODE     A0
+#endif
+#ifndef WM_PIN_CONFIG
+#define WM_PIN_CONFIG       A0
+#endif
+#ifndef WM_RELAY_NB_MAX
+#define WM_RELAY_NB_MAX     4
+#endif
+#ifndef WS_LOG_LEVEL
+#define WS_LOG_LEVEL        WM_LOG_LEVEL_ALL
+#endif
 // =========================
 
 
 // Serial conf
 // =========================
 // multiply by the clock divisor (ex:9600 baud at 2MHz instead of 16Mhz is 1200 baud)
+#ifndef WM_SERIAL    
 #define WM_SERIAL           Serial
+#endif
+#ifndef WM_SERIAL_SPEED    
 #define WM_SERIAL_SPEED     115200
-#define WM_USB_SPEED        WM_SERIAL_SPEED
+#endif
+#ifndef WM_USB_SPEED
+#define WM_USB_SPEED        9600
+#endif
 // =========================
 
 
 // WEB conf
 // =========================
-#define WM_WEB_PORT             WM_WEB_PORT_DEFAULT   
+#ifndef WM_WEB_PORT
+#define WM_WEB_PORT             WM_WEB_PORT_DEFAULT
+#endif
+#ifndef WM_WEB_SERVER_SECURE
 #define WM_WEB_SERVER_SECURE    WM_WEB_SERVER_SECURE_NO
+#endif
+#ifndef WM_WEB_FILE_EXT
 #define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_GZ
+#endif
 // =========================
 
 
 // Wifi conf
 // =========================
+#ifndef WM_WIFI_SSID
 #define WM_WIFI_SSID        "HelloWorld"
+#endif
+#ifndef WM_WIFI_PASSWORD
+//#define WM_WIFI_PASSWORD    "Open Sesame!"
+#endif
 // =========================
 
 
