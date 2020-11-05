@@ -166,7 +166,7 @@ void WebServer::_handleAll()
   const char *uri = _server.uri().c_str();
   const char *prefixUrl = PSTR("/api/r/");
 
-  if (strcmp_P(uri, prefixUrl)) {
+  if (strncmp_P(uri, prefixUrl, strlen_P(prefixUrl)) == 0) {
     uri += strlen_P(prefixUrl); // skip the prefixUrl and get to the relayId
     const uint8_t relayId = atoi(uri);
     

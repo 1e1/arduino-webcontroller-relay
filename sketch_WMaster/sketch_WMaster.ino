@@ -8,8 +8,9 @@
 
 
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
 #include <ESP8266mDNS.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 #include <Vector.h>
@@ -26,69 +27,6 @@
 
 
 /** ===================== **/
-
-  /*
-    * SETUP()
-    * -------
-    * if pinX == GROUND
-    * then config_erase()
-    * end
-    * 
-    * if config_exists()
-    * then
-    *   for credential in config[wifis]
-    *     nbRetry = 10
-    *     do
-    *       WiFi.connect(credential[ssid], credential[password])
-    *       idle(500ms)
-    *     while (!WL_CONNECTED && --nbRetry)
-    *   end
-    * end
-    * 
-    * if !WL_CONNECTED
-    * then
-    *   softAP(config[ap_ssid], config[ap_password])
-    *   if pinY == GROUND
-    *   then
-    *   else
-    *     idle(30s)
-    *     stalk(&mac)
-    *     for device in config[devices]
-    *       if mac == device.mac
-    *       then
-    *         EXEC(device.command)
-    *       end
-    *     end
-    *     sleep(30s)
-    *   end
-    * end
-    * 
-    * 
-    * LOOP()
-    * ------
-    * if WL_CONNECTED
-    *   then
-    *     PORTAL(form, save, reboot):8443
-    *     WEBAPP:8080
-    *     FAUXMO:80 if Alexa
-    *     sleep(2s)
-    *   else ESP.reset()
-    * end
-    * 
-    * 
-    * WEBAPP:
-    * -------
-    * GET /
-    * GET /api/{relayId}
-    * POST /api/{relayId} {pin?=int, isNc?=bool, value=bool}
-    * PUT /api/{relayId}/{value=bool}
-    * POST /api/special {action="save"}
-    * relays = EXEC(/$)
-    * for relay in relays
-    *   displayHtml(relay)
-    * 
-    * 
-    */
 
 
 
@@ -117,9 +55,13 @@ void setup()
   pinMode(WM_PIN_CONFIG, INPUT_PULLUP);
   pinMode(WM_PIN_SAFEMODE, INPUT_PULLUP);
 
-  bool isUnlocked = digitalRead(WM_PIN_CONFIG) == LOW;
-  bool isSafeMode = digitalRead(WM_PIN_SAFEMODE) == LOW;
+  bool isUnlocked = digitalRead(WM_PIN_CONFIG) == HIGH;
+  bool isSafeMode = digitalRead(WM_PIN_SAFEMODE) == HIGH;
   bool externalReset = ESP.getResetInfoPtr()->reason == rst_reason::REASON_EXT_SYS_RST;
+
+  LOG("isUnlocked="); LOGLN(isUnlocked);
+  LOG("isSafeMode="); LOGLN(isSafeMode);
+  LOG("externalReset="); LOGLN(externalReset);
 
   LOGLN(PSTR("-- load Configuration"));
   configuration->begin();
@@ -127,7 +69,7 @@ void setup()
 
   acl = configuration->getGlobal()->acl;
 
-  if (isUnlocked) {
+  if (isUnlocked || externalReset) {
     acl.canAutoRestart = false;
   }
   LOGLN(PSTR("---"));
@@ -140,6 +82,7 @@ void setup()
     BUSYLED_IDLE;
     LOGLN(PSTR("-- trying to connect to STA:"));
 
+    /* */
     WiFi.mode(WIFI_STA);
     std::list<Configuration::WifiStation> wifiList = configuration->getWifiStationList();
     for (Configuration::WifiStation wifi : wifiList) {
@@ -150,7 +93,18 @@ void setup()
           break;
         }
     }
-
+    /* * /
+    ESP8266WiFiMulti wifiMulti;
+    std::list<Configuration::WifiStation> wifiList = configuration->getWifiStationList();
+    for (Configuration::WifiStation wifi : wifiList) {
+        LOGLN(wifi.ssid);
+        wifiMulti.addAP(wifi.ssid, wifi.password);
+    }
+    
+    if (wifiMulti.run(30000) == WL_CONNECTED) { // TODO constantize
+      LOG(PSTR("connected at: ")); LOGLN(WiFi.SSID());
+    }
+    /* */
     LOGLN(PSTR("---"));
   }
 
@@ -163,8 +117,8 @@ void setup()
      * (Configuration*, Configuration::Global*)
      */
     LOGLN(PSTR("-- trying to create AP:"));
-    LOG("AP ssid: ");LOGLN(configuration->getGlobal()->wifiAp.ssid);
-    LOG("AP password: ");LOGLN(configuration->getGlobal()->wifiAp.password);
+    LOG(PSTR("AP ssid: "));LOGLN(configuration->getGlobal()->wifiAp.ssid);
+    LOG(PSTR("AP password: "));LOGLN(configuration->getGlobal()->wifiAp.password);
     
     WiFi.mode(WIFI_AP);
     WiFi.softAP(

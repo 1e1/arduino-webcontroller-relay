@@ -92,5 +92,5 @@ void loop()
   }
 
   BUSYLED_NONE;
-  //Energy.loop();
+  Energy.loop();
 }
