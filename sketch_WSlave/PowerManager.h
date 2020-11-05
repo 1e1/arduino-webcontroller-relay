@@ -39,19 +39,19 @@ class PowerManager {
     T_INFINITE=-1, 
   } Wdt;
 
-  __attribute__((always_inline)) inline static void free() { power_all_enable(); };
+  __attribute__((always_inline)) inline static void free(void) { power_all_enable(); };
 
-  static void begin();
-  static void loop();
-  static const bool isFirstLoop();
-  static void highCpu();
-  static void lowCpu();
-  static void sleep();
-  static void hold();
+  static void begin(void);
+  static void loop(void);
+  static const bool isFirstLoop(void);
+  static void highCpu(void);
+  static void lowCpu(void);
+  static void sleep(void);
+  static void hold(void);
 
   protected:
-  static void _disableComponents();
-  static void _enableComponents();
+  static void _disableComponents(void);
+  static void _enableComponents(void);
   static void _sleepTimer(const byte mode=SLEEP_MODE_IDLE, const Wdt timer=Wdt::WS_IDLE_TIME);
   static void _sleepUntilInterrupt(const byte mode=SLEEP_MODE_PWR_DOWN);
 

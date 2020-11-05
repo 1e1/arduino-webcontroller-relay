@@ -54,6 +54,13 @@ void AbstractStream::process()
             return;
         #endif
 
+        #if WS_ACL_ALLOW == WS_ACL_ALLOW_ABOUT
+        case WS_ACTION_ABOUT:
+            LOGLN("about");
+            this->_printAbout();
+            return;
+        #endif
+
         #if WS_STORAGE != WS_STORAGE_NONE
         case WS_ACTION_SAVE:
             LOGLN("save");
@@ -78,6 +85,10 @@ void AbstractStream::process()
 
     this->_currentRelay = this->_parseInt();
     LOG("parseRelay="); LOG(this->_currentRelay); LOGLN(';');
+
+    if (!Relayboard.exists(this->_currentRelay)) {
+        return;
+    }
 
     #if WS_ACL_ALLOW == WS_ACL_ALLOW_LOCK
     if (WS_ACTION_READ_UNLOCK == this->_currentAction) {
@@ -150,6 +161,13 @@ void AbstractStream::_printOne(const uint8_t relayId)
     this->_printData(Relayboard.isLocked(relayId));
     this->_printData(Relayboard.isNcAt(relayId));
     this->_printData(Relayboard.getPinAt(relayId));
+    this->_currentStream->print(WS_LF);
+}
+
+
+void AbstractStream::_printAbout()
+{
+    this->_currentStream->print(SCM_HASH);
     this->_currentStream->print(WS_LF);
 }
 

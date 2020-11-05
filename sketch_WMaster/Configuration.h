@@ -49,18 +49,18 @@ class Configuration {
 
   Configuration(FS &fs);
 
-  void begin();
+  void begin(void);
   void setSafeMode(const bool isSafeMode=true);
-  Global* getGlobal() { return &this->_global; };
-  const std::list<WifiStation> getWifiStationList();
-  const std::list<Relay> getRelayList();
+  Global* getGlobal(void) { return &this->_global; };
+  const std::list<WifiStation> getWifiStationList(void);
+  const std::list<Relay> getRelayList(void);
 
   protected:
   fs::FS* _fs = nullptr;
   Global _global;
 
   DynamicJsonDocument _open(const char* filename);
-  void _loadGlobal();
+  void _loadGlobal(void);
 
 };
 

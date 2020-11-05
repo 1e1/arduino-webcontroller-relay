@@ -15,8 +15,10 @@ class Relay {
   public:
   static const uint8_t optionsLength = min(WS_RELAY_NB_MAX, NUM_DIGITAL_PINS);
 
-  static void begin();
-  static void save();
+  static void begin(void);
+  static void save(void);
+  
+  static const bool exists(const uint8_t relayId);
 
   static const uint8_t getPinAt(const uint8_t relayId);
   static void setPinAt(const uint8_t relayId, const uint8_t pin);

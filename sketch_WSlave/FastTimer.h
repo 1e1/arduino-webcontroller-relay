@@ -37,11 +37,11 @@ class FastTimer {
 
   FastTimer(const Precision precision);
 
-  const uint8_t update(); // call it once in the main loop()
+  const uint8_t update(void); // call it once in the main loop()
 
   // inline
   __attribute__((always_inline)) inline const boolean isSection(const byte section) { return bitRead_boolean(this->_section, section); };
-  __attribute__((always_inline)) inline const uint8_t getTime() { return this->_embedTime; };
+  __attribute__((always_inline)) inline const uint8_t getTime(void) { return this->_embedTime; };
 
   protected:
   Precision _precision;

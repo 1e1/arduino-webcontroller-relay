@@ -193,11 +193,27 @@ paths:
         200:
           description: "successful operation"
 
+  /?:
+    get:
+      description: "about info"
+      produces:
+      - "text/plain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/About"
+
 responses:
   204:
     description: "no content, usually because the request was lost while the device was waking up"
 
 definitions:
+  About:
+    type: "string"
+    pattern: '^[a-f0-9]{40}$'
+    description: "scm hash"
+    example: "f496ca6a4cde79f8649100d6ba2b13c8fb6440a5"
   Relay:
     type: "string"
     pattern: '^[01] \d{1,3} [01] \d{1,3}$'

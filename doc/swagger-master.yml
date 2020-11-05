@@ -20,6 +20,16 @@ servers:
         default: ""
 
 paths:
+  /about:
+    get:
+      description: "about info"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/About"
   /cfg/g:      
     get:
       security:
@@ -124,7 +134,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CfgRelays"
-  /api/r/{relayId}: # TODO
+  /api/r/{relayId}:
     parameters:
     - name: relayId
       in: path
@@ -168,6 +178,29 @@ components:
       type: http
       scheme: basic
   schemas:
+    About:
+      type: "object"
+      description: "about description"
+      properties:
+        hash:
+          description: "scm hash"
+          type: "string"
+          minLength: 40
+          maxLength: 40
+        date:
+          description: "scm datetime"
+          type: "string"
+          format: "datetime"
+          minLength: 25
+          maxLength: 25
+        chan:
+          description: "scm channel"
+          type: "string"
+          minLength: 0
+        example:
+          hash: "f496ca6a4cde79f8649100d6ba2b13c8fb6440a5"
+          date: "2020-11-06 09:11:59 +0100"
+          chan: "develop"
     CfgGlobal:
       type: "object"
       description: "main configuration as Access Point"

@@ -1,12 +1,9 @@
 #!/bin/bash
 
 
-readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
-readonly BASE_DIR=$( dirname ${BIN_DIR})
+readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
+source "$SCRIPT_DIR/_init.sh"
 
-
-readonly DEFAULT_HOST="webrelay"
-readonly DEFAULT_BASEURL="/cfg/"
 
 readonly INPUT_DIR="$BASE_DIR/sketch_WMaster/dump/"
 
@@ -36,16 +33,18 @@ curl \
     --url "${INPUT_HOST}/cfg/${filename}" \
     --insecure \
     --header 'Content-Type: application/json' \
-    --data @"${INPUT_DIR}/$1" \
+    --data @"${MASTER_DUMP_DIR}/$1" \
     --silent \
 
 }
 
 
-ls -lh $INPUT_DIR
+echo ls -lh $MASTER_DUMP_DIR
+ls -lh $MASTER_DUMP_DIR
 
 
 cat <<EOT
+
 
 upload global.json
 ######
@@ -55,6 +54,7 @@ upload_config g.json
 
 cat <<EOT
 
+
 upload wifi.json
 ######
 EOT
@@ -62,6 +62,7 @@ upload_config w.json
 
 
 cat <<EOT
+
 
 upload relay.json
 ######
@@ -71,6 +72,7 @@ upload_config r.json
 
 cat <<EOT
 
+
 upload wiring.json
 ######
 EOT
@@ -78,6 +80,7 @@ upload_config p.json
 
 
 cat <<EOT
+
 
 reboot
 ######
@@ -89,4 +92,5 @@ curl \
     --insecure \
     --basic \
     --user "${INPUT_USER}:${INPUT_PASSWORD}" \
-    --silent 
+    --silent \
+    

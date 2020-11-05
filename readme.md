@@ -280,9 +280,9 @@ It will connect the Arduino Mega part to the Arduino ESP part.
 ### custom HTML
 
 - edit ./web/html/slave.html
-- export to ./sketch_WSlave/webApp-generated-*.h by `./web/slave_genhtml.sh`
-- export to ./sketch_WMaster/data/* by `./web/master_html_generate.sh`
-- export to ./sketch_WMaster/certificate-generated.h/* by `./web/master_certificate_generate.sh`
+- export to ./sketch_WSlave/webApp-generated-*.h by `./bin/slave_genhtml.sh`
+- export to ./sketch_WMaster/data/* by `./bin/master_html_generate.sh`
+- export to ./sketch_WMaster/certificate-generated.h/* by `./bin/master_certificate_generate.sh`
 - run `./web/docker-compose up` for testing
 
 ### docker-compose
@@ -307,8 +307,8 @@ Use a separate Wemos D1 mini and a standard Arduino Mega.
 A video explain how to upload the sketches on an Arduino Mega ESP8266
 [![HOWTO on YouTube](https://i.ytimg.com/vi_webp/7OckOeyoso8/maxresdefault.webp)](https://www.youtube.com/watch?v=7OckOeyoso8)
 
-Backup a configuration into `./sketch_WMaster/dump/` with `./web/master_config_download.sh`, 
-then upload it on a fresh install with `./web/master_config_upload.sh`.
+Backup a configuration into `./sketch_WMaster/dump/` with `./bin/master_config_download.sh`, 
+then upload it on a fresh install with `./bin/master_config_upload.sh`.
 
 
 ### Suggestions

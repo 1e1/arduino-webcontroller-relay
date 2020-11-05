@@ -1,11 +1,11 @@
 #!/bin/bash
 
 
-readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
-readonly BASE_DIR=$( dirname ${BIN_DIR})
+readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
+source "$SCRIPT_DIR/_init.sh"
+
 
 OUTPUT_FORMAT="br"
-OUTPUT_DIR="$BASE_DIR/sketch_WMaster/data"
 
 
 while getopts cf: flag
@@ -22,12 +22,12 @@ filename=$(basename -- "$1")
 extension="${filename##*.}"
 filename="${filename%.*}"
 
-INPUT_HTML="${BIN_DIR}/html/${filename}.${extension}"
-TEMP_HTML="${BIN_DIR}/html/_${filename}.${extension}"
-TEMP_GZ="${BIN_DIR}/html/_${filename}.gz"
-TEMP_BR="${BIN_DIR}/html/_${filename}.br"
-TEMP_EXT="${BIN_DIR}/html/_${filename}.${OUTPUT_FORMAT}"
-OUTPUT_DATA="${OUTPUT_DIR}/${filename}.${OUTPUT_FORMAT}"
+INPUT_HTML="${HTML_DIR}/${filename}.${extension}"
+TEMP_HTML="${HTML_DIR}/_${filename}.${extension}"
+TEMP_GZ="${HTML_DIR}/_${filename}.gz"
+TEMP_BR="${HTML_DIR}/_${filename}.br"
+TEMP_EXT="${HTML_DIR}/_${filename}.${OUTPUT_FORMAT}"
+OUTPUT_DATA="${MASTER_DATA_DIR}/${filename}.${OUTPUT_FORMAT}"
 
 SED_BACKUP_EXT=".sed"
 
@@ -77,4 +77,4 @@ master
 EOT
 seal master.html
 
-mv "$BASE_DIR/sketch_WMaster/data/master.${OUTPUT_FORMAT}" "$BASE_DIR/sketch_WMaster/data/index.${OUTPUT_FORMAT}"
+mv "$MASTER_DATA_DIR/master.${OUTPUT_FORMAT}" "$MASTER_DATA_DIR/index.${OUTPUT_FORMAT}"
