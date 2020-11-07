@@ -18,6 +18,7 @@ extern "C" {
 #include <list>
 #include "config.h"
 #include "macro.h"
+#include "scm-generated.h"
 #include "Bridge.h"
 
 
@@ -25,24 +26,24 @@ extern "C" {
 class WebServer {
 
   public:
-  void begin();
-  void loop();
+  void begin(void);
+  void loop(void);
 
   static void setAuthentication(const char* username, const char* password);
   static void setBridge(Bridge* bridge);
   static void setFs(FS &fs);
 
   protected:
-  void _setup();
+  void _setup(void);
 
-  static const bool _isAllowed();
-  static void _handleAll();
-  static void _streamBrotli(const char* path, const bool isPublic=true);
+  static const bool _isAllowed(void);
+  static void _handleAll(void);
+  static void _streamHtml(const char* path, const bool isPublic=true);
   static void _streamJson(const char* path, const char* defaultValue, const bool isPublic=true);
   static void _sendRelayMessage(const Bridge::RelayMessage relay);
   static void _uploadJson(const char* path);
-  static void _readSerialJson();
-  static void _writeSerialJson();
+  static void _readSerialJson(void);
+  static void _writeSerialJson(void);
   static const size_t _getFileContents(const char* path, char* &buffer);
 };
 

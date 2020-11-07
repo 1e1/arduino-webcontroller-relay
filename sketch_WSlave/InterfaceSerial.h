@@ -12,11 +12,11 @@
 class InterfaceSerial : public AbstractStream {
 
   public:
-  void begin();
-  void loop();
+  void begin(void);
+  void loop(void);
 
   protected:
-  char _read();
+  char _read(void);
 
 };
 

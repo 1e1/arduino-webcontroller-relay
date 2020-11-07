@@ -1,15 +1,16 @@
 #!/bin/bash
 
 
-readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
-readonly BASE_DIR=$( dirname $BIN_DIR)
+readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
+source "$SCRIPT_DIR/_init.sh"
 
-readonly INPUT_HTML="$BIN_DIR/html/slave.html"
-readonly TEMP_HTML="$BIN_DIR/html/_slave.html"
-readonly TEMP_GZ="$BIN_DIR/html/_slave.gz"
-readonly TEMP_BR="$BIN_DIR/html/_slave.br"
-readonly OUTPUT_GZ_H="$BASE_DIR/sketch_WSlave/webApp-generated-gzip.h"
-readonly OUTPUT_BR_H="$BASE_DIR/sketch_WSlave/webApp-generated-brotli.h"
+
+readonly INPUT_HTML="${HTML_DIR}/slave.html"
+readonly TEMP_HTML="${HTML_DIR}/_slave.html"
+readonly TEMP_GZ="${HTML_DIR}/_slave.gz"
+readonly TEMP_BR="${HTML_DIR}/_slave.br"
+readonly OUTPUT_GZ_H="${SLAVE_DIR}/webApp-generated-gzip.h"
+readonly OUTPUT_BR_H="${SLAVE_DIR}/webApp-generated-brotli.h"
 
 readonly SED_BACKUP_EXT=".sed"
 

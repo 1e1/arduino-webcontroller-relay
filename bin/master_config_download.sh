@@ -1,14 +1,9 @@
 #!/bin/bash
 
 
-readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
-readonly BASE_DIR=$( dirname ${BIN_DIR})
+readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
+source "$SCRIPT_DIR/_init.sh"
 
-
-readonly DEFAULT_HOST="webrelay"
-readonly DEFAULT_BASEURL="/cfg/"
-
-readonly OUTPUT_DIR="$BASE_DIR/sketch_WMaster/dump/"
 
 INPUT_HOST="http://esp8266"
 INPUT_USER=""
@@ -38,12 +33,13 @@ curl \
     --basic \
     --user "${INPUT_USER}:${INPUT_PASSWORD}" \
     --silent \
-    > "${OUTPUT_DIR}/$1"
+    > "${MASTER_DUMP_DIR}/$1"
 
 }
 
 
 cat <<EOT
+
 
 download global.json
 ######
@@ -53,6 +49,7 @@ download_config g.json
 
 cat <<EOT
 
+
 download wifi.json
 ######
 EOT
@@ -60,6 +57,7 @@ download_config w.json
 
 
 cat <<EOT
+
 
 download relay.json
 ######
@@ -69,11 +67,12 @@ download_config r.json
 
 cat <<EOT
 
+
 download wiring.json
 ######
 EOT
 download_config p.json
 
 
-echo ls -lh $OUTPUT_DIR
-ls -lh $OUTPUT_DIR
+echo ls -lh $MASTER_DUMP_DIR
+ls -lh $MASTER_DUMP_DIR

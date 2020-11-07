@@ -1,18 +1,17 @@
 #!/bin/bash
 
 
-readonly BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
-readonly BASE_DIR=$( dirname $BIN_DIR)
+readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )
+source "$SCRIPT_DIR/_init.sh"
 
-TEMP_KEY="$BIN_DIR/html/_KEY.txt"
-TEMP_CSR="$BIN_DIR/html/_CSR.txt"
 
-readonly OUTPUT_H="$BASE_DIR/sketch_WMaster/certificate-generated.h"
-OUTPUT_KEY="$BASE_DIR/sketch_WMaster/data/_KEY.txt"
-OUTPUT_CSR="$BASE_DIR/sketch_WMaster/data/_CSR.txt"
+TEMP_KEY="$HTML_DIR/_KEY.txt"
+TEMP_CSR="$HTML_DIR/_CSR.txt"
 
-readonly DEFAULT_DNAME="webrelay"
-readonly DEFAULT_AP_IP="192.168.4.1"
+readonly OUTPUT_H="$MASTER_DIR/certificate-generated.h"
+OUTPUT_KEY="$MASTER_DATA_DIR/_KEY.txt"
+OUTPUT_CSR="$MASTER_DATA_DIR/_CSR.txt"
+
 
 INPUT_DNAME="esp8266"
 INPUT_KEYSIZE=2048
@@ -61,10 +60,9 @@ echo "cert file"
 ls -l $TEMP_CSR
 
 echo "write .h"
-echo "" >  $OUTPUT_H
 ########################################
 
-cat <<EOT >> $OUTPUT_H
+cat <<EOT > $OUTPUT_H
 #ifndef _certificate_H_
 #define _certificate_H_
 

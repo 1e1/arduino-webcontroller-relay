@@ -29,24 +29,24 @@ class Bridge {
   const RelayMessage mapRelayToPin(const uint8_t relayId, const uint8_t pinId);
   const RelayMessage isRelayNc(const uint8_t relayId, const bool isNc);
 
-  const std::list<RelayMessage> getRelays();
+  const std::list<RelayMessage> getRelays(void);
 
-  void save();
-  void reset();
-  void sleep();
-  void wakeup();
+  void save(void);
+  void reset(void);
+  void sleep(void);
+  void wakeup(void);
 
   protected:
   void _executeNone(String command);
   const RelayMessage _executeOne(String command);
   const std::list<RelayMessage> _executeAll(String command);
   const bool _write(String command);
-  const bool _hasMessageBegin();
-  const bool _seekMessageBegin();
-  const bool _hasMessageEnd();
-  const bool _seekMessageEnd();
-  const RelayMessage _read();
-  void _clear();
+  const bool _hasMessageBegin(void);
+  const bool _seekMessageBegin(void);
+  const bool _hasMessageEnd(void);
+  const bool _seekMessageEnd(void);
+  const RelayMessage _read(void);
+  void _clear(void);
 
   Stream* _currentStream = nullptr;
 };

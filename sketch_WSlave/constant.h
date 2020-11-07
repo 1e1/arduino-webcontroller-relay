@@ -30,7 +30,8 @@
 #define WS_ACL_ALLOW_RESET          1
 #define WS_ACL_ALLOW_SLEEP          2
 #define WS_ACL_ALLOW_LOCK           4
-#define WS_ACL_ALLOW_ALL            ( WS_ACL_ALLOW_RESET + WS_ACL_ALLOW_SLEEP + WS_ACL_ALLOW_LOCK )
+#define WS_ACL_ALLOW_ABOUT          8
+#define WS_ACL_ALLOW_ALL            ( WS_ACL_ALLOW_RESET + WS_ACL_ALLOW_SLEEP + WS_ACL_ALLOW_LOCK + WS_ACL_ALLOW_ABOUT )
 
 #define WS_STORAGE_NONE             0
 #define WS_STORAGE_EEPROM           1

@@ -13,13 +13,13 @@
 class InterfaceEthernet : public AbstractInterfaceWebApp {
 
   public:
-  InterfaceEthernet();
+  InterfaceEthernet(void);
 
-  void begin();
-  void loop();
+  void begin(void);
+  void loop(void);
 
   protected:
-  void _broadcast();
+  void _broadcast(void);
 
   uint8_t _cycleCounter;
   EthernetServer* _server;

@@ -14,8 +14,8 @@
 class AbstractInterfaceWebApp : public AbstractStream {
 
   public:
-  virtual void begin() {};
-  virtual void loop()  {};
+  virtual void begin(void) {};
+  virtual void loop(void)  {};
 
   protected:
   void _listen(Client* client);

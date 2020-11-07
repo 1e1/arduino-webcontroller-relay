@@ -14,13 +14,13 @@
 
 
 
-#define WM_CONFIG_KEY_PATH      "_KEY.txt"
-#define WM_CONFIG_CERT_PATH     "_CSR.txt"
-#define WM_CONFIG_GLOBAL_PATH   "global.json"
-#define WM_CONFIG_WIFI_PATH     "wifis.json"
-#define WM_CONFIG_RELAY_PATH    "relays.json"
-#define WM_WEB_INDEX_BASENAME   "index"
-#define WM_WEB_PORTAL_BASENAME  "portal"
+#define WM_CONFIG_KEY_PATH          "_KEY.txt"
+#define WM_CONFIG_CERT_PATH         "_CSR.txt"
+#define WM_CONFIG_GLOBAL_PATH       "global.json"
+#define WM_CONFIG_WIFI_PATH         "wifis.json"
+#define WM_CONFIG_RELAY_PATH        "relays.json"
+#define WM_WEB_INDEX_BASENAME       "index"
+#define WM_WEB_PORTAL_BASENAME      "portal"
 
 #define WM_WEB_PORT_DEFAULT         80
 #define WM_WEB_PORT_DEFAULT_SECURE  443

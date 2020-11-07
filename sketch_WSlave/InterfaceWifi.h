@@ -12,10 +12,10 @@
 class InterfaceWifi : public AbstractInterfaceWebApp {
 
   public:
-  InterfaceWifi();
+  InterfaceWifi(void);
 
-  void begin();
-  void loop();
+  void begin(void);
+  void loop(void);
 
   protected:
   WiFiServer* _server;

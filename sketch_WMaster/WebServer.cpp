@@ -78,7 +78,7 @@ void WebServer::setFs(FS &fs)
 void WebServer::_setup()
 {
   _server.on("/", HTTP_GET, []() {
-    WebServer::_streamBrotli(WM_WEB_INDEX_BASENAME "." WM_WEB_FILE_EXT, true);
+    WebServer::_streamHtml(WM_WEB_INDEX_BASENAME "." WM_WEB_FILE_EXT, true);
   }); 
 
   _server.on("/api/r", HTTP_GET, []() { 
@@ -86,7 +86,7 @@ void WebServer::_setup()
   });
 
   _server.on("/portal", HTTP_GET, []() {
-    WebServer::_streamBrotli(WM_WEB_PORTAL_BASENAME "." WM_WEB_FILE_EXT, false);
+    WebServer::_streamHtml(WM_WEB_PORTAL_BASENAME "." WM_WEB_FILE_EXT, false);
   });
 
   _server.on("/cfg/g", HTTP_GET, []() {
@@ -127,6 +127,10 @@ void WebServer::_setup()
       LOGLN(F("** RESTART **"));
       ESP.restart();
     }
+  });
+  
+  _server.on("/about", HTTP_GET, []() {
+    _server.send(200, "text/json", "{\"hash\":\"" SCM_HASH "\",\"date\":\"" SCM_DATE "\",\"chan\":\"" SCM_CHAN "\"}");
   });
   
   _server.onNotFound([](){
@@ -194,7 +198,7 @@ void WebServer::_handleAll()
 }
 
 
-void WebServer::_streamBrotli(const char* path, const bool isPublic)
+void WebServer::_streamHtml(const char* path, const bool isPublic)
 {
   if (isPublic || WebServer::_isAllowed()) {
     _server.sendHeader(String(PSTR("Content-Encoding")), String(PSTR(WM_WEB_FILE_EXT)));

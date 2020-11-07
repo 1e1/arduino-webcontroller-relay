@@ -89,7 +89,7 @@ void setup()
         LOGLN(wifi.ssid);
         WiFi.begin(wifi.ssid, wifi.password);
         
-        if (WiFi.waitForConnectResult(30000) == WL_CONNECTED) { // TODO constantize
+        if (WiFi.waitForConnectResult(WM_WIFI_CONNEXION_TIMEOUT_MS) == WL_CONNECTED) {
           break;
         }
     }
@@ -101,7 +101,7 @@ void setup()
         wifiMulti.addAP(wifi.ssid, wifi.password);
     }
     
-    if (wifiMulti.run(30000) == WL_CONNECTED) { // TODO constantize
+    if (wifiMulti.run(WM_WIFI_CONNEXION_TIMEOUT_MS) == WL_CONNECTED) {
       LOG(PSTR("connected at: ")); LOGLN(WiFi.SSID());
     }
     /* */

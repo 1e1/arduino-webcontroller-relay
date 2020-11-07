@@ -58,6 +58,12 @@ void Relay::save()
 }
 
 
+const bool Relay::exists(const uint8_t relayId)
+{
+    return relayId < Relay::optionsLength;
+}
+
+
 const uint8_t Relay::getPinAt(const uint8_t relayId)
 {
     return Relay::_options[relayId] & _MASK_PIN;

@@ -55,10 +55,13 @@
 // Wifi conf
 // =========================
 #ifndef WM_WIFI_SSID
-#define WM_WIFI_SSID        "HelloWorld"
+#define WM_WIFI_SSID                    "HelloWorld"
 #endif
 #ifndef WM_WIFI_PASSWORD
-//#define WM_WIFI_PASSWORD    "Open Sesame!"
+//#define WM_WIFI_PASSWORD              "Open Sesame!"
+#endif
+#ifndef WM_WIFI_CONNEXION_TIMEOUT_MS
+#define WM_WIFI_CONNEXION_TIMEOUT_MS    30000
 #endif
 // =========================
 

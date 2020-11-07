@@ -5,8 +5,8 @@
 class AbstractInterface {
 
   public:
-  virtual void begin() {};
-  virtual void loop()  {};
+  virtual void begin(void) {};
+  virtual void loop(void)  {};
 
 };
 
