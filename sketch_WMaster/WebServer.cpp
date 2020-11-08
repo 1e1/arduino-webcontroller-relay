@@ -21,8 +21,8 @@ static ESP8266WebServer _server(WM_WEB_PORT);
 
 static Bridge* _bridge;
 static fs::FS* _fs = nullptr;
-static const char* _username = NULL;
-static const char* _password = NULL;
+static char* _username = { '\0' };
+static char* _password = { '\0' };
 
 
 
@@ -47,10 +47,14 @@ void WebServer::loop()
 }
 
 
-void WebServer::setAuthentication(const char* username, const char* password)
+void WebServer::setAuthentication(String username, String password)
 {
-  _username = username;
-  _password = password;
+  _username = new char[username.length() + 1];
+  strcpy(_username, username.c_str());
+
+  _password = new char[password.length() + 1];
+  strcpy(_password, password.c_str());
+
   LOG("'"); LOG(_username); LOG("' : '"); LOG(_password); LOGLN("'");
 }
 
@@ -153,7 +157,7 @@ void WebServer::_setup()
 
 const bool WebServer::_isAllowed()
 {
-  if (_username != NULL && _password != NULL) {
+  if (_username[0] != '\0' && _password[0] != '\0') {
     if (!_server.authenticate(_username, _password)) {
       _server.requestAuthentication();
 

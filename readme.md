@@ -260,7 +260,7 @@ Example with a Wemos Mega Wifi, a board with a Arduino Mega and an Esp8266 linke
 Then, upload the Master sketch on the Arduino ESP part. 
 
 <ins>/!\\</ins> First I have to update my USB driver for this board: 
-![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)
+![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)/![download CH340](https://docs.wemos.cc/en/latest/ch340_driver.html)
 
 
 Set the switches 5-6-7 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))

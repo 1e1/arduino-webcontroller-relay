@@ -18,15 +18,15 @@ class Configuration {
   typedef enum { T_false=0, T_true=1, T_indeterminate=-1 } TriState;
 
   struct Acl {
-    char* username;
-    char* password;
+    String username;
+    String password;
     bool isSafeMode;
     bool canAutoRestart;
   };
 
   struct WifiAp {
-    char* ssid;
-    char* password;
+    String ssid;
+    String password;
     uint8_t channel: 4;
     bool isHidden;
   };
@@ -37,14 +37,14 @@ class Configuration {
   };
 
   struct WifiStation {
-    char* ssid;
-    char* password;
+    String ssid;
+    String password;
   };
 
   struct Relay {
     uint8_t id;
     TriState onConnect;
-    char* name;
+    String name;
   };
 
   Configuration(FS &fs);

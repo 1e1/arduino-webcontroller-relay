@@ -30,6 +30,7 @@ void setup()
 {
   Energy.free();
 
+  BUSYLED_INIT;
   BUSYLED_WORK;
   LOG_START();
   LOGLN(F("DEBUG ON"));

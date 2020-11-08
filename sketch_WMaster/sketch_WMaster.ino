@@ -10,13 +10,10 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
+//#include <ESP8266WiFiMulti.h>
 #include <ArduinoJson.h>
 #include <LittleFS.h>
-#include <Vector.h>
 //#include <fauxmoESP.h>
-#include <sys/time.h>
-#include <time.h>
 #include "config.h"
 #include "macro.h"
 #include "certificate-generated.h"
@@ -38,8 +35,9 @@ WebServer* server;
 
 void setup()
 {
+  BUSYLED_INIT;
   BUSYLED_WORK;
-  Serial.begin(WM_SERIAL_SPEED);
+  LOG_START();
   WAIT(1000);
   LOGLN(PSTR("DEBUG ON"));
 
@@ -48,6 +46,7 @@ void setup()
   /**
    * init
    */
+  WM_SERIAL.begin(WM_SERIAL_SPEED);
   LittleFS.begin();
   Bridge* bridge = new Bridge(WM_SERIAL);
   Configuration* configuration = new Configuration(LittleFS);
@@ -74,7 +73,7 @@ void setup()
   }
   LOGLN(PSTR("---"));
 
-  if (!acl.isSafeMode && !externalReset) {
+  if (!acl.isSafeMode) {
     /**
      * set mode Home Assistant
      * (Configuration*)
