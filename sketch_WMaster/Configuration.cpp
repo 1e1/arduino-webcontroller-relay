@@ -42,20 +42,18 @@ void Configuration::setSafeMode(const bool isSafeMode)
   if (isSafeMode) {
     Configuration::Global g {
       .acl = {
-        .username = NULL,
-        .password = NULL,
+        .username = "",
+        .password = "",
         .isSafeMode = true,
-        .canAutoRestart = false
+        .canAutoRestart = false,
       },
       .wifiAp = {
-        .ssid = new char[strlen(WM_WIFI_SSID)],
-        .password = NULL,
+        .ssid = WM_WIFI_SSID,
+        .password = {},
         .channel = 1,
-        .isHidden = false
+        .isHidden = false,
       }
     };
-
-    strcpy(g.wifiAp.ssid, WM_WIFI_SSID);
 
     this->_global = g;
   }
@@ -71,12 +69,9 @@ const std::list<Configuration::WifiStation> Configuration::getWifiStationList()
 
     for (JsonObject o : root) {
       Configuration::WifiStation wifi {
-        .ssid = new char[strlen(o["n"])],
-        .password = new char[strlen(o["p"])]
+        .ssid = o["n"].as<String>(),
+        .password = o["p"].as<String>(),
       };
-    
-      strcpy(wifi.ssid, o["n"]);
-      strcpy(wifi.password, o["p"]);
 
       wifiStationList.emplace_back(wifi);
     }
@@ -97,10 +92,8 @@ const std::list<Configuration::Relay> Configuration::getRelayList()
       Configuration::Relay relay {
         .id = o["i"].as<uint8_t>(),
         .onConnect = static_cast<TriState>(o["a"].as<int>()),
-        .name = new char[strlen(o["n"])]
+        .name = o["n"].as<String>(),
       };
-
-      strcpy(relay.name, o["n"]);
       
       relayList.emplace_back(relay);
     }
@@ -136,23 +129,18 @@ void Configuration::_loadGlobal()
   
   Configuration::Global g {
     .acl = {
-      .username = new char[strlen(root["u"])],
-      .password = new char[strlen(root["w"])],
+      .username = root["u"].as<String>(),
+      .password = root["w"].as<String>(),
       .isSafeMode = false,
-      .canAutoRestart = root["r"].as<bool>()
+      .canAutoRestart = root["r"].as<bool>(),
     },
     .wifiAp = {
-      .ssid = new char[strlen(root["n"])],
-      .password = new char[strlen(root["p"])],
+      .ssid = root["n"].as<String>(),
+      .password = root["p"].as<String>(),
       .channel = root["c"].as<uint8_t>(),
-      .isHidden = root["h"].as<bool>()
+      .isHidden = root["h"].as<bool>(),
     }
   };
-
-  strcpy(g.acl.username, root["u"]);
-  strcpy(g.acl.password, root["w"]);
-  strcpy(g.wifiAp.ssid, root["n"]);
-  strcpy(g.wifiAp.password, root["p"]);
 
   this->_global = g;
 }

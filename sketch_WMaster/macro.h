@@ -21,18 +21,20 @@
 
 
 
-#if !(WM_LOWPOWER & WM_LOWPOWER_NO_LED)
+#if WM_USE_LED
   #if defined(LED_BUILTIN) && !defined(WM_LOG_LED)
     #define WM_LOG_LED LED_BUILTIN
   #endif
 #endif
 
 #ifdef WM_LOG_LED
+  #define BUSYLED_INIT pinMode(WM_LOG_LED, OUTPUT)
   #define BUSYLED_HIGH analogWrite(WM_LOG_LED, 255)
   #define BUSYLED_WORK analogWrite(WM_LOG_LED, 63)
   #define BUSYLED_IDLE analogWrite(WM_LOG_LED, 15)
   #define BUSYLED_NONE analogWrite(WM_LOG_LED, 0)
 #else
+  #define BUSYLED_INIT
   #define BUSYLED_HIGH
   #define BUSYLED_WORK
   #define BUSYLED_IDLE

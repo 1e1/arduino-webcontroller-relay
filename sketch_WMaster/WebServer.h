@@ -29,7 +29,7 @@ class WebServer {
   void begin(void);
   void loop(void);
 
-  static void setAuthentication(const char* username, const char* password);
+  static void setAuthentication(String username, String password);
   static void setBridge(Bridge* bridge);
   static void setFs(FS &fs);
 

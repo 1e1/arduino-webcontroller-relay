@@ -28,11 +28,13 @@
 #endif
 
 #ifdef WS_LOG_LED
+  #define BUSYLED_INIT pinMode(WS_LOG_LED, OUTPUT)
   #define BUSYLED_HIGH analogWrite(WS_LOG_LED, 255)
   #define BUSYLED_WORK analogWrite(WS_LOG_LED, 63)
   #define BUSYLED_IDLE analogWrite(WS_LOG_LED, 15)
   #define BUSYLED_NONE analogWrite(WS_LOG_LED, 0)
 #else
+  #define BUSYLED_INIT
   #define BUSYLED_HIGH
   #define BUSYLED_WORK
   #define BUSYLED_IDLE
