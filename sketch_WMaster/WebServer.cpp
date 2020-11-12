@@ -144,11 +144,19 @@ void WebServer::_setup()
   });
 
   #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
-  LOGLN("configure Certificate");
-  //WebServer::_getFileContents(WM_CONFIG_KEY_PATH, _serverKey);
-  //WebServer::_getFileContents(WM_CONFIG_CERT_PATH, _serverCert);
+  LOG(PSTR("certificate "));
+  //WebServer::_getFileContents(WS_CONFIG_KEY_PATH, _serverKey);
+  //WebServer::_getFileContents(WS_CONFIG_CERT_PATH, _serverCert);
 
-  _server.getServer().setRSACert(new BearSSL::X509List(certificate::serverCert), new BearSSL::PrivateKey(certificate::serverKey));
+  if (certificate::serverCertType == certificate::CertType::CT_ECC) {
+    LOGLN(PSTR("ECC"));
+    _server.getServer().setECCert(new BearSSL::X509List(certificate::serverCert), BR_KEYTYPE_KEYX|BR_KEYTYPE_SIGN, new BearSSL::PrivateKey(certificate::serverKey));
+  } else if(certificate::serverCertType == certificate::CertType::CT_RSA) {
+    LOGLN(PSTR("RSA"));
+    _server.getServer().setRSACert(new BearSSL::X509List(certificate::serverCert), new BearSSL::PrivateKey(certificate::serverKey));
+  } else {
+    LOGLN(PSTR("ERROR"));
+  }
   #endif
 
   _server.begin();

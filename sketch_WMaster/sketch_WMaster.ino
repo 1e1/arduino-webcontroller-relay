@@ -73,6 +73,8 @@ void setup()
   }
   LOGLN(PSTR("---"));
 
+  WiFi.hostname(certificate::dname);
+  
   if (!acl.isSafeMode) {
     /**
      * set mode Home Assistant
