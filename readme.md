@@ -71,14 +71,14 @@ Read the ![swagger](./doc/swagger-slave.yml)
 ##### HTTP
 
 - go to `http://webrelay.local/m/7/42`
-- go to `http://webrelay.local/c/7` if it's a NC wired (`http://webrelay.local/o/7` otherwise)
+- go to `http://webrelay.local/c/7/1` if it's a NC wired (`http://webrelay.local/c/7/0` otherwise)
 - go to `http://webrelay.local/w/7/1` if you want switch ON now (`http://webrelay.local/w/7/0`otherwise)
 - go to `http://webrelay.local/r/7` to check
 
 ##### Serial
 
 - Send `/m/7/42`
-- Send `/c/7` if it's a NC wired (`/o/7` otherwise)
+- Send `/c/7/1` if it's a NC wired (`/o/7/0` otherwise)
 - Send `/w/7/1` if you want switch ON now (`/w/7/0`otherwise)
 - Send `/r/7` to check
 - Tips: use `/` to wakeup
