@@ -15,7 +15,7 @@
 class Configuration {
 
   public:
-  typedef enum { T_false=0, T_true=1, T_indeterminate=-1 } TriState;
+  typedef enum { T_indeterminate=-1, T_false=0, T_true=1 } TriState;
 
   struct Acl {
     String username;
