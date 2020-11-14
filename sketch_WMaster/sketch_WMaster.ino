@@ -36,8 +36,6 @@ WebServer* server;
 void setup()
 {
   BUSYLED_INIT;
-  BUSYLED_WORK;
-  LOG_START();
   WAIT(1000);
   LOGLN(PSTR("DEBUG ON"));
 
@@ -54,8 +52,8 @@ void setup()
   pinMode(WM_PIN_CONFIG, INPUT_PULLUP);
   pinMode(WM_PIN_SAFEMODE, INPUT_PULLUP);
 
-  bool isUnlocked = digitalRead(WM_PIN_CONFIG) == HIGH;
-  bool isSafeMode = digitalRead(WM_PIN_SAFEMODE) == HIGH;
+  bool isUnlocked = digitalRead(WM_PIN_CONFIG) == LOW;
+  bool isSafeMode = digitalRead(WM_PIN_SAFEMODE) == LOW;
   bool externalReset = ESP.getResetInfoPtr()->reason == rst_reason::REASON_EXT_SYS_RST;
 
   LOG("isUnlocked="); LOGLN(isUnlocked);
@@ -74,13 +72,13 @@ void setup()
   LOGLN(PSTR("---"));
 
   WiFi.hostname(certificate::dname);
-  
+
   if (!acl.isSafeMode) {
     /**
      * set mode Home Assistant
      * (Configuration*)
      */
-    BUSYLED_IDLE;
+    BUSYLED_ON;
     LOGLN(PSTR("-- trying to connect to STA:"));
 
     /* */
@@ -107,6 +105,7 @@ void setup()
     }
     /* */
     LOGLN(PSTR("---"));
+    BUSYLED_OFF;
   }
 
   std::list<Configuration::Relay> relayList = configuration->getRelayList();
@@ -135,12 +134,12 @@ void setup()
       /**
        * stalk connected devices and switch sensitive relays
        */
-      BUSYLED_IDLE;
       LOGLN(PSTR("trying to detect connected devices"));
 
-      delay(30); // TODO 30s = 30000
+      delay(WM_WIFI_CONNEXION_TIMEOUT_MS);
       if (WiFi.softAPgetStationNum()) {
         LOGLN(PSTR("OK, run Relay commands:"));
+        BUSYLED_ON;
 
         for (Configuration::Relay relay : relayList) {
           if (relay.onConnect != Configuration::T_indeterminate) {
@@ -148,6 +147,8 @@ void setup()
             bridge->setRelay(relay.id, static_cast<bool>(relay.onConnect));
           }
         }
+
+        BUSYLED_OFF;
       }
 
       LOGLN(PSTR("---"));
@@ -180,7 +181,7 @@ void setup()
   MDNS.addService(WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES ? "https" : "http", "tcp", WM_WEB_PORT);
   LOGLN(PSTR("---"));
 
-  BUSYLED_NONE;
+  BUSYLED_OFF;
 }
 
 

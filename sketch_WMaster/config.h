@@ -20,6 +20,9 @@
 #ifndef WS_LOG_LEVEL
 #define WS_LOG_LEVEL        WM_LOG_LEVEL_ALL
 #endif
+#ifndef WM_USE_LED
+#define WM_USE_LED          0
+#endif
 // =========================
 
 

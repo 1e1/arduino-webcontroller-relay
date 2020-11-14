@@ -261,7 +261,7 @@ void WebServer::_uploadJson(const char* path)
       }
     }
 
-    WebServer::_streamJson(path, "null");
+    WebServer::_streamJson(path);
   }
 }
 

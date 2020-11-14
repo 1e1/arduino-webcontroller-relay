@@ -7,8 +7,8 @@
 
 // board metadata
 // =========================
-#define WM_PIN_SAFEMODE     A0 /* RXD */
-#define WM_PIN_CONFIG       A0 /* GPIO12 */
+#define WM_PIN_SAFEMODE     D2 /* GPIO4 */
+#define WM_PIN_CONFIG       D1 /* GPIO5 */
 #define WM_RELAY_NB_MAX     32
 #define WM_LOG_LEVEL        WM_LOG_LEVEL_OFF
 // =========================

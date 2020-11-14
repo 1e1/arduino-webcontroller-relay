@@ -304,7 +304,7 @@ Use a separate Wemos D1 mini and a standard Arduino Mega.
 ![app SerialTools](./doc/serialtools.png)
 
 
-A video explain how to upload the sketches on an Arduino Mega ESP8266
+A video explains how to upload the sketches on an Arduino Mega ESP8266
 [![HOWTO on YouTube](https://i.ytimg.com/vi_webp/7OckOeyoso8/maxresdefault.webp)](https://www.youtube.com/watch?v=7OckOeyoso8)
 
 Backup a configuration into `./sketch_WMaster/dump/` with `./bin/master_config_download.sh`, 
