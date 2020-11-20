@@ -17,7 +17,7 @@ INPUT_DNAME="esp8266"
 INPUT_KEYSIZE=2048
 INPUT_DURATION=$((25*365))
 INPUT_EMAIL="root@localhost"
-INPUT_TYPE="ecc"
+INPUT_TYPE="ECC"
 
 INPUT_COUNTRY="FR"
 INPUT_REGION="BZH"
@@ -35,7 +35,7 @@ do
         n) INPUT_DNAME=${OPTARG};;
         p) INPUT_PASSWORD=${OPTARG};;
         s) INPUT_KEYSIZE=${OPTARG};;
-        t) INPUT_TYPE=`echo ${OPTARG} | tr '[:upper:]' '[:lower:]'`;;
+        t) INPUT_TYPE=${OPTARG};;
     esac
 done
 
@@ -79,6 +79,7 @@ openssl req \
 
 
 
+INPUT_TYPE=`echo ${INPUT_TYPE} | tr '[:lower:]' '[:upper:]'`
 case "${INPUT_TYPE}" in
     RSA) gen_rsa;;
     *) gen_ecc;;
