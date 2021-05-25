@@ -21,8 +21,8 @@ static ESP8266WebServer _server(WM_WEB_PORT);
 
 static Bridge* _bridge;
 static fs::FS* _fs = nullptr;
-static char* _username = { '\0' };
-static char* _password = { '\0' };
+static char* _username = new char[1]; // { '\0' };
+static char* _password = new char[1]; // { '\0' };
 
 
 
