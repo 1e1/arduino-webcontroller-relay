@@ -18,22 +18,23 @@
 class AbstractStream : public AbstractInterface {
 
   public:
-  bool read(void);
+  const bool read(void);
   void process(void);
-  void terminate(void);
+  void terminate(void) const;
 
   // inline
   __attribute__((always_inline)) inline void setStream(Stream* inputStream) { this->_currentStream = inputStream; };
 
   protected:
-  void _printData(const uint8_t data);
-  void _printOne(const uint8_t relay);
-  void _printAbout(void);
-  void _printAll(void);
+  void _printData(const uint8_t data) const;
+  void _printOne(const uint8_t relay) const;
+  void _printAbout(void) const;
+  void _printLength(void) const;
+  void _printAll(void) const;
 
-  bool _findUntil(const int terminator, size_t length);
-  uint8_t _parseInt(void);
-  virtual char _read(void);
+  bool _findUntil(const int terminator, size_t length) const;
+  uint8_t _parseInt(void) const;
+  virtual const char _read(void) const;
 
   Stream* _currentStream;
 

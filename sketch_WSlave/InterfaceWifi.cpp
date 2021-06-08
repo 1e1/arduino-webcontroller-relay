@@ -43,7 +43,7 @@ InterfaceWifi::InterfaceWifi()
 
 
 
-void InterfaceWifi::begin()
+void InterfaceWifi::begin() const
 {
   this->_server->begin();
 }

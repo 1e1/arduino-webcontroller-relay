@@ -7,10 +7,11 @@
 
 // board metadata
 // =========================
-#define WM_PIN_SAFEMODE     D2 /* GPIO4 */
-#define WM_PIN_CONFIG       D1 /* GPIO5 */
+#define WM_PIN_SAFEMODE     4 /* D2 /* GPIO4 */
+#define WM_PIN_CONFIG       5 /* D1 /* GPIO5 */
 #define WM_RELAY_NB_MAX     32
 #define WM_LOG_LEVEL        WM_LOG_LEVEL_OFF
+#define WM_COMPONENT        ( WM_COMPONENT_MDNS + WM_COMPONENT_API )
 // =========================
 
 
@@ -23,9 +24,7 @@
 
 // WEB conf
 // =========================
-#define WM_WEB_PORT             WM_WEB_PORT_DEFAULT_SECURE
 #define WM_WEB_SERVER_SECURE    WM_WEB_SERVER_SECURE_YES
-#define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_BR
 // =========================
 
 

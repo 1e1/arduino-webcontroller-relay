@@ -1,5 +1,5 @@
-#ifndef constants_H_
-#define constants_H_
+#ifndef constant_H_
+#define constant_H_
 
 
 /* mode */
@@ -14,7 +14,8 @@
 #define WS_VERBOSE_HELP             1
 #define WS_VERBOSE_LIST             2
 #define WS_VERBOSE_WEBAPP           4
-#define WS_VERBOSE_ALL              ( WS_VERBOSE_HELP + WS_VERBOSE_LIST + WS_VERBOSE_WEBAPP )
+#define WS_VERBOSE_LENGTH           8
+#define WS_VERBOSE_ALL              ( WS_VERBOSE_HELP + WS_VERBOSE_LIST + WS_VERBOSE_WEBAPP + WS_VERBOSE_LENGTH)
 
 #define WS_WIRING_RELAY_NO          0
 #define WS_WIRING_RELAY_NC          1
@@ -72,6 +73,7 @@
 
 
 #define WS_ACTION_ALL          '$'
+#define WS_ACTION_LENGTH       '#'
 #define WS_ACTION_READ         'r'
 #define WS_ACTION_WRITE        'w'
 #define WS_ACTION_MAP          'm'
@@ -81,6 +83,7 @@
 #define WS_ACTION_SAVE         '!'
 #define WS_ACTION_RESET        '~'
 #define WS_ACTION_SLEEP        '.'
+#define WS_ACTION_ABOUT        '?'
 
 
 
@@ -104,4 +107,4 @@
 #define WS_HEADER_WAKEUP_F          "HTTP/1.0 204" WS_CRLF WS_CRLF
  
 
-#endif // constants_H_
+#endif // constant_H_

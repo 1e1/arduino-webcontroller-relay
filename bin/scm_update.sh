@@ -2,12 +2,14 @@
 
 
 readonly SCRIPT_DIR=$( cd "$( dirname $(realpath "${BASH_SOURCE[0]}") )" >/dev/null && pwd )
-source "$(dirname $SCRIPT_DIR)/_init.sh"
+source "${SCRIPT_DIR}/_init.sh"
 
+
+repo=$(git remote -v | grep '^origin\b.*\bpush)$' | awk '{ print $2 }')
 
 #=== 'prev-commit' solution by o_O Tync
 #commit_hash=$(git rev-parse --verify HEAD)
-commit=$(git log -1 --pretty="%H%n%ci") # hash \n date
+commit=$(git log -1 --pretty="%H%n%cI") # hash \n date
 commit_hash=$(echo "$commit" | head -1)
 commit_date=$(echo "$commit" | head -2 | tail -1) # 2010-12-28 05:16:23 +0300
 
@@ -21,6 +23,7 @@ cat <<EOT > "$MASTER_DIR/scm-generated.h"
 #ifndef _scminfo_H_
 #define _scminfo_H_
 
+#define SCM_REPO "$repo"
 #define SCM_HASH "$commit_hash"
 #define SCM_DATE "$commit_date"
 #define SCM_CHAN "$branch_name"
@@ -34,6 +37,7 @@ cat <<EOT > "$SLAVE_DIR/scm-generated.h"
 #ifndef _scminfo_H_
 #define _scminfo_H_
 
+#define SCM_REPO "$repo"
 #define SCM_HASH "$commit_hash"
 #define SCM_DATE "$commit_date"
 #define SCM_CHAN "$branch_name"

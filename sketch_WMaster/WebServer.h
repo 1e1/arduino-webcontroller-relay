@@ -37,10 +37,12 @@ class WebServer {
   void _setup(void);
 
   static const bool _isAllowed(void);
-  static void _handleAll(void);
-  static void _streamHtml(const char* path, const bool isPublic=true);
-  static void _streamJson(const char* path, const char* defaultValue="null", const bool isPublic=true);
-  static void _sendRelayMessage(const Bridge::RelayMessage relay);
+  static void _handleCfg(void);
+  static void _handleApi(void);
+  static void _uploadAndStreamJson(const char* path, const char* defaultValue="null", const bool isUpload=false);
+  static void _streamHtml(const char* path);
+  static void _streamJson(const char* path, const char* defaultValue="null");
+  static void _sendRelayMessage(const Bridge::RelayMessage* relay);
   static void _uploadJson(const char* path);
   static void _readSerialJson(void);
   static void _writeSerialJson(void);

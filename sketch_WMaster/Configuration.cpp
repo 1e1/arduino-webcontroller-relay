@@ -42,8 +42,8 @@ void Configuration::setSafeMode(const bool isSafeMode)
   if (isSafeMode) {
     Configuration::Global g {
       .acl = {
-        .username = "",
-        .password = "",
+        .username = emptyString,
+        .password = emptyString,
         .isSafeMode = true,
         .canAutoRestart = false,
       },
@@ -60,12 +60,11 @@ void Configuration::setSafeMode(const bool isSafeMode)
 }
 
 
-const std::list<Configuration::WifiStation> Configuration::getWifiStationList()
+const std::list<Configuration::WifiStation> Configuration::getWifiStationList() const
 {
   std::list<Configuration::WifiStation> wifiStationList;
   if (_fs->exists(WM_CONFIG_WIFI_PATH)) {
-    DynamicJsonDocument doc = this->_open(WM_CONFIG_WIFI_PATH);
-    JsonArray root = doc.as<JsonArray>();
+    JsonArray root = this->_open(WM_CONFIG_WIFI_PATH)->as<JsonArray>();
 
     for (JsonObject o : root) {
       Configuration::WifiStation wifi {
@@ -81,12 +80,11 @@ const std::list<Configuration::WifiStation> Configuration::getWifiStationList()
 }
 
 
-const std::list<Configuration::Relay> Configuration::getRelayList()
+const std::list<Configuration::Relay> Configuration::getRelayList() const
 {
   std::list<Configuration::Relay> relayList;
   if (_fs->exists(WM_CONFIG_RELAY_PATH)) {
-    DynamicJsonDocument doc = this->_open(WM_CONFIG_RELAY_PATH);
-    JsonArray root = doc.as<JsonArray>();
+    JsonArray root = this->_open(WM_CONFIG_RELAY_PATH)->as<JsonArray>();
 
     for (JsonObject o : root) {
       Configuration::Relay relay {
@@ -111,12 +109,13 @@ const std::list<Configuration::Relay> Configuration::getRelayList()
 
 
 
-DynamicJsonDocument Configuration::_open(const char* filename)
+JsonDocument* Configuration::_open(const char* filename) const
 {
   File file = _fs->open(filename, "r"); // "w+"
-  DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
-  deserializeJson(doc, file, DeserializationOption::NestingLimit(2));
+  DynamicJsonDocument* doc = new DynamicJsonDocument(WM_CONFIG_BUFFER_SIZE);
+  deserializeJson(*doc, file, DeserializationOption::NestingLimit(2));
   file.close();
+  doc->shrinkToFit();
 
   return doc;
 }
@@ -124,8 +123,7 @@ DynamicJsonDocument Configuration::_open(const char* filename)
 
 void Configuration::_loadGlobal()
 {
-  DynamicJsonDocument doc = this->_open(WM_CONFIG_GLOBAL_PATH);
-  JsonObject root = doc.as<JsonObject>();
+  JsonObject root = this->_open(WM_CONFIG_GLOBAL_PATH)->as<JsonObject>();
   
   Configuration::Global g {
     .acl = {

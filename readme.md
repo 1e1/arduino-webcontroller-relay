@@ -28,6 +28,9 @@ Edit `./sketch_WSlave/_config.h`
 
 Standard no-REST routes:
 
+- **$**: `/#`
+  number of relays if `WS_VERBOSE = WS_VERBOSE_LENGTH`
+
 - **$**: `/$`
   full status list of all pins if `WS_VERBOSE = WS_VERBOSE_LIST`
 

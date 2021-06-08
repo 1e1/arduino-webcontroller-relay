@@ -11,18 +11,26 @@
 
 #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
 static BearSSL::ESP8266WebServerSecure _server(WM_WEB_PORT);
-//static char* _serverKey;
-//static char* _serverCert;
+static BearSSL::ServerSessions _serverCache(WM_WEB_SERVER_CACHE_SIZE);
 
 #else
 static ESP8266WebServer _server(WM_WEB_PORT);
 #endif
 
 
+static const char TEXT_HTML[] PROGMEM = "text/html";
+static const char TEXT_JSON[] PROGMEM = "text/json";
+static const char PLAIN[] PROGMEM = "plain";
+
 static Bridge* _bridge;
 static fs::FS* _fs = nullptr;
 static char* _username = new char[1]; // { '\0' };
 static char* _password = new char[1]; // { '\0' };
+
+static constexpr const char _jsonLine[] = "{\"i\":##,\"s\":#,\"l\":#,\"p\":##,\"n\":#}";
+static const size_t _jsonLineLength = strlen(_jsonLine);
+
+static String _relayMessages;
 
 
 
@@ -55,7 +63,7 @@ void WebServer::setAuthentication(String username, String password)
   _password = new char[password.length() + 1];
   strcpy(_password, password.c_str());
 
-  LOG("'"); LOG(_username); LOG("' : '"); LOG(_password); LOGLN("'");
+  LOG("'"); LOG(_username); LOG(F("' : '")); LOG(_password); LOGLN("'");
 }
 
 
@@ -81,81 +89,64 @@ void WebServer::setFs(FS &fs)
 
 void WebServer::_setup()
 {
+  #if WM_COMPONENT & WM_COMPONENT_API
   _server.on("/", HTTP_GET, []() {
-    WebServer::_streamHtml(WM_WEB_INDEX_BASENAME "." WM_WEB_FILE_EXT, true);
+    WebServer::_streamHtml(WM_WEB_INDEX_BASENAME "." WM_WEB_FILE_EXT);
   }); 
 
   _server.on("/api/r", HTTP_GET, []() { 
-    WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", true); 
+    WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]"); 
   });
+  #endif
 
   _server.on("/portal", HTTP_GET, []() {
-    WebServer::_streamHtml(WM_WEB_PORTAL_BASENAME "." WM_WEB_FILE_EXT, false);
-  });
-
-  _server.on("/cfg/g", HTTP_GET, []() {
-    WebServer::_streamJson(WM_CONFIG_GLOBAL_PATH, "{}", false);
-  });
-
-  _server.on("/cfg/g", HTTP_POST, []() {
-    WebServer::_uploadJson(WM_CONFIG_GLOBAL_PATH);
-  });
-
-  _server.on("/cfg/w", HTTP_GET, []() { 
-    WebServer::_streamJson(WM_CONFIG_WIFI_PATH, "[]", false);
-  });
-
-  _server.on("/cfg/w", HTTP_POST, []() {
-    WebServer::_uploadJson(WM_CONFIG_WIFI_PATH);
-  });
-
-  _server.on("/cfg/r", HTTP_GET, []() { 
-    WebServer::_streamJson(WM_CONFIG_RELAY_PATH, "[]", false);
-  });
-
-  _server.on("/cfg/r", HTTP_POST, []() {
-    WebServer::_uploadJson(WM_CONFIG_RELAY_PATH);
-  });
-  
-  _server.on("/cfg/p", HTTP_GET, []() { 
-    WebServer::_readSerialJson(); 
-  });
-
-  _server.on("/cfg/p", HTTP_POST, []() {
-    WebServer::_writeSerialJson();
-  });
-  
-  _server.on("/cfg/reboot", HTTP_DELETE, []() {
     if (WebServer::_isAllowed()) {
-      _server.send(200, "text/json", "\"reboot\"");
-      LOGLN(F("** RESTART **"));
-      ESP.restart();
+      WebServer::_streamHtml(WM_WEB_PORTAL_BASENAME "." WM_WEB_FILE_EXT);
     }
   });
   
   _server.on("/about", HTTP_GET, []() {
-    _server.send(200, "text/json", "{\"hash\":\"" SCM_HASH "\",\"date\":\"" SCM_DATE "\",\"chan\":\"" SCM_CHAN "\"}");
+    _server.sendHeader(F("X-Heap"), String(ESP.getFreeHeap()));
+    _server.send(
+      200, 
+      FPSTR(TEXT_JSON), 
+      F("{\"repo\":\"" SCM_REPO "\",\"hash\":\"" SCM_HASH "\",\"date\":\"" SCM_DATE "\",\"chan\":\"" SCM_CHAN "\"}")
+    );
   });
   
   _server.onNotFound([](){
-    LOGLN("handle NotFound");
-    WebServer::_handleAll();
-    //_server.send(404, "text/plain", "It is not the page your are looking for");
+    #if WM_COMPONENT & WM_COMPONENT_API
+    switch (_server.uri().charAt(1)) {
+      case 'a':
+        LOGLN(F("handle API"));
+        return WebServer::_handleApi();
+      case 'c': 
+        LOGLN(F("handle Cfg"));
+        return WebServer::_handleCfg();
+    }
+
+    LOGLN(F("handle NotFound"));
+    
+    _server.send(404);
+
+    #else
+    return WebServer::_handleCfg();
+    #endif
   });
 
   #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
-  LOG(PSTR("certificate "));
-  //WebServer::_getFileContents(WS_CONFIG_KEY_PATH, _serverKey);
-  //WebServer::_getFileContents(WS_CONFIG_CERT_PATH, _serverCert);
+  LOG(F("certificate "));
+  //_server.getServer().setNoDelay(true);
+  _server.getServer().setCache(&_serverCache);
 
   if (certificate::serverCertType == certificate::CertType::CT_ECC) {
-    LOGLN(PSTR("ECC"));
+    LOGLN(F("ECC"));
     _server.getServer().setECCert(new BearSSL::X509List(certificate::serverCert), BR_KEYTYPE_KEYX|BR_KEYTYPE_SIGN, new BearSSL::PrivateKey(certificate::serverKey));
   } else if(certificate::serverCertType == certificate::CertType::CT_RSA) {
-    LOGLN(PSTR("RSA"));
+    LOGLN(F("RSA"));
     _server.getServer().setRSACert(new BearSSL::X509List(certificate::serverCert), new BearSSL::PrivateKey(certificate::serverKey));
   } else {
-    LOGLN(PSTR("ERROR"));
+    LOGLN(F("ERROR"));
   }
   #endif
 
@@ -177,162 +168,226 @@ const bool WebServer::_isAllowed()
 }
 
 
-void WebServer::_handleAll()
+void WebServer::_handleCfg()
 {
-  const char *uri = _server.uri().c_str();
-  const char *prefixUrl = PSTR("/api/r/");
+  if (!WebServer::_isAllowed()) {
+    return;
+  }
 
-  if (strncmp_P(uri, prefixUrl, strlen_P(prefixUrl)) == 0) {
-    uri += strlen_P(prefixUrl); // skip the prefixUrl and get to the relayId
-    const uint8_t relayId = atoi(uri);
+  String uri = _server.uri();
+  if (uri.startsWith(F("/cfg/"))) {
+    uri.remove(0, String("/cfg/").length());
+
+    if (_server.method() == HTTP_DELETE && uri.equals(F("reboot"))) {
+      _server.send(200, FPSTR(TEXT_JSON), F("\"reboot\""));
+      LOGLN(F("** RESTART **"));
+      ESP.restart();
+    }
+
+    const char cfg = uri.charAt(0);
+    const bool isPost = _server.method() == HTTP_POST;
+
+    switch (cfg) {
+      case 'g':
+        return _uploadAndStreamJson(WM_CONFIG_GLOBAL_PATH, "{}", isPost);
+
+      case 'r':
+        return _uploadAndStreamJson(WM_CONFIG_RELAY_PATH, "[]", isPost);
+
+      case 'w':
+        return _uploadAndStreamJson(WM_CONFIG_WIFI_PATH, "[]", isPost);
+
+      case 'p':
+        if (isPost) {
+          WebServer::_writeSerialJson();
+          yield();
+        }
+        
+        return WebServer::_readSerialJson();
+    }
+  }
+
+  _server.send(404);
+}
+
+
+void WebServer::_handleApi()
+{
+  String uri = _server.uri();
+  if (uri.startsWith(F("/api/r/"))) {
+    uri.remove(0, String("/api/r/").length());
+    const uint8_t relayId = uri.toInt();
     
     switch (_server.method()) {
       case HTTP_GET:
-        return WebServer::_sendRelayMessage(_bridge->getRelay(relayId));
+        return _bridge->getRelay(relayId)
+          ? WebServer::_sendRelayMessage(_bridge->getCurrentRelayMessage())
+          : _server.send(500);
+          ;
 
       case HTTP_PUT:
-        if (_server.hasArg("plain")) {
-          String payload = _server.arg("plain");
-          DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
-          auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
-          LOGLN(payload);
+        if (!_server.hasArg(FPSTR(PLAIN))) {
+          return _server.send(400);
+        }
+        
+        String payload = _server.arg(FPSTR(PLAIN));
+        StaticJsonDocument<WM_API_BUFFER_SIZE> jsonBuffer;
+        auto error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
+        LOGLN(payload);
+        
+        if (!error) {
+          const bool state = jsonBuffer["s"].as<bool>();
           
-          if (!error) {
-            const bool state = doc["s"].as<bool>();
-            
-            return WebServer::_sendRelayMessage(_bridge->setRelay(relayId, state));
+          if (_bridge->setRelay(relayId, state)) {
+            WebServer::_sendRelayMessage(_bridge->getCurrentRelayMessage());
           }
         }
+
+        return _server.send(500);
     }
   }
 
-  return _server.send(404, "text/plain", String(PSTR("It is not the page your are looking for")));
+  _server.send(404);
 }
 
 
-void WebServer::_streamHtml(const char* path, const bool isPublic)
+void WebServer::_uploadAndStreamJson(const char* path, const char* defaultValue, const bool isUpload)
 {
-  if (isPublic || WebServer::_isAllowed()) {
-    _server.sendHeader(String(PSTR("Content-Encoding")), String(PSTR(WM_WEB_FILE_EXT)));
-    _server.sendHeader(String(PSTR("Cache-Control")), String(PSTR("max-age=86400")));
-
-    File file = _fs->open(path, "r");
-    _server.streamFile(file, "text/html");
-    file.close();
-  }
-}
-
-
-void WebServer::_streamJson(const char* path, const char* defaultValue, const bool isPublic)
-{
-  if (isPublic || WebServer::_isAllowed()) {
-    if (_fs->exists(path)) {
-      File file = _fs->open(path, "r");
-      _server.streamFile(file, "text/json");
-      file.close();
-
-      return;
-    }
+  if (isUpload) {
+    WebServer::_uploadJson(path);
+    yield();
   }
 
-  _server.send(200, "text/json", defaultValue);
+  WebServer::_streamJson(path, defaultValue);
 }
 
 
-void WebServer::_sendRelayMessage(const Bridge::RelayMessage relay)
+void WebServer::_streamHtml(const char* path)
 {
-  _server.send(200, "text/json", String("{\"s\":") + String(relay.state) + String("}"));
+  _server.sendHeader(F("Content-Encoding"), F(WM_WEB_FILE_EXT));
+  _server.sendHeader(F("Cache-Control"), F("max-age=86400"));
+
+  File file = _fs->open(path, "r");
+  _server.streamFile(file, FPSTR(TEXT_HTML));
+  file.close();
+}
+
+
+void WebServer::_streamJson(const char* path, const char* defaultValue)
+{
+  if (!_fs->exists(path)) {
+    return _server.send(200, FPSTR(TEXT_JSON), defaultValue);
+  }
+
+  File file = _fs->open(path, "r");
+  _server.streamFile(file, FPSTR(TEXT_JSON));
+  file.close();
+}
+
+
+void WebServer::_sendRelayMessage(const Bridge::RelayMessage* relay)
+{
+  if (!relay->isOk) {
+    return _server.send(500);
+  }
+
+  _server.send(200, FPSTR(TEXT_JSON), relay->state ? F("{\"s\":1}") : F("{\"s\":0}"));
 }
 
 
 void WebServer::_uploadJson(const char* path)
 {
-  if (WebServer::_isAllowed()) {
-    if (_server.hasArg("plain")) {
-      String payload = _server.arg("plain");
-      DynamicJsonDocument doc(WM_CONFIG_BUFFER_SIZE);
-      auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
-      LOGLN(payload);
-      
-      if (!error) {
-        File file = _fs->open(path, "w");
-        serializeJson(doc, file);
-        file.close();
-      }
-    }
+  if (!_server.hasArg(FPSTR(PLAIN))) {
+    return _server.send(400);
+  }
 
-    WebServer::_streamJson(path);
+  String payload = _server.arg(FPSTR(PLAIN));
+  DynamicJsonDocument jsonBuffer(WM_CONFIG_BUFFER_SIZE);
+  auto error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
+  LOGLN(payload);
+  
+  if (!error) {
+    File file = _fs->open(path, "w");
+    serializeJson(jsonBuffer, file);
+    file.close();
   }
 }
 
 
 void WebServer::_readSerialJson()
 {
-  if (WebServer::_isAllowed()) {
-      bool hasComa = false;
-      std::list<Bridge::RelayMessage> relayList = _bridge->getRelays();
+  _bridge->wakeup();
 
-      _server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-      _server.send(200, "text/json", "");
-      _server.sendContent("[");
+  uint8_t i = _bridge->size();
 
-      for (Bridge::RelayMessage relay : relayList) {
-        if (relay.isOk) {
-          String relayJson;
-
-          if (hasComa) {
-            relayJson = ',';
-          }
-
-          relayJson += "{\"i\":";
-          relayJson += String(relay.relayId);
-          relayJson += ",\"s\":";
-          relayJson += String(relay.state);
-          relayJson += ",\"l\":";
-          relayJson += String(relay.isLocked);
-          relayJson += ",\"p\":";
-          relayJson += String(relay.pinId);
-          relayJson += ",\"n\":";
-          relayJson += String(relay.isNc);
-          relayJson += "}";
-
-          _server.sendContent(relayJson);
-
-          hasComa = true;
-        }
+  if (_relayMessages.length() == 0) {
+    _relayMessages.reserve(2+ i * (_jsonLineLength+1)); // [ $jsonLine}(,$jsonLine)* ]
+    _relayMessages ='[';
+  
+    while (i-->0) {
+      _relayMessages += _jsonLine;
+      if (i != 0) {
+        _relayMessages += ',';
       }
+    }
 
-      _server.sendContent("]");
+    _relayMessages += ']';
+  
+    i = _bridge->size();
   }
+
+  _bridge->walkRelayList([](const Bridge::RelayMessage* relay, const uint8_t index) {
+   yield();
+   if (relay->isOk) {
+      const unsigned int ptr = 1+ index *(_jsonLineLength+1);
+      uint8_t dec;
+
+      dec = relay->relayId /10;
+      _relayMessages[ptr+5] = dec != 0 ? '0' + dec : ' ';
+      _relayMessages[ptr+6] = '0' + (relay->relayId - 10* dec);
+
+      dec = relay->pinId /10;
+      _relayMessages[ptr+24] = dec != 0 ? '0' + dec : ' ';
+      _relayMessages[ptr+25] = '0' + (relay->pinId - 10* dec);
+
+      _relayMessages[ptr+12] = '0' + relay->state;
+      _relayMessages[ptr+18] = '0' + relay->isLocked;
+      _relayMessages[ptr+31] = '0' + relay->isNc;
+    }
+  });
+
+  _server.send(200, FPSTR(TEXT_JSON), _relayMessages);
 }
 
 
 void WebServer::_writeSerialJson()
 {
-  if (WebServer::_isAllowed()) {
-    if (_server.hasArg("plain")) {
-      _bridge->wakeup();
-
-      String payload = _server.arg("plain");
-      DynamicJsonDocument doc(JSON_ARRAY_SIZE(WM_RELAY_NB_MAX+1)*6);
-      auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
-      
-      JsonArray root = doc.as<JsonArray>();
-
-      for (JsonObject o : root) {
-        const uint8_t relayId = o["i"].as<uint8_t>();
-        const uint8_t pinId = o["p"].as<uint8_t>();
-        const bool isNc = o["n"].as<bool>();
-
-        _bridge->mapRelayToPin(relayId, pinId);
-        _bridge->isRelayNc(relayId, isNc);
-      }
-
-      _bridge->save();
-    }
-
-    WebServer::_readSerialJson();
+  if (!_server.hasArg(FPSTR(PLAIN))) {
+    return _server.send(400);
   }
+
+  _bridge->wakeup();
+
+  JsonArray root;
+  {
+    DynamicJsonDocument doc(WM_CORE_BUFFER_SIZE);
+    String payload = _server.arg(FPSTR(PLAIN));
+    auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
+    doc.shrinkToFit();
+
+    root = doc.as<JsonArray>();
+  }
+
+  for (JsonObject o : root) {
+    const uint8_t relayId = o["i"].as<uint8_t>();
+    const uint8_t pinId   = o["p"].as<uint8_t>();
+    const bool    isNc    = o["n"].as<bool>();
+
+    _bridge->mapRelayToPin(relayId, pinId);
+    _bridge->isRelayNc(relayId, isNc);
+  }
+
+  _bridge->save();
 }
 
 
