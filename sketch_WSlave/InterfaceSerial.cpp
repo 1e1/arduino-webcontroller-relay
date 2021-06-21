@@ -37,9 +37,15 @@ void InterfaceSerial::loop()
 {
   if (WS_SERIAL.available() > 0) {
     if (this->read()) {
+      LOGLN(F("> TX_BEGIN"));
+      LOG(WS_CHAR_TX_BEGIN);
+
       WS_SERIAL.print(WS_CHAR_TX_BEGIN);
       this->process();
       WS_SERIAL.print(WS_CHAR_TX_END);
+
+      LOG("> "); LOGLN(WS_CHAR_TX_END);
+      LOGLN(F("> TX_END"));
     } else {
       WS_SERIAL.print(WS_CHAR_RX_UNKNOWN);
     }
@@ -57,7 +63,7 @@ void InterfaceSerial::loop()
 
 
 
-char InterfaceSerial::_read()
+const char InterfaceSerial::_read() const
 {
     uint8_t nbRetry = _READ_NB_RETRY;
     int c;

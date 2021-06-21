@@ -17,6 +17,9 @@
 #ifndef WM_RELAY_NB_MAX
 #define WM_RELAY_NB_MAX     4
 #endif
+#ifndef WM_COMPONENT
+#define WM_COMPONENT        WM_COMPONENT_ALL
+#endif
 #ifndef WS_LOG_LEVEL
 #define WS_LOG_LEVEL        WM_LOG_LEVEL_ALL
 #endif
@@ -43,14 +46,22 @@
 
 // WEB conf
 // =========================
-#ifndef WM_WEB_PORT
-#define WM_WEB_PORT             WM_WEB_PORT_DEFAULT
-#endif
 #ifndef WM_WEB_SERVER_SECURE
 #define WM_WEB_SERVER_SECURE    WM_WEB_SERVER_SECURE_NO
 #endif
 #ifndef WM_WEB_FILE_EXT
-#define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_GZ
+    #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
+    #define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_BR
+    #else
+    #define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_GZ
+    #endif
+#endif
+#ifndef WM_WEB_PORT
+    #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
+    #define WM_WEB_PORT             WM_WEB_PORT_DEFAULT_SECURE
+    #else
+    #define WM_WEB_PORT             WM_WEB_PORT_DEFAULT
+    #endif
 #endif
 // =========================
 

@@ -15,7 +15,7 @@ class InterfaceEthernet : public AbstractInterfaceWebApp {
   public:
   InterfaceEthernet(void);
 
-  void begin(void);
+  void begin(void) const;
   void loop(void);
 
   protected:

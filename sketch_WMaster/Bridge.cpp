@@ -9,7 +9,7 @@
 
 
 
-
+static const uint8_t _length_undefined = 0;
 
 
 
@@ -23,58 +23,94 @@
 
 Bridge::Bridge(Stream &inputStream)
 {
-  this->_currentStream = &inputStream;
+  this->_stream = &inputStream;
+  this->_relayMessage = new RelayMessage;
+  this->_length = _length_undefined;
+
+  this->_stream->setTimeout(WM_SERIAL_READ_TIMEOUT);
 }
 
 
-const Bridge::RelayMessage Bridge::getRelay(const uint8_t relayId, const bool unlock)
+const uint8_t Bridge::size(void)
 {
-  return this->_executeOne(
-    String(WM_PATH_SEPARATOR) + String(unlock ? WM_ACTION_READ_UNLOCK : WM_ACTION_READ) + 
-    String(WM_PATH_SEPARATOR) + String(relayId)
-  );
+  if (this->_length == _length_undefined) {
+    if (this->_write(String(WM_PATH_SEPARATOR) + String(WM_ACTION_LENGTH))) {
+      this->_length = this->_stream->parseInt();
+    }
+  }
+
+  return this->_length;
 }
 
 
-const Bridge::RelayMessage Bridge::setRelay(const uint8_t relayId, const bool state, const bool lock)
+const bool Bridge::getRelay(const uint8_t relayId, const bool unlock) const
 {
-  return this->_executeOne(
-    String(WM_PATH_SEPARATOR) + String(lock ? WM_ACTION_WRITE_LOCK : WM_ACTION_WRITE) + 
-    String(WM_PATH_SEPARATOR) + String(relayId) + 
-    String(WM_PATH_SEPARATOR) + String(state)
-  );
+  String command;
+  command.reserve(5);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(unlock ? WM_ACTION_READ_UNLOCK : WM_ACTION_READ);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(relayId);
+
+  return this->_executeOne(command);
 }
 
 
-const Bridge::RelayMessage Bridge::mapRelayToPin(const uint8_t relayId, const uint8_t pinId)
+const bool Bridge::setRelay(const uint8_t relayId, const bool state, const bool lock) const
 {
-  return this->_executeOne(
-    String(WM_PATH_SEPARATOR) + String(WM_ACTION_MAP) + 
-    String(WM_PATH_SEPARATOR) + String(relayId) + 
-    String(WM_PATH_SEPARATOR) + String(pinId)
-  );
+  String command;
+  command.reserve(7);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(lock ? WM_ACTION_WRITE_LOCK : WM_ACTION_WRITE);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(relayId);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(state);
+
+  return this->_executeOne(command);
 }
 
 
-const Bridge::RelayMessage Bridge::isRelayNc(const uint8_t relayId, const bool isNc)
+const bool Bridge::mapRelayToPin(const uint8_t relayId, const uint8_t pinId) const
 {
-  return this->_executeOne(
-    String(WM_PATH_SEPARATOR) + String(WM_ACTION_ISNC) + 
-    String(WM_PATH_SEPARATOR) + String(relayId) + 
-    String(WM_PATH_SEPARATOR) + String(isNc)
-  );
+  String command;
+  command.reserve(8);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(WM_ACTION_MAP);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(relayId);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(pinId);
+
+  return this->_executeOne(command);
 }
 
 
-const std::list<Bridge::RelayMessage> Bridge::getRelays()
+const bool Bridge::isRelayNc(const uint8_t relayId, const bool isNc) const
+{
+  String command;
+  command.reserve(7);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(WM_ACTION_ISNC);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(relayId);
+  command.concat(WM_PATH_SEPARATOR);
+  command.concat(isNc);
+
+  return this->_executeOne(command);
+}
+
+
+const bool Bridge::walkRelayList(TPrintMessageRelayFunction printRelayMessage) const
 {
   return this->_executeAll(
-    String(WM_PATH_SEPARATOR) + String(WM_ACTION_ALL)
+    String(WM_PATH_SEPARATOR) + String(WM_ACTION_ALL),
+    printRelayMessage
   );
 }
 
 
-void Bridge::save()
+const bool Bridge::save() const
 {
   return this->_executeNone(
     String(WM_PATH_SEPARATOR) + String(WM_ACTION_SAVE)
@@ -82,7 +118,7 @@ void Bridge::save()
 }
 
 
-void Bridge::reset()
+const bool Bridge::reset() const
 {
   return this->_executeNone(
     String(WM_PATH_SEPARATOR) + String(WM_ACTION_RESET)
@@ -90,7 +126,7 @@ void Bridge::reset()
 }
 
 
-void Bridge::sleep()
+const bool Bridge::sleep() const
 {
   return this->_executeNone(
     String(WM_PATH_SEPARATOR) + String(WM_ACTION_SLEEP)
@@ -98,10 +134,10 @@ void Bridge::sleep()
 }
 
 
-void Bridge::wakeup()
+void Bridge::wakeup() const
 {
-  this->_currentStream->print(WM_PATH_SEPARATOR);
-  this->_currentStream->flush();
+  this->_stream->print(WM_PATH_SEPARATOR);
+  this->_stream->flush();
 }
 
 
@@ -113,43 +149,46 @@ void Bridge::wakeup()
 
 
 
-void Bridge::_executeNone(String command)
+const bool Bridge::_executeNone(String command) const
 {
-  this->_write(command);
+  return this->_write(command);
 }
 
-const Bridge::RelayMessage Bridge::_executeOne(String command)
+
+const bool Bridge::_executeOne(String command) const
+{
+  return this->_write(command)
+    && this->_readRelayMessage()
+    ;
+}
+
+
+const bool Bridge::_executeAll(String command, TPrintMessageRelayFunction printRelayMessage) const
 {
   if (this->_write(command)) {
-    return this->_read();
+    uint8_t index = 0;
+
+    while (this->_readRelayMessage()) {
+      printRelayMessage(this->_relayMessage, index++);
+      if (this->_hasMessageEnd()) {
+        return true;
+      }
+    }
   }
 
-  return {};
+  return false;
 }
 
-const std::list<Bridge::RelayMessage> Bridge::_executeAll(String command)
-{
-  std::list<Bridge::RelayMessage> relayList;
-
-  if (this->_write(command)) {
-    do {
-      relayList.emplace_back(this->_read());
-    } while(!this->_hasMessageEnd());
-  }
-
-  return relayList;
-}
-
-const bool Bridge::_write(String command)
+const bool Bridge::_write(String command) const
 {
   this->_clear();
 
-  LOG("command: "); LOGLN(command);
+  LOG(F("command: ")); LOGLN(command);
   uint8_t nbTry = WM_SERIAL_TX_NB_TRY;
 
   do {
-    this->_currentStream->print(command);
-    this->_currentStream->flush();
+    this->_stream->print(command);
+    this->_stream->flush();
 
     int maxTime = WM_SERIAL_TX_TIMEOUT;
 
@@ -158,26 +197,29 @@ const bool Bridge::_write(String command)
       maxTime -= WM_SERIAL_TX_LOOP_DELAY;
 
       if (this->_seekMessageBegin()) {
+        LOGLN(F("listening"));
         return true;
       }
     } while (maxTime>0);
 
   } while (--nbTry > 0);
 
+  LOGLN(F("timeout"));
+
   return false;
 }
 
 
-const bool Bridge::_hasMessageBegin()
+const bool Bridge::_hasMessageBegin() const
 {
-  return this->_currentStream->peek() == WM_CHAR_RX_BEGIN;
+  return this->_stream->peek() == WM_CHAR_RX_BEGIN;
 }
 
 
-const bool Bridge::_seekMessageBegin()
+const bool Bridge::_seekMessageBegin() const
 {
-  while (this->_currentStream->available()) {
-    if (this->_currentStream->read() == WM_CHAR_RX_BEGIN) {
+  while (this->_stream->available()) {
+    if (this->_stream->read() == WM_CHAR_RX_BEGIN) {
       return true;
     }
   }
@@ -186,16 +228,16 @@ const bool Bridge::_seekMessageBegin()
 }
 
 
-const bool Bridge::_hasMessageEnd()
+const bool Bridge::_hasMessageEnd() const
 {
-  return this->_currentStream->peek() == WM_CHAR_RX_END;
+  return this->_stream->peek() == WM_CHAR_RX_END;
 }
 
 
-const bool Bridge::_seekMessageEnd()
+const bool Bridge::_seekMessageEnd() const
 {
-  while (this->_currentStream->available()) {
-    if (this->_currentStream->read() == WM_CHAR_RX_END) {
+  while (this->_stream->available()) {
+    if (this->_stream->read() == WM_CHAR_RX_END) {
       return true;
     }
   }
@@ -204,59 +246,60 @@ const bool Bridge::_seekMessageEnd()
 }
 
 
-const Bridge::RelayMessage Bridge::_read()
+const bool Bridge::_readRelayMessage() const
 {
   /*
     pattern: '^[01] \d{1,3} [01] \d{1,3}$'
     description: "{state} {relay_id} {is_locked} {is_nc} {pin_id}"
   */
-  Bridge::RelayMessage response {};
+  this->_relayMessage->isOk = false;
 
-  if (!this->_hasMessageEnd()) {
-
-    int maxTime = WM_SERIAL_TX_TIMEOUT;
-
-    // message min size is: 5 (1int + 1space) = 5*2chars 
-    while (10 > this->_currentStream->available()) { // TODO constantize
-      delay(WM_SERIAL_TX_LOOP_DELAY);
-      maxTime -= WM_SERIAL_TX_LOOP_DELAY;
-
-      if (maxTime <= 0) {
-        return response;
-      }
-    }
-
-    response.state    = this->_currentStream->parseInt();
-    response.relayId  = this->_currentStream->parseInt();
-    response.isLocked = this->_currentStream->parseInt();
-    response.isNc     = this->_currentStream->parseInt();
-    response.pinId    = this->_currentStream->parseInt();
-
-    // .isOk will read/check 2 chars
-    while (2 > this->_currentStream->available()) {
-      delay(WM_SERIAL_TX_LOOP_DELAY);
-      maxTime -= WM_SERIAL_TX_LOOP_DELAY;
-
-      if (maxTime <= 0) {
-        return response;
-      }
-    }
-
-    response.isOk     = (WM_DATA_SEPARATOR == this->_currentStream->read())
-      && (WM_LF == this->_currentStream->read());
+  if (this->_hasMessageEnd()) {
+    return false;
   }
 
-  LOG("relay: "); LOGLN(response.relayId);
-  LOG("state: "); LOGLN(response.state); 
-  LOG(" isOk: "); LOGLN(response.isOk); 
+  int maxTime = WM_SERIAL_TX_TIMEOUT;
 
-  return response;
+  // message min size is: 5 (1int + 1space) = 5*2chars 
+  while (10 > this->_stream->available()) { // TODO constantize
+    delay(WM_SERIAL_TX_LOOP_DELAY);
+    maxTime -= WM_SERIAL_TX_LOOP_DELAY;
+
+    if (maxTime <= 0) {
+      return false;
+    }
+  }
+
+  this->_relayMessage->state    = this->_stream->parseInt();
+  this->_relayMessage->relayId  = this->_stream->parseInt();
+  this->_relayMessage->isLocked = this->_stream->parseInt();
+  this->_relayMessage->isNc     = this->_stream->parseInt();
+  this->_relayMessage->pinId    = this->_stream->parseInt();
+
+  // .isOk will read/check 2 chars
+  while (2 > this->_stream->available()) {
+    delay(WM_SERIAL_TX_LOOP_DELAY);
+    maxTime -= WM_SERIAL_TX_LOOP_DELAY;
+
+    if (maxTime <= 0) {
+      return false;
+    }
+  }
+
+  this->_relayMessage->isOk     = (WM_DATA_SEPARATOR == this->_stream->read())
+    && (WM_LF == this->_stream->read());
+
+  LOG(F("relay: ")); LOGLN(this->_relayMessage->relayId);
+  LOG(F("state: ")); LOGLN(this->_relayMessage->state); 
+  LOG(F(" isOk: ")); LOGLN(this->_relayMessage->isOk); 
+
+  return true;
 }
 
 
-void Bridge::_clear()
+void Bridge::_clear() const
 {
-  while (this->_currentStream->available()) {
-    this->_currentStream->read();
+  while (this->_stream->available()) {
+    this->_stream->read();
   }
 }

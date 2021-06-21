@@ -105,9 +105,9 @@ cat <<EOT > $OUTPUT_H
 namespace certificate {
     typedef enum { CT_ECC=0, CT_RSA=1 } CertType;
 
-    const char dname[] = "$INPUT_DNAME";
-
     const CertType serverCertType = CT_${INPUT_TYPE};
+
+    constexpr const char dname[] = "$INPUT_DNAME";
 
     const char serverKey[] PROGMEM = R"EOT(
 $(cat $TEMP_KEY)

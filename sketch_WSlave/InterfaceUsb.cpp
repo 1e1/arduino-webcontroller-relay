@@ -56,7 +56,7 @@ void InterfaceUsb::loop()
 
 
 
-char InterfaceUsb::_read()
+const char InterfaceUsb::_read() const
 {
     uint8_t nbRetry = _READ_NB_RETRY;
     int c;

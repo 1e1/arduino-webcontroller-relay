@@ -9,11 +9,13 @@
 #if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
   #define LOG_START() Serial.begin(WM_USB_SPEED)
   #define LOG(...)    Serial.print  (__VA_ARGS__)
+  #define LOGF(...)   Serial.printf (__VA_ARGS__)
   #define LOGLN(...)  Serial.println(__VA_ARGS__); Serial.flush()
   #define WAIT(ms)    delay(ms)
 #else
   #define LOG_START()
   #define LOG(...)
+  #define LOGF(...)
   #define LOGLN(...)
   #define WAIT(ms)
 #endif
@@ -29,8 +31,8 @@
 
 #ifdef WM_LOG_LED
   #define BUSYLED_INIT pinMode(WM_LOG_LED, OUTPUT)
-  #define BUSYLED_ON digitalWrite(WM_LOG_LED, LOW)
-  #define BUSYLED_OFF digitalWrite(WM_LOG_LED, HIGH)
+  #define BUSYLED_ON   digitalWrite(WM_LOG_LED, LOW)
+  #define BUSYLED_OFF  digitalWrite(WM_LOG_LED, HIGH)
 #else
   #define BUSYLED_INIT
   #define BUSYLED_ON

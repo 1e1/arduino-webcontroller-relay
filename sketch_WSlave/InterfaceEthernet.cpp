@@ -57,7 +57,7 @@ InterfaceEthernet::InterfaceEthernet()
 
 
 
-void InterfaceEthernet::begin()
+void InterfaceEthernet::begin() const
 {
   this->_server->begin();
 }

@@ -16,7 +16,7 @@ class InterfaceUsb : public AbstractStream {
   void loop(void);
 
   protected:
-  char _read(void);
+  const char _read(void) const;
 
 };
 

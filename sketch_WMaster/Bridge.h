@@ -4,7 +4,6 @@
 
 
 #include <ESP8266WiFi.h>
-#include <list>
 #include "config.h"
 #include "macro.h"
 
@@ -14,6 +13,7 @@ class Bridge {
 
   public:
   struct RelayMessage {
+    RelayMessage() : isOk(false) {};
     uint8_t relayId;
     uint8_t pinId;
     bool state;
@@ -21,34 +21,40 @@ class Bridge {
     bool isNc;
     bool isOk;
   };
+  typedef std::function<void(const RelayMessage*, const uint8_t)> TPrintMessageRelayFunction;
 
   Bridge(Stream &inputStream);
+  
+  const RelayMessage* getCurrentRelayMessage(void) const { return this->_relayMessage; };
+  const uint8_t size(void);
+  
+  const bool getRelay(const uint8_t relayId, const bool unlock=false) const;
+  const bool setRelay(const uint8_t relayId, const bool state, const bool lock=false) const;
+  const bool mapRelayToPin(const uint8_t relayId, const uint8_t pinId) const;
+  const bool isRelayNc(const uint8_t relayId, const bool isNc) const;
 
-  const RelayMessage getRelay(const uint8_t relayId, const bool unlock=false);
-  const RelayMessage setRelay(const uint8_t relayId, const bool state, const bool lock=false);
-  const RelayMessage mapRelayToPin(const uint8_t relayId, const uint8_t pinId);
-  const RelayMessage isRelayNc(const uint8_t relayId, const bool isNc);
+  const bool walkRelayList(TPrintMessageRelayFunction printRelayMessage) const;
 
-  const std::list<RelayMessage> getRelays(void);
-
-  void save(void);
-  void reset(void);
-  void sleep(void);
-  void wakeup(void);
+  const bool save(void) const;
+  const bool reset(void) const;
+  const bool sleep(void) const;
+  void wakeup(void) const;
 
   protected:
-  void _executeNone(String command);
-  const RelayMessage _executeOne(String command);
-  const std::list<RelayMessage> _executeAll(String command);
-  const bool _write(String command);
-  const bool _hasMessageBegin(void);
-  const bool _seekMessageBegin(void);
-  const bool _hasMessageEnd(void);
-  const bool _seekMessageEnd(void);
-  const RelayMessage _read(void);
-  void _clear(void);
+  const bool _executeNone(String command) const;
+  const bool _executeOne(String command) const;
+  const bool _executeAll(String command, TPrintMessageRelayFunction printRelayMessage) const;
+  const bool _write(String command) const;
+  const bool _hasMessageBegin(void) const;
+  const bool _seekMessageBegin(void) const;
+  const bool _hasMessageEnd(void) const;
+  const bool _seekMessageEnd(void) const;
+  const bool _readRelayMessage(void) const;
+  void _clear(void) const;
 
-  Stream* _currentStream = nullptr;
+  Stream* _stream = nullptr;
+  RelayMessage* _relayMessage = nullptr;
+  uint8_t _length;
 };
 
 
