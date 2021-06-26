@@ -38,6 +38,7 @@
 #define WS_STORAGE_EEPROM           1
 
 #define WS_LOG_LEVEL_OFF            0
+#define WS_LOG_LEVEL_NONE           0
 #define WS_LOG_LEVEL_FATAL          10
 #define WS_LOG_LEVEL_ERROR          20
 #define WS_LOG_LEVEL_WARN           30

@@ -1,21 +1,9 @@
-#ifndef WebServer_h
-#define WebServer_h
+#ifndef WebServer_H_
+#define WebServer_H_
 
 
-
-extern "C" {
-  #include "c_types.h"
-}
-
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
-#include <ESP8266WebServerSecure.h>
-#include "certificate-generated.h"
-#endif
-#include <ArduinoJson.h>
 #include <FS.h>
-#include <list>
+#include "certificate-generated.h"
 #include "config.h"
 #include "macro.h"
 #include "scm-generated.h"
@@ -26,27 +14,43 @@ extern "C" {
 class WebServer {
 
   public:
-  void begin(void);
-  void loop(void);
+  typedef enum { 
+      MODE_NONE, 
+      MODE_PORTAL, 
+      MODE_API,
+      MODE_ALL, 
+  } Mode;
 
-  static void setAuthentication(String username, String password);
-  static void setBridge(Bridge* bridge);
-  static void setFs(FS &fs);
+  static constexpr const char TEXT_HTML[] PROGMEM = "text/html";
+  static constexpr const char TEXT_JSON[] PROGMEM = "text/json";
+  static constexpr const char PLAIN[] PROGMEM = "plain";
+  static constexpr const char LOCATION[] PROGMEM = "Location";
+  static constexpr const char CONTENT_ENCODING[] PROGMEM = "Content-Encoding";
+  static constexpr const char CACHE_CONTROL[] PROGMEM = "Cache-Control";
+  static constexpr const char X_HEAP[] PROGMEM = "X-Heap";
+  static constexpr const char X_UPTIME[] PROGMEM = "X-Uptime";
+  static constexpr const char MAX_AGE_86400[] PROGMEM = "max-age=86400";
+  static constexpr const char JSON_OBJECT_EMPTY[] PROGMEM = "{}";
+  static constexpr const char JSON_ARRAY_EMPTY[] PROGMEM = "[]";
+
+  static constexpr const char ROUTE_HOME[] = "/home";
+  static constexpr const char ROUTE_PORTAL[] = "/portal";
+  static constexpr const char ROUTE_ABOUT[] = "/about";
+
+  virtual void begin(void) =0;
+  virtual void loop(void) =0;
+
+  void setFs(FS &fs);
+  void setBridge(Bridge* bridge);
+  virtual void setAuthentication(String username, String password) =0;
+  virtual void setMode(const Mode mode) =0;
 
   protected:
-  void _setup(void);
 
-  static const bool _isAllowed(void);
-  static void _handleCfg(void);
-  static void _handleApi(void);
-  static void _uploadAndStreamJson(const char* path, const char* defaultValue="null", const bool isUpload=false);
-  static void _streamHtml(const char* path);
-  static void _streamJson(const char* path, const char* defaultValue="null");
-  static void _sendRelayMessage(const Bridge::RelayMessage* relay);
-  static void _uploadJson(const char* path);
-  static void _readSerialJson(void);
-  static void _writeSerialJson(void);
-  static const size_t _getFileContents(const char* path, char* &buffer);
+  static char _jsonLine[];
+
+  Bridge* _bridge;
+  FS* _fs;
 };
 
 

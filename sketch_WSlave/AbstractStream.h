@@ -1,5 +1,5 @@
-#ifndef AbstractStream_h
-#define AbstractStream_h
+#ifndef AbstractStream_H_
+#define AbstractStream_H_
 
 
 

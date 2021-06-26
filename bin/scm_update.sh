@@ -20,29 +20,29 @@ branch_name=${branch_name:-HEAD} # 'HEAD' indicates detached HEAD situation
 
 # Master
 cat <<EOT > "$MASTER_DIR/scm-generated.h"
-#ifndef _scminfo_H_
-#define _scminfo_H_
+#ifndef SCM_GENERATED_H_
+#define SCM_GENERATED_H_
 
 #define SCM_REPO "$repo"
 #define SCM_HASH "$commit_hash"
 #define SCM_DATE "$commit_date"
 #define SCM_CHAN "$branch_name"
 
-#endif // _scminfo_H_
+#endif // SCM_GENERATED_H_
 EOT
 
 
 # Slave
 cat <<EOT > "$SLAVE_DIR/scm-generated.h"
-#ifndef _scminfo_H_
-#define _scminfo_H_
+#ifndef SCM_GENERATED_H_
+#define SCM_GENERATED_H_
 
 #define SCM_REPO "$repo"
 #define SCM_HASH "$commit_hash"
 #define SCM_DATE "$commit_date"
 #define SCM_CHAN "$branch_name"
 
-#endif // _scminfo_H_
+#endif // SCM_GENERATED_H_
 EOT
 
 

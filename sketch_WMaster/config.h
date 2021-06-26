@@ -14,8 +14,8 @@
 #ifndef WM_PIN_CONFIG
 #define WM_PIN_CONFIG       A0
 #endif
-#ifndef WM_RELAY_NB_MAX
-#define WM_RELAY_NB_MAX     4
+#ifndef WM_WAKE_UP_PIN
+#define WM_WAKE_UP_PIN      16
 #endif
 #ifndef WM_COMPONENT
 #define WM_COMPONENT        WM_COMPONENT_ALL
@@ -25,6 +25,16 @@
 #endif
 #ifndef WM_USE_LED
 #define WM_USE_LED          0
+#endif
+#ifndef WM_LED_ON
+#define WM_LED_ON           LOW
+#endif
+#ifndef WM_LED_OFF
+  #if WM_LED_ON == LOW
+    #define WM_LED_OFF      HIGH
+  #else
+    #define WM_LED_OFF      LOW
+  #endif
 #endif
 // =========================
 
@@ -51,17 +61,13 @@
 #endif
 #ifndef WM_WEB_FILE_EXT
     #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
-    #define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_BR
+    #define WM_WEB_FILE_EXT     WM_WEB_FILE_EXT_BR
     #else
-    #define WM_WEB_FILE_EXT         WM_WEB_FILE_EXT_GZ
+    #define WM_WEB_FILE_EXT     WM_WEB_FILE_EXT_GZ
     #endif
 #endif
-#ifndef WM_WEB_PORT
-    #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
-    #define WM_WEB_PORT             WM_WEB_PORT_DEFAULT_SECURE
-    #else
-    #define WM_WEB_PORT             WM_WEB_PORT_DEFAULT
-    #endif
+#ifndef WM_WEB_PORTAL
+#define WM_WEB_PORTAL           WM_WEB_PORTAL_NO
 #endif
 // =========================
 

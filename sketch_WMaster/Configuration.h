@@ -1,5 +1,5 @@
-#ifndef Configuration_h
-#define Configuration_h
+#ifndef Configuration_H_
+#define Configuration_H_
 
 
 
@@ -34,6 +34,7 @@ class Configuration {
   struct Global {
     Acl acl;
     WifiAp wifiAp;
+    //bool isSecure;
   };
 
   struct WifiStation {

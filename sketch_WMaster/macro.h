@@ -24,15 +24,13 @@
 
 
 #if WM_USE_LED
-  #if defined(LED_BUILTIN) && !defined(WM_LOG_LED)
-    #define WM_LOG_LED LED_BUILTIN
-  #endif
+  #define WM_LOG_LED BUILTIN_LED
 #endif
 
 #ifdef WM_LOG_LED
   #define BUSYLED_INIT pinMode(WM_LOG_LED, OUTPUT)
-  #define BUSYLED_ON   digitalWrite(WM_LOG_LED, LOW)
-  #define BUSYLED_OFF  digitalWrite(WM_LOG_LED, HIGH)
+  #define BUSYLED_ON   digitalWrite(WM_LOG_LED, HIGH)
+  #define BUSYLED_OFF  digitalWrite(WM_LOG_LED, LOW)
 #else
   #define BUSYLED_INIT
   #define BUSYLED_ON

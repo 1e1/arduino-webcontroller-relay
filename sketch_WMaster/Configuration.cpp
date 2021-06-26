@@ -52,7 +52,8 @@ void Configuration::setSafeMode(const bool isSafeMode)
         .password = {},
         .channel = 1,
         .isHidden = false,
-      }
+      },
+      //.isSecure = false,
     };
 
     this->_global = g;
@@ -137,7 +138,8 @@ void Configuration::_loadGlobal()
       .password = root["p"].as<String>(),
       .channel = root["c"].as<uint8_t>(),
       .isHidden = root["h"].as<bool>(),
-    }
+    },
+    //.isSecure = root["s"].as<bool>(),
   };
 
   this->_global = g;
