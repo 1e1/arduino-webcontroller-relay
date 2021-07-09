@@ -31,7 +31,7 @@ Bridge::Bridge(Stream &inputStream)
 }
 
 
-const uint8_t Bridge::size(void)
+uint8_t Bridge::size(void)
 {
   if (this->_length == _length_undefined) {
     if (this->_write(String(WM_PATH_SEPARATOR) + String(WM_ACTION_LENGTH))) {
@@ -43,7 +43,7 @@ const uint8_t Bridge::size(void)
 }
 
 
-const bool Bridge::getRelay(const uint8_t relayId, const bool unlock) const
+bool Bridge::getRelay(const uint8_t relayId, const bool unlock) const
 {
   String command;
   command.reserve(5);
@@ -56,7 +56,7 @@ const bool Bridge::getRelay(const uint8_t relayId, const bool unlock) const
 }
 
 
-const bool Bridge::setRelay(const uint8_t relayId, const bool state, const bool lock) const
+bool Bridge::setRelay(const uint8_t relayId, const bool state, const bool lock) const
 {
   String command;
   command.reserve(7);
@@ -71,7 +71,7 @@ const bool Bridge::setRelay(const uint8_t relayId, const bool state, const bool 
 }
 
 
-const bool Bridge::mapRelayToPin(const uint8_t relayId, const uint8_t pinId) const
+bool Bridge::mapRelayToPin(const uint8_t relayId, const uint8_t pinId) const
 {
   String command;
   command.reserve(8);
@@ -86,7 +86,7 @@ const bool Bridge::mapRelayToPin(const uint8_t relayId, const uint8_t pinId) con
 }
 
 
-const bool Bridge::isRelayNc(const uint8_t relayId, const bool isNc) const
+bool Bridge::isRelayNc(const uint8_t relayId, const bool isNc) const
 {
   String command;
   command.reserve(7);
@@ -101,7 +101,7 @@ const bool Bridge::isRelayNc(const uint8_t relayId, const bool isNc) const
 }
 
 
-const bool Bridge::walkRelayList(TPrintMessageRelayFunction printRelayMessage) const
+bool Bridge::walkRelayList(TPrintMessageRelayFunction printRelayMessage) const
 {
   return this->_executeAll(
     String(WM_PATH_SEPARATOR) + String(WM_ACTION_ALL),
@@ -110,7 +110,25 @@ const bool Bridge::walkRelayList(TPrintMessageRelayFunction printRelayMessage) c
 }
 
 
-const bool Bridge::save() const
+bool Bridge::prepareRelayList(void) const
+{
+  return this->_executeNone(
+    String(WM_PATH_SEPARATOR) + String(WM_ACTION_ALL)
+  );
+}
+
+
+bool Bridge::nextRelay(void) const
+{
+  if (this->_hasMessageEnd()) {
+    return false;
+  }
+  
+  return this->_readRelayMessage();
+}
+
+
+bool Bridge::save() const
 {
   return this->_executeNone(
     String(WM_PATH_SEPARATOR) + String(WM_ACTION_SAVE)
@@ -118,7 +136,7 @@ const bool Bridge::save() const
 }
 
 
-const bool Bridge::reset() const
+bool Bridge::reset() const
 {
   return this->_executeNone(
     String(WM_PATH_SEPARATOR) + String(WM_ACTION_RESET)
@@ -126,7 +144,7 @@ const bool Bridge::reset() const
 }
 
 
-const bool Bridge::sleep() const
+bool Bridge::sleep() const
 {
   return this->_executeNone(
     String(WM_PATH_SEPARATOR) + String(WM_ACTION_SLEEP)
@@ -149,13 +167,13 @@ void Bridge::wakeup() const
 
 
 
-const bool Bridge::_executeNone(String command) const
+bool Bridge::_executeNone(String command) const
 {
   return this->_write(command);
 }
 
 
-const bool Bridge::_executeOne(String command) const
+bool Bridge::_executeOne(String command) const
 {
   return this->_write(command)
     && this->_readRelayMessage()
@@ -163,7 +181,7 @@ const bool Bridge::_executeOne(String command) const
 }
 
 
-const bool Bridge::_executeAll(String command, TPrintMessageRelayFunction printRelayMessage) const
+bool Bridge::_executeAll(String command, TPrintMessageRelayFunction printRelayMessage) const
 {
   if (this->_write(command)) {
     uint8_t index = 0;
@@ -179,7 +197,7 @@ const bool Bridge::_executeAll(String command, TPrintMessageRelayFunction printR
   return false;
 }
 
-const bool Bridge::_write(String command) const
+bool Bridge::_write(String command) const
 {
   this->_clear();
 
@@ -190,17 +208,11 @@ const bool Bridge::_write(String command) const
     this->_stream->print(command);
     this->_stream->flush();
 
-    int maxTime = WM_SERIAL_TX_TIMEOUT;
-
-    do {
-      delay(WM_SERIAL_TX_LOOP_DELAY);
-      maxTime -= WM_SERIAL_TX_LOOP_DELAY;
-
+    if (this->_timedAvailable()) { 
       if (this->_seekMessageBegin()) {
-        LOGLN(F("listening"));
         return true;
       }
-    } while (maxTime>0);
+    }
 
   } while (--nbTry > 0);
 
@@ -210,13 +222,13 @@ const bool Bridge::_write(String command) const
 }
 
 
-const bool Bridge::_hasMessageBegin() const
+bool Bridge::_hasMessageBegin() const
 {
   return this->_stream->peek() == WM_CHAR_RX_BEGIN;
 }
 
 
-const bool Bridge::_seekMessageBegin() const
+bool Bridge::_seekMessageBegin() const
 {
   while (this->_stream->available()) {
     if (this->_stream->read() == WM_CHAR_RX_BEGIN) {
@@ -228,13 +240,13 @@ const bool Bridge::_seekMessageBegin() const
 }
 
 
-const bool Bridge::_hasMessageEnd() const
+bool Bridge::_hasMessageEnd() const
 {
   return this->_stream->peek() == WM_CHAR_RX_END;
 }
 
 
-const bool Bridge::_seekMessageEnd() const
+bool Bridge::_seekMessageEnd() const
 {
   while (this->_stream->available()) {
     if (this->_stream->read() == WM_CHAR_RX_END) {
@@ -246,7 +258,7 @@ const bool Bridge::_seekMessageEnd() const
 }
 
 
-const bool Bridge::_readRelayMessage() const
+bool Bridge::_readRelayMessage() const
 {
   /*
     pattern: '^[01] \d{1,3} [01] \d{1,3}$'
@@ -257,33 +269,21 @@ const bool Bridge::_readRelayMessage() const
   if (this->_hasMessageEnd()) {
     return false;
   }
-
-  int maxTime = WM_SERIAL_TX_TIMEOUT;
-
-  // message min size is: 5 (1int + 1space) = 5*2chars 
-  while (10 > this->_stream->available()) { // TODO constantize
-    delay(WM_SERIAL_TX_LOOP_DELAY);
-    maxTime -= WM_SERIAL_TX_LOOP_DELAY;
-
-    if (maxTime <= 0) {
-      return false;
-    }
+  
+  // message min size is: 5 (1int + 1space) = 5*2chars
+  if (!this->_timedAvailable(10)) {
+    return false;
   }
-
+  
   this->_relayMessage->state    = this->_stream->parseInt();
   this->_relayMessage->relayId  = this->_stream->parseInt();
   this->_relayMessage->isLocked = this->_stream->parseInt();
   this->_relayMessage->isNc     = this->_stream->parseInt();
   this->_relayMessage->pinId    = this->_stream->parseInt();
-
+  
   // .isOk will read/check 2 chars
-  while (2 > this->_stream->available()) {
-    delay(WM_SERIAL_TX_LOOP_DELAY);
-    maxTime -= WM_SERIAL_TX_LOOP_DELAY;
-
-    if (maxTime <= 0) {
-      return false;
-    }
+  if (!this->_timedAvailable(2)) {
+    return false;
   }
 
   this->_relayMessage->isOk     = (WM_DATA_SEPARATOR == this->_stream->read())
@@ -294,6 +294,21 @@ const bool Bridge::_readRelayMessage() const
   LOG(F(" isOk: ")); LOGLN(this->_relayMessage->isOk); 
 
   return true;
+}
+
+
+bool Bridge::_timedAvailable(const int bufferSize) const
+{
+  const long maxTime = millis() + WM_SERIAL_TX_TIMEOUT;
+
+  do {
+    //delay(WM_SERIAL_TX_LOOP_DELAY);
+    if (bufferSize <= this->_stream->available()) {
+      return true;
+    }
+  } while (maxTime-millis()>0);
+
+  return false;
 }
 
 

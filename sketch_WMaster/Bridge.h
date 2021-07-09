@@ -1,9 +1,9 @@
-#ifndef Bridge_h
-#define Bridge_h
+#ifndef Bridge_H_
+#define Bridge_H_
 
 
 
-#include <ESP8266WiFi.h>
+#include <Arduino.h>
 #include "config.h"
 #include "macro.h"
 
@@ -26,30 +26,33 @@ class Bridge {
   Bridge(Stream &inputStream);
   
   const RelayMessage* getCurrentRelayMessage(void) const { return this->_relayMessage; };
-  const uint8_t size(void);
+  uint8_t size(void);
   
-  const bool getRelay(const uint8_t relayId, const bool unlock=false) const;
-  const bool setRelay(const uint8_t relayId, const bool state, const bool lock=false) const;
-  const bool mapRelayToPin(const uint8_t relayId, const uint8_t pinId) const;
-  const bool isRelayNc(const uint8_t relayId, const bool isNc) const;
+  bool getRelay(const uint8_t relayId, const bool unlock=false) const;
+  bool setRelay(const uint8_t relayId, const bool state, const bool lock=false) const;
+  bool mapRelayToPin(const uint8_t relayId, const uint8_t pinId) const;
+  bool isRelayNc(const uint8_t relayId, const bool isNc) const;
 
-  const bool walkRelayList(TPrintMessageRelayFunction printRelayMessage) const;
+  bool walkRelayList(TPrintMessageRelayFunction printRelayMessage) const;
+  bool prepareRelayList(void) const;
+  bool nextRelay(void) const;
 
-  const bool save(void) const;
-  const bool reset(void) const;
-  const bool sleep(void) const;
+  bool save(void) const;
+  bool reset(void) const;
+  bool sleep(void) const;
   void wakeup(void) const;
 
   protected:
-  const bool _executeNone(String command) const;
-  const bool _executeOne(String command) const;
-  const bool _executeAll(String command, TPrintMessageRelayFunction printRelayMessage) const;
-  const bool _write(String command) const;
-  const bool _hasMessageBegin(void) const;
-  const bool _seekMessageBegin(void) const;
-  const bool _hasMessageEnd(void) const;
-  const bool _seekMessageEnd(void) const;
-  const bool _readRelayMessage(void) const;
+  bool _executeNone(String command) const;
+  bool _executeOne(String command) const;
+  bool _executeAll(String command, TPrintMessageRelayFunction printRelayMessage) const;
+  bool _write(String command) const;
+  bool _hasMessageBegin(void) const;
+  bool _seekMessageBegin(void) const;
+  bool _hasMessageEnd(void) const;
+  bool _seekMessageEnd(void) const;
+  bool _readRelayMessage(void) const;
+  bool _timedAvailable(const int bufferSize=1) const;
   void _clear(void) const;
 
   Stream* _stream = nullptr;

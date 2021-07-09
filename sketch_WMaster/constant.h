@@ -4,6 +4,7 @@
 
 /* mode */
 #define WM_LOG_LEVEL_OFF            0
+#define WM_LOG_LEVEL_NONE           0
 #define WM_LOG_LEVEL_FATAL          10
 #define WM_LOG_LEVEL_ERROR          20
 #define WM_LOG_LEVEL_WARN           30
@@ -17,7 +18,8 @@
 #define WM_COMPONENT_MDNS           1
 #define WM_COMPONENT_API            2
 #define WM_COMPONENT_ALEXA          4
-#define WM_COMPONENT_ALL            ( WM_COMPONENT_MDNS + WM_COMPONENT_API + WM_COMPONENT_ALEXA )
+#define WM_COMPONENT_LED            8
+#define WM_COMPONENT_ALL            ( WM_COMPONENT_MDNS + WM_COMPONENT_API + WM_COMPONENT_ALEXA + WM_COMPONENT_LED )
 
 
 #define WM_CONFIG_KEY_PATH          "_KEY.txt"
@@ -30,6 +32,8 @@
 
 #define WM_WEB_PORT_DEFAULT         80
 #define WM_WEB_PORT_DEFAULT_SECURE  443
+#define WM_WEB_PORTAL_NO            0
+#define WM_WEB_PORTAL_YES           1
 #define WM_WEB_SERVER_SECURE_NO     0
 #define WM_WEB_SERVER_SECURE_YES    1
 #define WM_WEB_FILE_EXT_BR          "br"

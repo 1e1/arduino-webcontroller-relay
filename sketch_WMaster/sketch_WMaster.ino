@@ -7,23 +7,32 @@
 
 
 
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 #include <list>
+#include "certificate-generated.h"
 #include "config.h"
 #include "macro.h"
-#include "certificate-generated.h"
 #include "Bridge.h"
 #include "Configuration.h"
-#include "WebServer.h"
+#ifdef WM_USE_ASYNC
+#include "WebServerASync.h"
+#else
+#include "WebServerEsp8266.h"
+#endif
 
 #if WM_COMPONENT & WM_COMPONENT_MDNS
-  #include <ESP8266mDNS.h>
+#include <ESP8266mDNS.h>
 #endif
 #if WM_COMPONENT & WM_COMPONENT_ALEXA
-  #include <fauxmoESP.h>
+#include <fauxmoESP.h>
+#endif
+
+#ifdef LED_BUILTIN
+#include "MorseLed.hpp"
 #endif
 
 
@@ -36,15 +45,15 @@
 Configuration::Acl acl;
 Bridge* bridge;
 WebServer* server;
+bool isAdminReset;
 
 #if WM_COMPONENT & WM_COMPONENT_ALEXA
-struct AlexaRelay {
-  const unsigned char alexaId;
-  const uint8_t relayId;
-};
-
 fauxmoESP fauxmo;
-std::list<AlexaRelay> alexaRelayList;
+#endif
+
+
+#if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
+unsigned long nextLog = 0;
 #endif
 
 
@@ -67,14 +76,39 @@ void setup()
 
   pinMode(WM_PIN_CONFIG, INPUT_PULLUP);
   pinMode(WM_PIN_SAFEMODE, INPUT_PULLUP);
+  pinMode(WM_WAKE_UP_PIN, INPUT_PULLUP);
 
-  bool isUnlocked = digitalRead(WM_PIN_CONFIG) == LOW;
-  bool isSafeMode = digitalRead(WM_PIN_SAFEMODE) == LOW;
-  bool externalReset = ESP.getResetInfoPtr()->reason == rst_reason::REASON_EXT_SYS_RST;
+  const bool isSafeMode = digitalRead(WM_PIN_SAFEMODE) == LOW;
+  const bool isUnlocked = digitalRead(WM_PIN_CONFIG) == LOW;
+  const bool externalReset = ESP.getResetInfoPtr()->reason == rst_reason::REASON_EXT_SYS_RST;
+
+  isAdminReset = isUnlocked || externalReset;
 
   LOG(F("isUnlocked=")); LOGLN(isUnlocked);
   LOG(F("isSafeMode=")); LOGLN(isSafeMode);
   LOG(F("externalReset=")); LOGLN(externalReset);
+
+  #if WM_COMPONENT & WM_COMPONENT_LED
+  {
+    LOGLN(F("-- init Morse Led"));
+    MorseLed led(LED_BUILTIN);
+
+    if (isUnlocked) {
+      led.print("free");
+      led.space();
+    }
+
+    if (isSafeMode) {
+      led.print("safe");
+      led.space();
+    }
+
+    if (externalReset) {
+      led.print("reset");
+      led.space();
+    }
+  }
+  #endif
 
   LOGLN(F("-- load Configuration"));
   configuration->begin();
@@ -82,7 +116,7 @@ void setup()
 
   acl = configuration->getGlobal()->acl;
 
-  if (isUnlocked || externalReset) {
+  if (isAdminReset) {
     acl.canAutoRestart = false;
   }
   LOGLN(F("---"));
@@ -125,8 +159,8 @@ void setup()
     LOG(F("AP ssid: "));LOGLN(configuration->getGlobal()->wifiAp.ssid);
     LOG(F("AP password: "));LOGLN(configuration->getGlobal()->wifiAp.password);
     
-    IPAddress myIp(192, 168, 240, 1);
-    WiFi.softAPConfig(myIp, myIp, IPAddress(255, 255, 255, 0));
+    //IPAddress myIp(192, 168, 0, 1); // TODO CONSTANTIZE
+    //WiFi.softAPConfig(myIp, myIp, IPAddress(255, 255, 255, 0));
 
     WiFi.mode(WIFI_AP);
     WiFi.softAP(
@@ -138,7 +172,7 @@ void setup()
     
     LOGLN(F("---"));
     
-    if (!isUnlocked) {
+    if (!isAdminReset) {
       /**
        * stalk connected devices and switch sensitive relays
        */
@@ -159,7 +193,8 @@ void setup()
 
         BUSYLED_OFF;
       } else {
-        ESP.deepSleepInstant(ESP.deepSleepMax(), WAKE_RF_DISABLED);
+        //ESP.deepSleepInstant(ESP.deepSleepMax(), WAKE_RF_DISABLED); // TODO constantize (microseconds)
+        delay(5 *60 *1000); // TODO constantize (millis)
       }
 
       LOGLN(F("---"));
@@ -171,92 +206,111 @@ void setup()
   #if WM_COMPONENT & WM_COMPONENT_MDNS
   LOGLN(F("-- setup mDNS"));
   MDNS.begin(certificate::dname);
-  MDNS.addService(WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES ? "https" : "http", "tcp", WM_WEB_PORT);
+  #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
+  MDNS.addService(F("https"), F("tcp"), WM_WEB_PORT_DEFAULT_SECURE);
+  #else
+  MDNS.addService(F("http"), F("tcp"), WM_WEB_PORT_DEFAULT);
+  #endif
   LOGLN(F("---"));
   #endif
-  
-  #if WM_COMPONENT & WM_COMPONENT_ALEXA
-  LOGLN(F("-- setup Alexa"));
-  fauxmo.createServer(true);
-  fauxmo.enable(true);
 
-  LOGLN(F("register devices:"));
-  { // register Alexa devices
-    for (Configuration::Relay relay : relayList) {
-      AlexaRelay alexaRelay {
-        .alexaId = fauxmo.addDevice(relay.name.c_str()), 
-        .relayId = relay.id,
-      };
+  if (isAdminReset) {
+    LOGLN(F("-- setup WebServer (portal)"));
+    #ifdef WM_USE_ASYNC
+    server = new WebServerASync(LittleFS, bridge);
+    #else
+    server = new WebServerEsp8266(LittleFS, bridge);
+    #endif
+    server->setAuthentication(acl.username, acl.password);
+    // server->setMode(WebServer::MODE_ALL);
+    server->setMode(WebServer::MODE_PORTAL);
+    server->begin();
+    LOGLN(F("---"));
+  } else {
+    #if WM_COMPONENT & WM_COMPONENT_ALEXA
+    LOGLN(F("-- setup Alexa"));
+    fauxmo.createServer(true);
+    fauxmo.enable(true);
 
-      LOG(F("- name=\""));
-      LOG(relay.name);
-      LOG(F("\"; relayId="));
-      LOG(alexaRelay.relayId);
-      LOG(F("; alexaId="));
-      LOG(alexaRelay.alexaId);
-      LOGLN();
-      
-      alexaRelayList.emplace_back(alexaRelay);
-    }
-  }
-  
-  LOGLN(F("register callback"));
-  fauxmo.onSetState([](unsigned char device_id, const char* device_name, bool state, unsigned char value) {
-    LOGF("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
-    
-    for (AlexaRelay alexaRelay : alexaRelayList) {
-      if (alexaRelay.alexaId == device_id) {
-        bridge->setRelay(alexaRelay.relayId, state);
-        return;
+    LOGLN(F("register devices:"));
+    { // register Alexa devices
+      for (Configuration::Relay relay : relayList) {
+        LOG(relay.id);
+        LOG(F("- name=\""));
+        LOG(relay.name);
+        LOGLN('"');
+
+        fauxmo.addDevice(relay.name.c_str());
       }
     }
-  });
-  LOGLN(F("---"));
-  #endif
+    
+    LOGLN(F("register callback"));
+    fauxmo.onSetState([=](unsigned char device_id, const char* device_name, bool state, unsigned char value) {
+      LOGF("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+      
+      for (Configuration::Relay relay : relayList) {
+        if (relay.name.equals(device_name)) {
+          bridge->setRelay(relay.id, state);
+          return;
+        }
+      }
+    });
 
-  LOGLN(F("-- setup WebServer"));
-  WebServer::setFs(LittleFS);
-  WebServer::setBridge(bridge);
-  WebServer::setAuthentication(acl.username, acl.password);
+    LOGLN(F("---"));
+    #endif
 
-  server = new WebServer();
-  server->begin();
-
-  LOGLN(F("---"));
+    LOGLN(F("-- setup WebServer (api)"));
+    #ifdef WM_USE_ASYNC
+    server = new WebServerASync(LittleFS, bridge);
+    #else
+    server = new WebServerEsp8266(LittleFS, bridge);
+    #endif
+    server->setAuthentication(acl.username, acl.password);
+    // server->setMode(WebServer::MODE_ALL);
+    server->setMode(WebServer::MODE_API);
+    server->begin();
+    LOGLN(F("---"));
+  }
 
   BUSYLED_OFF;
+  #if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
+  nextLog = millis();
+  #endif
 }
-
-
-unsigned long nextLog = 0;
 
 
 void loop()
 {
   if (acl.canAutoRestart) {
     if (WiFi.status() != WL_CONNECTED) {
+      LOGLN(F("** WiFi disconnected **"));
       LOGLN(F("** RESTART **"));
-      for (uint8_t i=0; i<100; i++) { // TODO REMOVE
-        BUSYLED_ON;
-        WAIT(1300);
-        BUSYLED_OFF;
-        WAIT(700);
-      }
-
       ESP.restart();
     }
   }
 
+  if (!isAdminReset) {
+    if (digitalRead(WM_PIN_CONFIG) == LOW) {
+      LOGLN(F("** Unlock pressed **"));
+      LOGLN(F("** RESTART **"));
+      ESP.restart();
+    }
+  }
+
+  #if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
   if (millis() > nextLog) {
     nextLog += 2000;
     LOGF("[HW] Free heap: %d bytes\n", ESP.getFreeHeap());
   }
+  #endif
 
   #if WM_COMPONENT & WM_COMPONENT_ALEXA
   fauxmo.handle();
+  yield();
   #endif
   server->loop();
   #if WM_COMPONENT & WM_COMPONENT_MDNS
+  yield();
   MDNS.update();
   #endif
 

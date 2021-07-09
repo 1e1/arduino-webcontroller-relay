@@ -26,9 +26,9 @@ h2 button{
 o={};
 f=(a,u)=>{
     let x=new XMLHttpRequest;
-    x.open(a,`/cfg/${u}.json`,0);
+    x.open(a,`/cfg/${u}.json`);
     x.send(JSON.stringify(o[u]));
-    if(200==x.status){
+    x.onload=()=>{
         o[u]=JSON.parse(x.response);
         p[u]()
     }

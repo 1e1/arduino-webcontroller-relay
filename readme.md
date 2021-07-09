@@ -28,7 +28,10 @@ Edit `./sketch_WSlave/_config.h`
 
 Standard no-REST routes:
 
-- **$**: `/#`
+- **?**: `/?`
+  version info
+
+- **#**: `/#`
   number of relays if `WS_VERBOSE = WS_VERBOSE_LENGTH`
 
 - **$**: `/$`
@@ -251,6 +254,8 @@ The config portal os on `https://{ip}/portal`.
 #### software
 
 - Esp8266 for the optional Master sketch
+- ESPAsyncWebServer (+ ESPAsyncTCP + ArduinoJson)
+- ArduinoJson
 - fauxmoESP (for Alexa)
 - ESP AsyncTCP (for Alexa, required by fauxmoESP)
 
@@ -264,6 +269,8 @@ Then, upload the Master sketch on the Arduino ESP part.
 
 <ins>/!\\</ins> First I have to update my USB driver for this board: 
 ![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)/![download CH340](https://docs.wemos.cc/en/latest/ch340_driver.html)
+
+Set BUILTIN_LED on pin #14 according to [schematics](https://robotdyn.com/pub/media/0G-00005806==MEGA+WiFi-R3-AT2560-ESP8266-32MB-CH340G/DOCS/Schematic==0G-00005806==MEGA+WiFi-R3-AT2560-ESP8266-32MB-CH340G.pdf).
 
 
 Set the switches 5-6-7 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))
