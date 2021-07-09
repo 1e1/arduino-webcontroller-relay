@@ -29,7 +29,7 @@ class WebServerASync : public WebServer {
   void loop(void);
 
   void setAuthentication(String username, String password);
-  void setMode(const Mode mode) const;
+  //void setMode(const Mode mode) const;
 
   protected:
   void _setRoutes(void) const;

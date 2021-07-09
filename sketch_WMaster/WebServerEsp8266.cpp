@@ -56,6 +56,7 @@ WebServerEsp8266::WebServerEsp8266(FS &fs, Bridge* bridge)
 
 void WebServerEsp8266::begin(void)
 {
+  this->_setRoutes();
   //this->_server->getServer().setNoDelay(true);
   this->_server->begin();
 }
@@ -78,7 +79,7 @@ void WebServerEsp8266::setAuthentication(String username, String password)
   LOG("'"); LOG(_username); LOG(F("' : '")); LOG(_password); LOGLN("'");
 }
 
-
+/*
 void WebServerEsp8266::setMode(const Mode mode)
 {
   switch (mode) {
@@ -92,7 +93,7 @@ void WebServerEsp8266::setMode(const Mode mode)
       return this->_setRoutes();
   }
 }
-
+*/
 
 
 /***********************************************************
@@ -277,14 +278,14 @@ void WebServerEsp8266::_handleApi(void) const
         
         String payload = this->_server->arg(FPSTR(WebServer::PLAIN));
         StaticJsonDocument<WM_API_BUFFER_SIZE> jsonBuffer;
-        auto error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
+        DeserializationError error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
         LOGLN(payload);
         
         if (!error) {
           const bool state = jsonBuffer["s"].as<bool>();
           
           if (_bridge->setRelay(relayId, state)) {
-            this->_sendRelayMessage(_bridge->getCurrentRelayMessage());
+            return this->_sendRelayMessage(_bridge->getCurrentRelayMessage());
           }
         }
 
@@ -373,7 +374,7 @@ void WebServerEsp8266::_uploadJson(const char* path) const
 
   String payload = this->_server->arg(FPSTR(WebServer::PLAIN));
   DynamicJsonDocument jsonBuffer(WM_CONFIG_BUFFER_SIZE);
-  auto error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
+  DeserializationError error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
   LOGLN(payload);
   
   if (!error) {
@@ -450,7 +451,7 @@ void WebServerEsp8266::_writeSerialJson(void) const
   {
     DynamicJsonDocument doc(WM_CORE_BUFFER_SIZE);
     String payload = this->_server->arg(FPSTR(WebServer::PLAIN));
-    auto error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
+    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
     doc.shrinkToFit();
 
     root = doc.as<JsonArray>();

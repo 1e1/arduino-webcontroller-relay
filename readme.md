@@ -2,8 +2,10 @@
 
 A single controller connected by Web or USB.
 
+![mobile](./doc/home.png)
+
 This project has 2 parts:
-- a required Slave sketch to control the relay with optional interfaces:
+- a [required Slave sketch](#slave-sketch) to control the relay with optional interfaces:
   - CLI
     - USB (CLI)
     - Serial (CLI)
@@ -11,7 +13,7 @@ This project has 2 parts:
     - Ethernet
     - Wifi
 
-- an optional Master sketch for some powerful features driven by an ESP
+- an [optional Master sketch](#master-sketch) for some powerful features driven by an ESP
 
 ![landscape](./doc/hardware.jpg)
 
@@ -111,8 +113,8 @@ write anything and the read the help
 
 #### software
 
-- Arduino for the required Slave sketch
-- EthernetBonjour if `WS_BONJOUR_MODE` != `WS_BONJOUR_MODE_NONE`
+- **Arduino** (for the required Slave sketch)
+- *EthernetBonjour if `WS_BONJOUR_MODE` != `WS_BONJOUR_MODE_NONE`*
 
 
 ### upload Sketch
@@ -231,8 +233,7 @@ switch:
 Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`)
 
 
-## Mater sketch
-
+## Master sketch
 
 ### Setup
 
@@ -248,16 +249,18 @@ Connect to "HelloWorld" Wifi (* you could change)
 Open a bowser on `https://{ip}`.
 The config portal os on `https://{ip}/portal`.
 
+![portal](./doc/portal2.png)
+
 
 ### dependancies
 
 #### software
 
-- Esp8266 for the optional Master sketch
-- ESPAsyncWebServer (+ ESPAsyncTCP + ArduinoJson)
-- ArduinoJson
-- fauxmoESP (for Alexa)
-- ESP AsyncTCP (for Alexa, required by fauxmoESP)
+- **Esp8266**
+- **ArduinoJson**
+- *ESPAsyncWebServer (optional for faster HTTP server, not HTTPS)*
+- *fauxmoESP (optional for Alexa)*
+- *ESP AsyncTCP (optional for ESPAsyncWebServer or fauxmoESP)*
 
 
 ### upload Sketch
@@ -271,6 +274,9 @@ Then, upload the Master sketch on the Arduino ESP part.
 ![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)/![download CH340](https://docs.wemos.cc/en/latest/ch340_driver.html)
 
 Set BUILTIN_LED on pin #14 according to [schematics](https://robotdyn.com/pub/media/0G-00005806==MEGA+WiFi-R3-AT2560-ESP8266-32MB-CH340G/DOCS/Schematic==0G-00005806==MEGA+WiFi-R3-AT2560-ESP8266-32MB-CH340G.pdf).
+
+
+![switches-arduino-esp8266-mega](./doc/switches-arduino-esp8266-mega.png)
 
 
 Set the switches 5-6-7 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))
@@ -290,7 +296,7 @@ It will connect the Arduino Mega part to the Arduino ESP part.
 ### custom HTML
 
 - edit ./web/html/slave.html
-- export to ./sketch_WSlave/webApp-generated-*.h by `./bin/slave_genhtml.sh`
+- export to ./sketch_WSlave/webApp-generated-*.h by `./bin/slave_html_generate.sh`
 - export to ./sketch_WMaster/data/* by `./bin/master_html_generate.sh`
 - export to ./sketch_WMaster/certificate-generated.h/* by `./bin/master_certificate_generate.sh`
 - run `./web/docker-compose up` for testing

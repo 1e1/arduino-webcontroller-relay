@@ -1,19 +1,27 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>🔌 WCRelay</title>
+<meta name="mobile-web-app-capable"content="yes">
+<meta name="apple-mobile-web-app-capable"content="yes">
+<meta name="viewport"content="width=device-width, user-scalable=no">
+<title>🚥 WCRelay</title>
 <style>
 body{
     background:#222;
-    color:#fff;
+    color:#f0f8ff;
     font-family:sans-serif;
     font-size:1.2em;
     text-align:center;
     text-overflow:ellipsis;
-    display:flex;
-    flex-wrap:wrap;
+}
+
+h1{
+  border-bottom:1px solid;
+}
+
+#r{
+  display:flex;
+  flex-wrap:wrap;
 }
 
 label{
@@ -81,11 +89,11 @@ f=(a,b,c)=>{
 };
 w=(a,b,c)=>{
     a.forEach((a,b,c)=>
-        document.body.innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT','/${a.i}',JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
+    document.getElementById(`r`).innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT','/${a.i}',JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
     );
     index = 0;
     cb=x=>document.getElementById(`r${a[index].i}`).checked=x.s;
-    lp=()=>f('GET',`/${a[index].i}`,x=>{cb(x);if(++index<a.length){lp()}else{index=0;window.setTimeout(lp,30000)}});
+    lp=()=>f('GET',`/${a[index].i}`,x=>{cb(x);if(++index<a.length){lp()}else{index=0;window.setTimeout(lp,1000)}});
     lp();
 
     window.scrollTo(0,1);
@@ -93,3 +101,5 @@ w=(a,b,c)=>{
 </script>
 </head>
 <body onload="f('GET','',w)">
+<h1>🚥 WCRelay</h1>
+<div id="r">
