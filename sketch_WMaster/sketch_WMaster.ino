@@ -222,8 +222,6 @@ void setup()
     server = new WebServerEsp8266(LittleFS, bridge);
     #endif
     server->setAuthentication(acl.username, acl.password);
-    // server->setMode(WebServer::MODE_ALL);
-    server->setMode(WebServer::MODE_PORTAL);
     server->begin();
     LOGLN(F("---"));
   } else {
@@ -266,8 +264,6 @@ void setup()
     server = new WebServerEsp8266(LittleFS, bridge);
     #endif
     server->setAuthentication(acl.username, acl.password);
-    // server->setMode(WebServer::MODE_ALL);
-    server->setMode(WebServer::MODE_API);
     server->begin();
     LOGLN(F("---"));
   }

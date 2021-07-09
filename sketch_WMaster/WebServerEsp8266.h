@@ -25,7 +25,7 @@ class WebServerEsp8266 : public WebServer {
   void loop(void);
 
   void setAuthentication(String username, String password);
-  void setMode(const Mode mode);
+  //void setMode(const Mode mode);
 
   protected:
   void _setRoutes(void);

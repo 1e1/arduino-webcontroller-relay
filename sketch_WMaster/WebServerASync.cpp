@@ -48,6 +48,7 @@ WebServerASync::WebServerASync(FS &fs, Bridge* bridge)
 
 void WebServerASync::begin(void)
 {
+  this->_setRoutes();
   /* * /
   if (_jsonLine[0] == 'S') {
     _jsonLine[0] = ' ';
@@ -90,7 +91,7 @@ void WebServerASync::setAuthentication(String username, String password)
   LOG("'"); LOG(_username); LOG(F("' : '")); LOG(_password); LOGLN("'");
 }
 
-
+/*
 void WebServerASync::setMode(const Mode mode) const
 {
   switch (mode) {
@@ -104,7 +105,7 @@ void WebServerASync::setMode(const Mode mode) const
       return this->_setRoutes();
   }
 }
-
+*/
 
 
 /***********************************************************

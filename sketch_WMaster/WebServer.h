@@ -43,7 +43,7 @@ class WebServer {
   void setFs(FS &fs);
   void setBridge(Bridge* bridge);
   virtual void setAuthentication(String username, String password) =0;
-  virtual void setMode(const Mode mode) =0;
+  //virtual void setMode(const Mode mode) =0;
 
   protected:
 

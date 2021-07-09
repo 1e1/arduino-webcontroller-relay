@@ -42,7 +42,7 @@
 
 #define WM_CORE_BUFFER_SIZE         4096
 #define WM_CONFIG_BUFFER_SIZE       1024
-#define WM_API_BUFFER_SIZE          16
+#define WM_API_BUFFER_SIZE          32
 
 
 #define WM_SERIAL_READ_TIMEOUT      10
