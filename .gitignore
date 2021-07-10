@@ -1,10 +1,11 @@
 !**/.keep
 **/__pycache__
 
-web/html/_*.txt
 web/html/_*.html
+web/html/_*.ini
+web/html/_*.txt
 web/nodered
 web/hass
 
 sketch_WMaster/dump
-sketch_WMaster/data
+sketch_WMaster/data/*.json
