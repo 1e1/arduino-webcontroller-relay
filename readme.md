@@ -1,8 +1,10 @@
-# WrightSlave Relay
+
+![landscape](./doc/hardware.jpg)
+
+
+# 🚥 Wright Relay
 
 A single controller connected by Web or USB.
-
-![mobile](./doc/home.png)
 
 This project has 2 parts:
 - a [required Slave sketch](#slave-sketch) to control the relay with optional interfaces:
@@ -11,14 +13,22 @@ This project has 2 parts:
     - Serial (CLI)
   - API/html
     - Ethernet
-    - Wifi
+    - WiFi
 
-- an [optional Master sketch](#master-sketch) for some powerful features driven by an ESP
+- an [optional Master sketch](#master-sketch) for some powerful features driven by an ESP:
+  - rich configuration portal
+  - relay labeling
+  - switching on Hotspot connection
+  - multi-WiFi
+  - Alexa
+  - https
 
-![landscape](./doc/hardware.jpg)
+[![WebController Relay on Arduino Mega ESP8266](https://i.ytimg.com/vi_webp/T4h35BUY_8s/maxresdefault.webp)](https://www.youtube.com/watch?v=T4h35BUY_8s)
 
 
 ## Slave sketch
+
+On standalone mode, you can add an Ethernet shield or a WiFi shield.
 
 
 ### Setup
@@ -98,7 +108,9 @@ Read the ![swagger](./doc/swagger-slave.yml)
 
 The Arduino boots on the DHCP.
 If `#define WS_VERBOSE WS_VERBOSE_WEBAPP` (or `WS_VERBOSE_ALL` by default),
-open a bowser on `http://{ip}`.
+open a bowser on `http://{ip}` (379B).
+
+![portal](./doc/slave.png)
 
 
 ### USB
@@ -117,123 +129,11 @@ write anything and the read the help
 - *EthernetBonjour if `WS_BONJOUR_MODE` != `WS_BONJOUR_MODE_NONE`*
 
 
-### upload Sketch
-
-Open the folder ./sketch_WSlave/ with your favorite IDE (Arduino?)
-
-Example with a Wemos Mega Wifi, a board with a Arduino Mega and an Esp8266 linked by a Serial. 
-First, upload the Slave sketch on the Arduino Mega part. 
-
-<ins>/!\\</ins> First I have to update my USB driver for this board: 
-![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)
-
-
-Set the switches 3-4 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))
-
-![ide-config-slave](./doc/ide-config-slave.png)
-
-
-### integrations
-
-#### Home Assistant (hass)
-
-![hass](./doc/hass/preview.png)
-
-##### UI Wizard setup
-
-If the component is not embed in your HASS version,
-install `http_inline` from `./doc/hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`,
-then use the wizard.
-
-
-##### CLI install
-
-###### Custom component
-
-Add the following lines into `configuration.yaml`,
-and apply this template:
-
-```yaml
-switch:
-  - platform: http_inline
-    host: http://{host}
-    relays:
-      {relayId}: {friendlyName}
-```
-
-And customize:
-- `{host}`: WebController IP or host
-- `{relayId}`: WebController ID
-- `{friendlyName}`: a free text
-
-Example:
-
-```yaml
-switch:
-  - platform: http_inline
-    host: http://web
-    relays:
-      0: Fan Office
-      1: Light Desk
-      2: Light Kitchen
-      3: Light Living room
-      4: Light Bedroom 1
-      5: Light Bedroom 2
-      6: Light Garage
-      7: Light Garden
-```
-
-###### Official
-
-Add the following lines into `configuration.yaml`,
-and apply this template:
-
-```yaml
-switch:
-  - platform: command_line
-    switches:
-      {sluggedEntityId}:
-        command_on: "/usr/bin/curl -X GET http://{host}/w/{relayId}/1"
-        command_off: "/usr/bin/curl -X GET http://{host}/w/{relayId}/0"
-        command_state: "/usr/bin/curl -X GET http://{host}/r/{relayId}"
-        value_template: '{{ value.split()[0] == "1" }}'
-        friendly_name: {friendlyName}
-```
-
-And customize:
-- `{sluggedEntityId}`: HASS entity ID
-- `{host}`: WebController IP or host
-- `{relayId}`: WebController ID
-- `{friendlyName}`: a free text
-
-Example:
-
-```yaml
-switch:
-  - platform: command_line
-    switches:
-      r0:
-        command_on: "/usr/bin/curl -X GET http://webrelay.local/w/0/1"
-        command_off: "/usr/bin/curl -X GET http://webrelay.local/w/0/0"
-        command_state: "/usr/bin/curl -X GET http://webrelay.local/r/0"
-        value_template: '{{ value.split()[0] == "1" }}'
-        friendly_name: "Relay #0"
-      r42:
-        command_on: "/usr/bin/curl -X GET http://webrelay.local/w/42/1"
-        command_off: "/usr/bin/curl -X GET http://webrelay.local/w/42/0"
-        command_state: "/usr/bin/curl -X GET http://webrelay.local/r/42"
-        value_template: '{{ value.split()[0] == "1" }}'
-        friendly_name: "Relay #42"
-```
-
-##### NodeRed
-
-![hass](./doc/nodered/preview.png)
-
-Import the `./doc/nodered/flows_subFlowAndTest.json` (or `flow_subFlowOnly.json`)
-
 
 ## Master sketch
+
+It will add Relay names, Alexa features, low power consumption. The Master communicates to the Slave by the Serial interface.
+
 
 ### Setup
 
@@ -242,14 +142,31 @@ Edit `./sketch_WMaster/config.h`
 
 ### Commands
 
+Standard REST routes:
+
+- `GET /api/r`
+  get relay list
+
+- `GET /api/r/{relay_id}`
+  get state of a relay
+
+- `PUT /api/r/{relay_id}`
+  set state of a relay
+
+Read the ![swagger](./doc/swagger-master.yml)
+
 
 ### webApp
 
-Connect to "HelloWorld" Wifi (* you could change)
-Open a bowser on `https://{ip}`.
-The config portal os on `https://{ip}/portal`.
+Connect to "HelloWorld" WiFi (* you could change),
+Open a bowser on `https://{ip}` (742B).
+
+![mobile](./doc/home.png)
+
+The config portal is on `https://{ip}/portal` (1047B).
 
 ![portal](./doc/portal2.png)
+
 
 
 ### dependancies
@@ -263,74 +180,16 @@ The config portal os on `https://{ip}/portal`.
 - *ESP AsyncTCP (optional for ESPAsyncWebServer or fauxmoESP)*
 
 
-### upload Sketch
-
-Open the folder ./sketch_WMaster/ with your favorite IDE (Arduino?)
-
-Example with a Wemos Mega Wifi, a board with a Arduino Mega and an Esp8266 linked by a Serial. 
-Then, upload the Master sketch on the Arduino ESP part. 
-
-<ins>/!\\</ins> First I have to update my USB driver for this board: 
-![download CH34X](http://www.wch-ic.com/downloads/category/30.html?page=2)/![download CH340](https://docs.wemos.cc/en/latest/ch340_driver.html)
-
-Set BUILTIN_LED on pin #14 according to [schematics](https://robotdyn.com/pub/media/0G-00005806==MEGA+WiFi-R3-AT2560-ESP8266-32MB-CH340G/DOCS/Schematic==0G-00005806==MEGA+WiFi-R3-AT2560-ESP8266-32MB-CH340G.pdf).
-
-
-![switches-arduino-esp8266-mega](./doc/switches-arduino-esp8266-mega.png)
-
-
-Set the switches 5-6-7 ON, the others ones OFF (![Robotdyn manual](https://robotdyn.com/mega-wifi-r3-atmega2560-esp8266-flash-32mb-usb-ttl-ch340g-micro-usb.html))
-
-![ide-config-master](./doc/ide-config-master.png)
-
-Press the MODE button while the sketch is uploading. 
-Close the Serial Monitor window to upload the LittleFS data. 
-
-For the final run, 
-set the switches 1-2 ON, the others ones OFF. 
-It will connect the Arduino Mega part to the Arduino ESP part.
-
-
-## tools
-
-### custom HTML
-
-- edit ./web/html/slave.html
-- export to ./sketch_WSlave/webApp-generated-*.h by `./bin/slave_html_generate.sh`
-- export to ./sketch_WMaster/data/* by `./bin/master_html_generate.sh`
-- export to ./sketch_WMaster/certificate-generated.h/* by `./bin/master_certificate_generate.sh`
-- run `./web/docker-compose up` for testing
-
-### docker-compose
-
-```bash
-$ ./web
-$ docker-compose up
-```
-
-- test custom HTML on http://{docker-machine}:8080
-- test Home Assistant on http://{docker-machine}:8123
-- test NodeRed on http://{docker-machine}:1880
-
-### help
-
-You can watch the communication between an Arduino Mega slave and a ESP master with SerialTools.
-Use a separate Wemos D1 mini and a standard Arduino Mega. 
-
-![app SerialTools](./doc/serialtools.png)
-
-
-A video explains how to upload the sketches on an Arduino Mega ESP8266
-[![HOWTO on YouTube](https://i.ytimg.com/vi_webp/7OckOeyoso8/maxresdefault.webp)](https://www.youtube.com/watch?v=7OckOeyoso8)
-
-Backup a configuration into `./sketch_WMaster/dump/` with `./bin/master_config_download.sh`, 
-then upload it on a fresh install with `./bin/master_config_upload.sh`.
-
-
 ### Suggestions
 
 - ☐ TODO: read states from calendar
-- ☑︎ TODO: ESP as master controller: ESP interrupts the sleeping Arduino on Serial (RX3=PCINT[9] on Mega)
-- ☑︎ TODO: ESP has no preconfigured credentials (from the firmware)
-- ☑︎ TODO: if the ESP cannot join a known network, it starts as hotspot during a # seconds
-- ☑︎ TODO: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)
+- ☑︎ DONE: ESP as master controller: ESP interrupts the sleeping Arduino on Serial (RX3=PCINT[9] on Mega)
+- ☑︎ DONE: ESP has no preconfigured credentials (from the firmware)
+- ☑︎ DONE: if the ESP cannot join a known network, it starts as hotspot during a # seconds
+- ☑︎ DONE: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)
+
+
+## more docs
+
+- [External integrations](./doc/extra.md) (HomeAssitant, NodeRed, tools, etc)
+- [All-in-One hardware](./doc/wemos-mega-wifi.md) (Arduino+ESP8266, Wemos Mega WiFi, RobotDyn, etc)
