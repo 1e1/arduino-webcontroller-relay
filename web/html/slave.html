@@ -26,7 +26,7 @@ label{
                 document.body.innerHTML+=`<label><input type=checkbox onclick="f('GET','/w/${x[1]}/'+1*this.checked)" ${x[0]>0?'checked':''}>${x[1]}</label>`
             }
         })
-    };
+    }
 </script>
 </head>
 <body onload="x(f('GET','/all.txt'))">
