@@ -70,7 +70,7 @@ Standard no-REST routes:
   set a relay to NC mode (is_nc=1) or NO mode (is_nc=0)
 
 - save (**!**): `/!`
-  save the wiring into EEPROM, not the values ON/OFF if `WS_STORAGE = !WS_STORAGE_NONE`
+  save the wiring into EEPROM, not the values ON/OFF if `WS_STORAGE != WS_STORAGE_NONE`
 
 - reset (**~**): `/~`
   reset the board  if `WS_ACL_ALLOW = WS_ACL_ALLOW_RESET`
@@ -88,10 +88,10 @@ Read the ![swagger](./doc/swagger-slave.yml)
 
 ##### HTTP
 
-- go to `http://webrelay.local/m/7/42`
-- go to `http://webrelay.local/c/7/1` if it's a NC wired (`http://webrelay.local/c/7/0` otherwise)
-- go to `http://webrelay.local/w/7/1` if you want switch ON now (`http://webrelay.local/w/7/0`otherwise)
-- go to `http://webrelay.local/r/7` to check
+- Go to `http://webrelay.local/m/7/42`
+- Go to `http://webrelay.local/c/7/1` if it's a NC wired (`http://webrelay.local/c/7/0` otherwise)
+- Go to `http://webrelay.local/w/7/1` if you want switch ON now (`http://webrelay.local/w/7/0`otherwise)
+- Go to `http://webrelay.local/r/7` to check
 
 ##### Serial
 
@@ -108,7 +108,7 @@ Read the ![swagger](./doc/swagger-slave.yml)
 
 The Arduino boots on the DHCP.
 If `#define WS_VERBOSE WS_VERBOSE_WEBAPP` (or `WS_VERBOSE_ALL` by default),
-open a bowser on `http://{ip}` (379B).
+open a bowser on `http://{ip}` (455B).
 
 ![portal](./doc/slave.png)
 
@@ -137,7 +137,7 @@ It will add Relay names, Alexa features, low power consumption. The Master commu
 
 ### Setup
 
-Edit `./sketch_WMaster/config.h`
+Edit `./sketch_WMaster/_config.h`
 
 
 ### Commands
@@ -159,7 +159,7 @@ Read the ![swagger](./doc/swagger-master.yml)
 ### webApp
 
 Connect to "HelloWorld" WiFi (* you could change),
-Open a bowser on `https://{ip}` (742B).
+Open a bowser on `https://{ip}` (675B).
 
 ![mobile](./doc/home.png)
 

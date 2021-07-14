@@ -35,7 +35,7 @@ void setup()
   LOG_START();
   LOGLN(F("DEBUG ON"));
 
-  delay(2000);
+  WAIT(2000);
   Energy.begin();
   Relayboard.begin();
 
