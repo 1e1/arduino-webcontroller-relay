@@ -52,7 +52,7 @@ class Configuration {
 
   void begin(void);
   void setSafeMode(const bool isSafeMode=true);
-  const Global* getGlobal(void) const { return &this->_global; };
+  Global* getGlobal(void) { return &this->_global; };
   const std::list<WifiStation> getWifiStationList(void) const;
   const std::list<Relay> getRelayList(void) const;
 

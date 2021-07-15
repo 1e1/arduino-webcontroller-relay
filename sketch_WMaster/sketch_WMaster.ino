@@ -42,7 +42,7 @@
 
 
 
-Configuration::Acl acl;
+Configuration* configuration;
 Bridge* bridge;
 WebServer* server;
 bool isAdminReset;
@@ -55,6 +55,108 @@ fauxmoESP fauxmo;
 #if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
 unsigned long nextLog = 0;
 #endif
+
+
+void connectWiFiSta(void)
+{
+  /**
+    * set mode Home Assistant
+    * (Configuration*)
+    */
+  BUSYLED_ON;
+  LOGLN(F("-- trying to connect to STA:"));
+  WiFi.mode(WIFI_STA);
+  WiFi.hostname(certificate::dname);
+  WiFi.setOutputPower(WM_WIFI_STA_OUTPUT_POWER);
+  WiFi.setPhyMode(WM_WIFI_STA_PHY_MODE);
+
+  ESP8266WiFiMulti wifiMulti;
+  std::list<Configuration::WifiStation> wifiList = configuration->getWifiStationList();
+  for (Configuration::WifiStation wifi : wifiList) {
+      LOGLN(wifi.ssid);
+      wifiMulti.addAP(wifi.ssid.c_str() + '\0', wifi.password.c_str() + '\0');
+  }
+  
+  if (wifiMulti.run(WM_WIFI_CONNEXION_TIMEOUT_MS) == WL_CONNECTED) {
+    LOG(F("connected at: ")); LOGLN(WiFi.SSID());
+  }
+  /* */
+  LOGLN(F("---"));
+  BUSYLED_OFF;
+}
+
+
+void connectWiFiAp(void)
+{
+  /**
+    * set mode Guardian
+    * (Configuration*, Configuration::Global*)
+    */
+  LOGLN(F("-- trying to create AP:"));
+  WiFi.mode(WIFI_AP);
+  WiFi.hostname(certificate::dname);
+  WiFi.setOutputPower(WM_WIFI_AP_OUTPUT_POWER);
+  WiFi.setPhyMode(WM_WIFI_AP_PHY_MODE);
+
+  LOG(F("AP ssid: "));LOGLN(configuration->getGlobal()->wifiAp.ssid);
+  LOG(F("AP password: "));LOGLN(configuration->getGlobal()->wifiAp.password);
+  
+  //IPAddress myIp(192, 168, 0, 1); // TODO CONSTANTIZE
+  //WiFi.softAPConfig(myIp, myIp, IPAddress(255, 255, 255, 0));
+
+  WiFi.softAP(
+    configuration->getGlobal()->wifiAp.ssid, 
+    configuration->getGlobal()->wifiAp.password, 
+    configuration->getGlobal()->wifiAp.channel, 
+    configuration->getGlobal()->wifiAp.isHidden
+  );
+  
+  LOGLN(F("---"));
+}
+
+
+void connectWiFi(void)
+{
+  if (!configuration->getGlobal()->acl.isSafeMode) {
+    connectWiFiSta();
+  }
+
+  if (WiFi.status() != WL_CONNECTED) {
+    connectWiFiAp();
+    
+    if (!isAdminReset) {
+      /**
+       * stalk connected devices and switch sensitive relays
+       */
+      LOGLN(F("trying to detect connected devices"));
+
+      WiFi.setSleepMode(WIFI_LIGHT_SLEEP, 3); // TODO constantize
+      delay(WM_WIFI_CONNEXION_TIMEOUT_MS);
+      if (WiFi.softAPgetStationNum()) {
+        LOGLN(F("OK, run Relay commands:"));
+        BUSYLED_ON;
+
+        std::list<Configuration::Relay> relayList = configuration->getRelayList();
+
+        for (Configuration::Relay relay : relayList) {
+          if (relay.onConnect != Configuration::T_indeterminate) {
+            LOG(relay.name); LOG(F(" -> ")); LOGLN(relay.onConnect);
+            bridge->setRelay(relay.id, static_cast<bool>(relay.onConnect));
+          }
+        }
+
+        BUSYLED_OFF;
+      } else {
+        //ESP.deepSleepInstant(ESP.deepSleepMax(), WAKE_RF_DISABLED); // TODO constantize (microseconds)
+        delay(5 *60 *1000); // TODO constantize (millis)
+      }
+
+      LOGLN(F("---"));
+      LOGLN(F("** RESTART **"));
+      ESP.restart();
+    }
+  }
+}
 
 
 void setup()
@@ -72,7 +174,7 @@ void setup()
   WM_SERIAL.begin(WM_SERIAL_SPEED);
   LittleFS.begin();
   bridge = new Bridge(WM_SERIAL);
-  Configuration* configuration = new Configuration(LittleFS);
+  configuration = new Configuration(LittleFS);
 
   pinMode(WM_PIN_CONFIG, INPUT_PULLUP);
   pinMode(WM_PIN_SAFEMODE, INPUT_PULLUP);
@@ -110,125 +212,39 @@ void setup()
   }
   #endif
 
-  LOGLN(F("-- load Configuration"));
-  configuration->begin();
-  configuration->setSafeMode(isSafeMode);
+  {
+    LOGLN(F("-- load Configuration"));
+    configuration->begin();
+    configuration->setSafeMode(isSafeMode);
 
-  acl = configuration->getGlobal()->acl;
-
-  if (isAdminReset) {
-    acl.canAutoRestart = false;
-  }
-  LOGLN(F("---"));
-
-  WiFi.hostname(certificate::dname);
-
-  if (!acl.isSafeMode) {
-    /**
-     * set mode Home Assistant
-     * (Configuration*)
-     */
-    BUSYLED_ON;
-    LOGLN(F("-- trying to connect to STA:"));
-    WiFi.setOutputPower(20); // TODO CONSTANTIZE
-
-    ESP8266WiFiMulti wifiMulti;
-    std::list<Configuration::WifiStation> wifiList = configuration->getWifiStationList();
-    for (Configuration::WifiStation wifi : wifiList) {
-        LOGLN(wifi.ssid);
-        wifiMulti.addAP(wifi.ssid.c_str() + '\0', wifi.password.c_str() + '\0');
+    if (isAdminReset) {
+      configuration->getGlobal()->acl.canAutoRestart = false;
     }
-    
-    if (wifiMulti.run(WM_WIFI_CONNEXION_TIMEOUT_MS) == WL_CONNECTED) {
-      LOG(F("connected at: ")); LOGLN(WiFi.SSID());
-    }
-    /* */
     LOGLN(F("---"));
-    BUSYLED_OFF;
   }
 
-  std::list<Configuration::Relay> relayList = configuration->getRelayList();
-
-  if (WiFi.status() != WL_CONNECTED) {
-    /**
-     * set mode Guardian
-     * (Configuration*, Configuration::Global*)
-     */
-    LOGLN(F("-- trying to create AP:"));
-    WiFi.setOutputPower(10); // TODO CONSTANTIZE
-    LOG(F("AP ssid: "));LOGLN(configuration->getGlobal()->wifiAp.ssid);
-    LOG(F("AP password: "));LOGLN(configuration->getGlobal()->wifiAp.password);
-    
-    //IPAddress myIp(192, 168, 0, 1); // TODO CONSTANTIZE
-    //WiFi.softAPConfig(myIp, myIp, IPAddress(255, 255, 255, 0));
-
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(
-      configuration->getGlobal()->wifiAp.ssid, 
-      configuration->getGlobal()->wifiAp.password, 
-      configuration->getGlobal()->wifiAp.channel, 
-      configuration->getGlobal()->wifiAp.isHidden
-    );
-    
-    LOGLN(F("---"));
-    
-    if (!isAdminReset) {
-      /**
-       * stalk connected devices and switch sensitive relays
-       */
-      LOGLN(F("trying to detect connected devices"));
-
-      WiFi.setSleepMode(WIFI_LIGHT_SLEEP, 3); // TODO constantize
-      delay(WM_WIFI_CONNEXION_TIMEOUT_MS);
-      if (WiFi.softAPgetStationNum()) {
-        LOGLN(F("OK, run Relay commands:"));
-        BUSYLED_ON;
-
-        for (Configuration::Relay relay : relayList) {
-          if (relay.onConnect != Configuration::T_indeterminate) {
-            LOG(relay.name); LOG(F(" -> ")); LOGLN(relay.onConnect);
-            bridge->setRelay(relay.id, static_cast<bool>(relay.onConnect));
-          }
-        }
-
-        BUSYLED_OFF;
-      } else {
-        //ESP.deepSleepInstant(ESP.deepSleepMax(), WAKE_RF_DISABLED); // TODO constantize (microseconds)
-        delay(5 *60 *1000); // TODO constantize (millis)
-      }
-
-      LOGLN(F("---"));
-      ESP.restart();
-    }
-
-  }
+  connectWiFi();
 
   #if WM_COMPONENT & WM_COMPONENT_MDNS
-  LOGLN(F("-- setup mDNS"));
-  MDNS.begin(certificate::dname);
-  #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
-  MDNS.addService(F("https"), F("tcp"), WM_WEB_PORT_DEFAULT_SECURE);
-  #else
-  MDNS.addService(F("http"), F("tcp"), WM_WEB_PORT_DEFAULT);
-  #endif
-  LOGLN(F("---"));
-  #endif
-
-  if (isAdminReset) {
-    LOGLN(F("-- setup WebServer (portal)"));
-    #ifdef WM_USE_ASYNC
-    server = new WebServerASync(LittleFS, bridge);
+  {
+    LOGLN(F("-- setup mDNS"));
+    MDNS.begin(certificate::dname);
+    #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
+    MDNS.addService(F("https"), F("tcp"), WM_WEB_PORT_DEFAULT_SECURE);
     #else
-    server = new WebServerEsp8266(LittleFS, bridge);
+    MDNS.addService(F("http"), F("tcp"), WM_WEB_PORT_DEFAULT);
     #endif
-    server->setAuthentication(acl.username, acl.password);
-    server->begin();
     LOGLN(F("---"));
-  } else {
-    #if WM_COMPONENT & WM_COMPONENT_ALEXA
+  }
+  #endif
+  
+  #if WM_COMPONENT & WM_COMPONENT_ALEXA
+  {
     LOGLN(F("-- setup Alexa"));
     fauxmo.createServer(true);
     fauxmo.enable(true);
+
+    std::list<Configuration::Relay> relayList = configuration->getRelayList();
 
     LOGLN(F("register devices:"));
     { // register Alexa devices
@@ -255,15 +271,17 @@ void setup()
     });
 
     LOGLN(F("---"));
-    #endif
+  }
+  #endif
 
-    LOGLN(F("-- setup WebServer (api)"));
+  {
+    LOGLN(F("-- setup WebServer"));
     #ifdef WM_USE_ASYNC
     server = new WebServerASync(LittleFS, bridge);
     #else
     server = new WebServerEsp8266(LittleFS, bridge);
     #endif
-    server->setAuthentication(acl.username, acl.password);
+    server->setAuthentication(configuration->getGlobal()->acl.username, configuration->getGlobal()->acl.password);
     server->begin();
     LOGLN(F("---"));
   }
@@ -277,11 +295,14 @@ void setup()
 
 void loop()
 {
-  if (acl.canAutoRestart) {
-    if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {
+    if (configuration->getGlobal()->acl.canAutoRestart) {
       LOGLN(F("** WiFi disconnected **"));
       LOGLN(F("** RESTART **"));
       ESP.restart();
+    } else {
+      connectWiFiSta();
+      yield();
     }
   }
 
@@ -309,6 +330,4 @@ void loop()
   yield();
   MDNS.update();
   #endif
-
-
 }

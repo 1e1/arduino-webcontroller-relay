@@ -26,62 +26,114 @@ EMPTY_INTERRUPT(WDT_vect);
 #endif
 
 #if (WS_LOWPOWER & WS_LOWPOWER_INTERRUPTS)
-ISR(PCINT1_vect)
-{
-  _ISR_wakeup();
-}
-ISR(PCINT0_vect)
-{
-  _ISR_wakeup();
-}
-
-void attachDefaultInterrupts(const uint8_t mode = RISING)
-{
-  bitSet(PCICR,1);
-  #if ((WS_INTERFACE & WS_INTERFACE_SERIAL) && (WS_SERIAL_ID == 0)) || (WS_INTERFACE & WS_INTERFACE_USB)
-    #ifdef PCINT8 // RX0
-      bitSet(PCMSK1, PCINT8);
-    #endif
-  #endif
-  #if (WS_INTERFACE & WS_INTERFACE_SERIAL) && (WS_SERIAL_ID == 1)
-    #ifdef PCINT9 // RX1
-      bitSet(PCMSK1, PCINT8);
-    #endif
-  #endif
-  #if (WS_INTERFACE & WS_INTERFACE_SERIAL) && (WS_SERIAL_ID == 3)
-    #ifdef PCINT9 // RX3
-      bitSet(PCMSK1, PCINT9);
-    #endif
-  #endif
-  #if WS_INTERFACE & WS_INTERFACE_ETHERNET
-    #ifdef PCINT3  // MISO
-      // bitSet(PCMSK0, PCINT3);
-    #endif
-  #endif
-}
-
-void detachDefaultInterrupts()
-{
-  bitSet(PCICR,1);
-  #if (WS_INTERFACE & WS_INTERFACE_SERIAL) || (WS_INTERFACE & WS_INTERFACE_USB)
-    #ifdef PCINT8 // RX0
-      bitClear(PCMSK1, PCINT8);
-    #endif
+  #if WS_INTERFACE & WS_INTERFACE_LCD
+  ISR(PCINT2_vect)
+  {
+    //_ISR_wakeup();
+    // check analog input
+  }
   #endif
   #if WS_INTERFACE & WS_INTERFACE_SERIAL
-    #ifdef PCINT9 // RX3
-      bitClear(PCMSK1, PCINT9);
-    #endif
+  ISR(PCINT1_vect)
+  {
+    _ISR_wakeup();
+  }
   #endif
   #if WS_INTERFACE & WS_INTERFACE_ETHERNET
-    #ifdef PCINT3  // MISO
-      // bitClear(PCMSK0, PCINT3);
-    #endif
+  ISR(PCINT0_vect)
+  {
+    //_ISR_wakeup();
+    // check Ethernet
+  }
   #endif
-}
+
+
+  void attachDefaultInterrupts(const uint8_t mode = RISING)
+  {
+    //noInterrupts();
+    /*
+    PCIE2 = PCINT23:16
+    PCIE1 = PCINT15:8
+    PCIE0 = PCINT7:0
+    */
+    #if WS_INTERFACE & WS_INTERFACE_LCD
+      bitSet(PCICR, PCIE2);
+      #ifdef PCINT16  // A8
+        bitSet(PCMSK2, PCINT16);
+      #endif
+    #endif
+    #if WS_INTERFACE & WS_INTERFACE_SERIAL
+      bitSet(PCICR, PCIE1);
+      #if WS_SERIAL_ID == 3
+        #ifdef PCINT9 // RX3
+          bitSet(PCMSK1, PCINT9);
+        #endif
+      #endif
+      #if (WS_SERIAL_ID == 0)) || (WS_INTERFACE & WS_INTERFACE_USB)
+        #ifdef PCINT8 // RX0
+          bitSet(PCMSK1, PCINT8);
+        #endif
+      #endif
+      #if WS_SERIAL_ID == 1
+        #ifdef PCINT9 // RX1
+          bitSet(PCMSK1, PCINT8);
+        #endif
+      #endif
+    #endif
+    #if WS_INTERFACE & WS_INTERFACE_ETHERNET
+      bitSet(PCICR, PCIE0);
+      #ifdef PCINT3  // MISO
+        // bitSet(PCMSK0, PCINT3);
+      #endif
+    #endif
+    //interrupts();
+  }
+
+  void detachDefaultInterrupts()
+  {
+    //noInterrupts();
+    /*
+    PCIE2 = PCINT23:16
+    PCIE1 = PCINT15:8
+    PCIE0 = PCINT7:0
+    */
+    #if WS_INTERFACE & WS_INTERFACE_LCD
+      bitSet(PCICR, PCIE2);
+      #ifdef PCINT16  // A8
+        bitClear(PCMSK2, PCINT16);
+      #endif
+    #endif
+    #if WS_INTERFACE & WS_INTERFACE_SERIAL
+      bitSet(PCICR, PCIE1);
+      #if WS_SERIAL_ID == 3
+        #ifdef PCINT9 // RX3
+          bitClear(PCMSK1, PCINT9);
+        #endif
+      #endif
+      #if (WS_SERIAL_ID == 0)) || (WS_INTERFACE & WS_INTERFACE_USB)
+        #ifdef PCINT8 // RX0
+          bitClear(PCMSK1, PCINT8);
+        #endif
+      #endif
+      #if WS_SERIAL_ID == 1
+        #ifdef PCINT9 // RX1
+          bitClear(PCMSK1, PCINT8);
+        #endif
+      #endif
+    #endif
+    #if WS_INTERFACE & WS_INTERFACE_ETHERNET
+      bitSet(PCICR, PCIE0);
+      #ifdef PCINT3  // MISO
+        // bitClear(PCMSK0, PCINT3);
+      #endif
+    #endif
+    //interrupts();
+  }
+#endif
+
 #else
-void attachDefaultInterrupts(const uint8_t mode = RISING) {};
-void detachDefaultInterrupts() {};
+  void attachDefaultInterrupts(const uint8_t mode = RISING) {};
+  void detachDefaultInterrupts() {};
 #endif
 
 uint8_t PowerManager::_cycleCounter = 0;

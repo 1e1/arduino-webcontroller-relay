@@ -7,8 +7,9 @@
 #define WS_INTERFACE_ETHERNET       2
 #define WS_INTERFACE_WIFI           4
 #define WS_INTERFACE_SERIAL         8
+#define WS_INTERFACE_LCD            16
 #define WS_INTERFACE_ALL            ( WS_INTERFACE_USB + WS_INTERFACE_ETHERNET )
-#define WS_INTERFACE_COUNT(m)       ( bool(m & WS_INTERFACE_USB) + bool(m & WS_INTERFACE_ETHERNET) + bool(m & WS_INTERFACE_WIFI) + bool(m & WS_INTERFACE_SERIAL) )
+#define WS_INTERFACE_COUNT(m)       ( bool(m & WS_INTERFACE_USB) + bool(m & WS_INTERFACE_ETHERNET) + bool(m & WS_INTERFACE_WIFI) + bool(m & WS_INTERFACE_SERIAL) + bool(m & WS_INTERFACE_LCD) )
 
 #define WS_VERBOSE_NONE             0
 #define WS_VERBOSE_HELP             1
