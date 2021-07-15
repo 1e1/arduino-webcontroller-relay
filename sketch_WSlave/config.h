@@ -105,6 +105,16 @@
 #ifndef WS_HTML_COMPRESSION
 #define WS_HTML_COMPRESSION WS_HTML_COMPRESSION_GZ
 #endif
+
+#ifndef WS_WIRING_ETHERNET_SS
+#define WS_WIRING_ETHERNET_SS       10
+#endif
+#ifndef WS_WIRING_SDCARD_SS
+#define WS_WIRING_SDCARD_SS         4
+#endif
+#ifndef WS_WIRING_SDCARD_SS_OFF
+#define WS_WIRING_SDCARD_SS_OFF     HIGH
+#endif
 // =========================
 
 

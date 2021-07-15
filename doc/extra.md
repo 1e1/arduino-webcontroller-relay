@@ -10,92 +10,101 @@
 
 ![hass](./hass/preview.png)
 
-##### UI Wizard setup
-
-If the component is not embed in your HASS version,
-install `http_inline` from `./hass/custom_compoenents/http_inline` to `/config/custom_compoenents/http_inline`,
-then use the wizard.
-
 
 ##### CLI install
 
-###### Custom component
+###### Master integration
 
-Add the following lines into `configuration.yaml`,
-and apply this template:
-
-```yaml
-switch:
-  - platform: http_inline
-    host: http://{host}
-    relays:
-      {relayId}: {friendlyName}
+Get the Relayboard configuration with the tool: 
+```bash
+$ ./bin/master_hass_export.sh -h https://webrelay.local > ./relayboard_master.yaml
 ```
 
-And customize:
-- `{host}`: WebController IP or host
-- `{relayId}`: WebController ID
-- `{friendlyName}`: a free text
+Then move this file to the Hass config folder. 
 
-Example:
+Example with the required lines:
 
+
+- `$HASS_CONFIG/configuration.yaml`
 ```yaml
-switch:
-  - platform: http_inline
-    host: http://web
-    relays:
-      0: Fan Office
-      1: Light Desk
-      2: Light Kitchen
-      3: Light Living room
-      4: Light Bedroom 1
-      5: Light Bedroom 2
-      6: Light Garage
-      7: Light Garden
+homeassistant:
+  packages: !include_dir_named integrations
+```
+- `$HASS_CONFIG/integrations/switch.yaml`
+```yaml
+switch: !include_dir_merge_list ../entities/switches
+```
+- `$HASS_CONFIG/entities/switches/relayboard_master.yaml` exported from the tool
+```yaml
+# relayboard_master.yaml
+
+- name: "gateway"
+  resource: "https://192.168.10.1/api/r/0"
+  platform: rest
+  method: put
+  body_on: '{"s":1}'
+  body_off: '{"s":0}'
+  timeout: 30
+  verify_ssl: false
+
+- name: "living room"
+  resource: "https://192.168.10.1/api/r/1"
+  platform: rest
+  method: put
+  body_on: '{"s":1}'
+  body_off: '{"s":0}'
+  timeout: 30
+  verify_ssl: false
+
 ```
 
-###### Official
 
-Add the following lines into `configuration.yaml`,
-and apply this template:
 
-```yaml
-switch:
-  - platform: command_line
-    switches:
-      {sluggedEntityId}:
-        command_on: "/usr/bin/curl -X GET http://{host}/w/{relayId}/1"
-        command_off: "/usr/bin/curl -X GET http://{host}/w/{relayId}/0"
-        command_state: "/usr/bin/curl -X GET http://{host}/r/{relayId}"
-        value_template: '{{ value.split()[0] == "1" }}'
-        friendly_name: {friendlyName}
+###### Slave Only
+
+Get the Relayboard configuration with the tool: 
+```bash
+$ ./bin/master_hass_export.sh -h https://relayboard.local > ./relayboard_slave.yaml
 ```
 
-And customize:
-- `{sluggedEntityId}`: HASS entity ID
-- `{host}`: WebController IP or host
-- `{relayId}`: WebController ID
-- `{friendlyName}`: a free text
+You should edit the exported file and rename the relay names at `friendly_name` ("Relay ##" by default).
+Then move this file to the Hass config folder. 
 
-Example:
+Example with the required lines:
 
+
+- `$HASS_CONFIG/configuration.yaml`
 ```yaml
-switch:
-  - platform: command_line
-    switches:
-      r0:
-        command_on: "/usr/bin/curl -X GET http://webrelay.local/w/0/1"
-        command_off: "/usr/bin/curl -X GET http://webrelay.local/w/0/0"
-        command_state: "/usr/bin/curl -X GET http://webrelay.local/r/0"
-        value_template: '{{ value.split()[0] == "1" }}'
-        friendly_name: "Relay #0"
-      r42:
-        command_on: "/usr/bin/curl -X GET http://webrelay.local/w/42/1"
-        command_off: "/usr/bin/curl -X GET http://webrelay.local/w/42/0"
-        command_state: "/usr/bin/curl -X GET http://webrelay.local/r/42"
-        value_template: '{{ value.split()[0] == "1" }}'
-        friendly_name: "Relay #42"
+homeassistant:
+  packages: !include_dir_named integrations
 ```
+- `$HASS_CONFIG/integrations/switch.yaml`
+```yaml
+switch: !include_dir_merge_list ../entities/switches
+```
+- `$HASS_CONFIG/entities/switches/relayboard_slave.yaml` exported from the tool
+```yaml
+# relayboard_slave.yaml
+
+
+- platform: command_line
+  switches:
+    wc_r1:
+      command_on: "/usr/bin/curl -X GET http://192.168.10.1/w/1/1"
+      command_off: "/usr/bin/curl -X GET http://192.168.10.1/w/1/0"
+      command_state: "/usr/bin/curl -X GET http://192.168.10.1/r/1"
+      value_template: '{{ value.split()[0] == "1" }}'
+      friendly_name: "Relay #1"
+
+    wc_r0:
+      command_on: "/usr/bin/curl -X GET http://192.168.10.1/w/0/1"
+      command_off: "/usr/bin/curl -X GET http://192.168.10.1/w/0/0"
+      command_state: "/usr/bin/curl -X GET http://192.168.10.1/r/0"
+      value_template: '{{ value.split()[0] == "1" }}'
+      friendly_name: "Relay #0"
+
+```
+
 
 ##### NodeRed
 

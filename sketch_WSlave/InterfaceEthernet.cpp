@@ -23,6 +23,12 @@
 
 InterfaceEthernet::InterfaceEthernet()
 {
+  // switch off SD Card
+  pinMode(WS_WIRING_SDCARD_SS, OUTPUT);
+  digitalWrite(WS_WIRING_SDCARD_SS, WS_WIRING_SDCARD_SS_OFF);
+
+  Ethernet.init(WS_WIRING_ETHERNET_SS);
+
   #if WS_MAC_TYPE & WS_MAC_TYPE_DYNAMIC
   randomSeed(analogRead(0));
 

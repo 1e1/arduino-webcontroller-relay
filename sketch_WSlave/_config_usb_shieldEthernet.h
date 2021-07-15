@@ -9,7 +9,7 @@
 // =========================
 // a number between 2 and 253
 #define WS_DEVICE_NUMBER    12
-#define WS_DEVICE_NAME      "webrelay"
+#define WS_DEVICE_NAME      "relayboard"
 #define WS_RELAY_NB_MAX     32
 #define WS_STORAGE          WS_STORAGE_EEPROM
 #define WS_LOG_LEVEL        WS_LOG_LEVEL_OFF
