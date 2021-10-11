@@ -387,9 +387,11 @@ void WebServerEsp8266::_uploadJson(const char* path) const
 
 void WebServerEsp8266::_readSerialJson(void)
 {
-  const unsigned int jsonLineLength = strlen(WebServer::_jsonLine);
+  const unsigned int jsonLineLength = strlen(RELAY_JSON);
 
   this->_bridge->wakeup();
+
+  String jsonLine = String(FPSTR(RELAY_JSON));
 
   if (this->_relayMessages.length() == 0) {
     const uint8_t size = this->_bridge->size();
@@ -398,8 +400,8 @@ void WebServerEsp8266::_readSerialJson(void)
     this->_relayMessages = '[';
 
     for (uint8_t i=0; i<size; ++i) {
-      WebServer::_jsonLine[0] = i==0 ? ' ' : ',';
-      this->_relayMessages += WebServer::_jsonLine;
+      jsonLine[0] = i==0 ? ' ' : ',';
+      this->_relayMessages += jsonLine;
     }
 
     this->_relayMessages += ']';

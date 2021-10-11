@@ -418,7 +418,9 @@ void WebServerASync::_readSerialJson(AsyncWebServerRequest* request) const
 {
   this->_bridge->wakeup();
 
-  WebServer::_jsonLine[0] = ' ';
+  String jsonLine = String(FPSTR(RELAY_JSON));
+
+  jsonLine[0] = ' ';
 
   if (!this->_bridge->prepareRelayList()) {
     return request->send(503);
@@ -435,23 +437,21 @@ void WebServerASync::_readSerialJson(AsyncWebServerRequest* request) const
 
     if (relay->isOk) {
       dec = relay->relayId /10;
-      WebServer::_jsonLine[6] = dec != 0 ? '0' + dec : ' ';
-      WebServer::_jsonLine[7] = '0' + (relay->relayId - 10* dec);
+      jsonLine[6] = dec != 0 ? '0' + dec : ' ';
+      jsonLine[7] = '0' + (relay->relayId - 10* dec);
 
-      WebServer::_jsonLine[13] = '0' + relay->state;
-      WebServer::_jsonLine[19] = '0' + relay->isLocked;
+      jsonLine[13] = '0' + relay->state;
+      jsonLine[19] = '0' + relay->isLocked;
 
       dec = relay->pinId /10;
-      WebServer::_jsonLine[25] = dec != 0 ? '0' + dec : ' ';
-      WebServer::_jsonLine[26] = '0' + (relay->pinId - 10* dec);
+      jsonLine[25] = dec != 0 ? '0' + dec : ' ';
+      jsonLine[26] = '0' + (relay->pinId - 10* dec);
 
-      WebServer::_jsonLine[32] = '0' + relay->isNc;
+      jsonLine[32] = '0' + relay->isNc;
 
-      response->print(WebServer::_jsonLine);
+      response->print(jsonLine);
 
-      if (WebServer::_jsonLine[0] == ' ') {
-        WebServer::_jsonLine[0] = ',';
-      }
+      jsonLine[0] = ',';
     }
 
     response->print(")");

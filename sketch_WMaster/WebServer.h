@@ -37,6 +37,8 @@ class WebServer {
   static constexpr const char ROUTE_PORTAL[] = "/portal";
   static constexpr const char ROUTE_ABOUT[] = "/about";
 
+  static constexpr const char RELAY_JSON[] PROGMEM = " {\"i\":##,\"s\":#,\"l\":#,\"p\":##,\"n\":#}";
+
   virtual void begin(void) =0;
   virtual void loop(void) =0;
 
@@ -46,8 +48,6 @@ class WebServer {
   //virtual void setMode(const Mode mode) =0;
 
   protected:
-
-  static char _jsonLine[];
 
   Bridge* _bridge;
   FS* _fs;
