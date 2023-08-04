@@ -1,8 +1,8 @@
 <html>
 <head>
-    <meta name="mobile-web-app-capable"content="yes">
-    <meta name="apple-mobile-web-app-capable"content="yes">
-    <meta name="viewport"content="width=device-width, user-scalable=no">
+<meta name='mobile-web-app-capable'content=yes>
+<meta name='apple-mobile-web-app-capable'content=yes>
+<meta name='viewport'content='width=device-width,user-scalable=no'>
 <style>
 body{
     flex-wrap:wrap;
@@ -16,17 +16,17 @@ label{
 </style>
 <script>
     f=(a,u)=>{
-        x=new XMLHttpRequest();
+        x=new XMLHttpRequest;
         x.open(a,u,0);
         x.send();
         if(200==x.status)
             return x.responseText
     };
     x=(a,u)=>{
-        a.split('\n').forEach(a=>{
+        a.split('\n').forEach((a,u)=>{
             if(a){
                 x=a.split(' ');
-                document.body.innerHTML+=`<label><input type=checkbox onclick="f('GET','/w/${x[1]}/'+1*this.checked)" ${x[0]>0?'checked':''}>${x[1]}</label>`
+                document.body.innerHTML+=`<label><input type=checkbox onclick="f('GET','/w/${x[1]}/'+1*this.checked)" ${0==x[0]?'':'checked'}>${x[1]}</label>`
             }
         })
     }

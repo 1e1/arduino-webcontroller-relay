@@ -108,7 +108,7 @@ Read the ![swagger](./doc/swagger-slave.yml)
 
 The Arduino boots on the DHCP.
 If `#define WS_VERBOSE WS_VERBOSE_WEBAPP` (or `WS_VERBOSE_ALL` by default),
-open a bowser on `http://{ip}` (455B).
+open a bowser on `http://{ip}` (416B).
 
 ![portal](./doc/slave.png)
 
@@ -159,11 +159,11 @@ Read the ![swagger](./doc/swagger-master.yml)
 ### webApp
 
 Connect to "HelloWorld" WiFi (* you could change),
-Open a bowser on `https://{ip}` (675B).
+Open a bowser on `https://{ip}` (645B).
 
 ![mobile](./doc/home.png)
 
-The config portal is on `https://{ip}/portal` (1047B).
+The config portal is on `https://{ip}/portal` (1020B).
 
 ![portal](./doc/portal2.png)
 

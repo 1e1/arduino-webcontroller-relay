@@ -1,31 +1,31 @@
 <html>
 <head>
-<meta name="mobile-web-app-capable"content="yes">
-<meta name="apple-mobile-web-app-capable"content="yes">
-<meta name="viewport"content="width=device-width, user-scalable=no">
+<meta name=mobile-web-app-capable content="yes">
+<meta name=apple-mobile-web-app-capable content="yes">
+<meta name=viewport content="width=device-width,user-scalable=no">
 <title>🚥 WCRelay</title>
 <style>
 body{
     background:#222;
-    color:#f0f8ff;
+    color:#F0F8FF;
     font-family:sans-serif;
     font-size:1.2em;
     text-align:center;
-    text-overflow:ellipsis;
+    text-overflow:ellipsis
 }
 
 h1{
-  border-bottom:1px solid;
+    border-bottom:1px solid
 }
 
 #r{
-  display:flex;
-  flex-wrap:wrap;
+    display:flex;
+    flex-wrap:wrap
 }
 
 label{
     flex:auto;
-    width:120px;
+    width:120px
 }
 
 input{
@@ -33,51 +33,50 @@ input{
     position:relative;
     width:120px;
     height:40px;
+    border-radius:20px;
     appearance:none;
     outline:none;
-    border-radius:20px;
     background:linear-gradient(0,#333,#000);
-    box-shadow:0 0 0 4px #353535,inset 0 0 10px rgba(0,0,0,1);
+    box-shadow:0 0 0 4px #353535,inset 0 0 10px rgba(0,0,0,1)
   }
   
-  input:checked{
-    background:linear-gradient(0deg,#70a1ff,#1e90ff);
-    box-shadow:0 0 0 4px #353535,inset 0 0 10px rgba(0,0,0,1);
-  }
+input:checked{
+    background:linear-gradient(0,#70A1FF,#1E90FF);
+}
   
-  input:before{
+input:before{
+    left:0;
     content:'';
     position:absolute;
     top:0;
-    left:0;
     width:80px;
     height:40px;
     border-radius:20px;
     transform:scale(.98,.96);
     transition:.5s;
     background:linear-gradient(0,#000,#777);
-    box-shadow:0 0 0 1px #232323;
-  }
+    box-shadow:0 0 0 1px #232323
+}
   
-  input:checked:before{
-    left:40px;
-  }
+input:checked:before{
+    left:40px
+}
 </style>
 <script>
 f=(a,b,c)=>{
-    let x=new XMLHttpRequest();
-    x.open(a,`/api/r${b}.json`);
-    x.onload=()=>c(JSON.parse(x.response));
-    x.send(c);
+    let r=new XMLHttpRequest;
+    r.open(a,`/api/r${b}.json`);
+    r.onload=()=>c(JSON.parse(r.response));
+    r.send(c);
 };
 w=(a,b,c)=>{
     a.forEach((a,b,c)=>
-    document.getElementById(`r`).innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT','/${a.i}',JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
+        document.getElementById(`r`).innerHTML+=`<label><div>${a.n}</div><input type=checkbox onclick="f('PUT','/${a.i}',JSON.stringify({'s':1*this.checked}))" id=r${a.i}></label>`
     );
-    index = 0;
-    cb=x=>document.getElementById(`r${a[index].i}`).checked=x.s;
-    lp=()=>f('GET',`/${a[index].i}`,x=>{cb(x);if(++index<a.length){lp()}else{index=0;window.setTimeout(lp,1000)}});
-    lp();
+    i=0;
+    c=r=>document.getElementById(`r${a[i].i}`).checked=r.s;
+    b=()=>f('GET',`/${a[i].i}`,r=>{c(r);if(++i<a.length){b()}else{i=0;window.setTimeout(b,1000)}});
+    b();
 
     window.scrollTo(0,1);
 };
@@ -85,4 +84,4 @@ w=(a,b,c)=>{
 </head>
 <body onload="f('GET','',w)">
 <h1>🚥 WCRelay</h1>
-<div id="r">
+<div id=r>
