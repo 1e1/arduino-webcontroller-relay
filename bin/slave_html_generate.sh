@@ -26,7 +26,7 @@ touch -t 200404040200 $TEMP_HTML
 echo "minify HTML"
 ls -l $TEMP_HTML
 gzip -c -9 $TEMP_HTML > $TEMP_GZ
-brotli -c -Z $TEMP_HTML > $TEMP_BR
+brotli -c -q 11 $TEMP_HTML > $TEMP_BR
 
 #touch -t 200404040200 $TEMP_GZ
 #touch -t 200404040200 $TEMP_BR

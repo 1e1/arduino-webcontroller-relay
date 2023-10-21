@@ -1,37 +1,38 @@
 <html>
 <head>
 <style>
-h2{
-    background:#cd853f;
-    padding:0 1em;
-}
-
 input{
     width:280px;
     font-family:monospace;
 }
 
-[min],[onclick]{
+h2>button{
+    float:right;
+}
+
+h2{
+    background:peru;
+    padding:0 1em;
+}
+
+[onclick],[min]{
     width:60px;
 }
 
 [onclick^=s]{
     display:none;
 }
-h2 button{
-    float:right;
-}
 </style>
 <script>
 o={};
 f=(a,u)=>{
-    let x=new XMLHttpRequest;
-    x.open(a,`/cfg/${u}.json`);
-    x.send(JSON.stringify(o[u]));
-    x.onload=()=>{
-        o[u]=JSON.parse(x.response);
-        p[u]()
+    let h=new XMLHttpRequest;
+    h.onload=()=>{
+        o[u]=JSON.parse(h.response);
+        p[u]();
     }
+    h.open(a,`/cfg/${u}.json`);
+    h.send(JSON.stringify(o[u]));
 };
 b=(a,u)=>{
     document.querySelector(`[onclick*="('${a}')"]`).style.display=u?"block":"none";
@@ -64,7 +65,7 @@ d=(a,u)=>{
 };
 p={
     g:(a,u)=>{
-        document.querySelectorAll('[data-o]').forEach((a,u)=>{
+        document.querySelectorAll(`[data-o]`).forEach((a,u)=>{
             a.value=a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o.substr(2)][a.dataset.o[1]]:o[a.dataset.o[0]][a.dataset.o[1]];
             a.onchange=()=>{
                 b(a.dataset.o[0],1);
@@ -108,7 +109,7 @@ p={
             f('GET','g');
             if(o.g)
                 window.location.reload();
-        }, 2000);
+        },2000);
     }
 };
 </script>
@@ -116,7 +117,6 @@ p={
 <body onload="f('GET','g');f('GET','w');f('GET','r');f('GET','p')">
 <h2>access point<button onclick="x('reboot')">reboot</button><button onclick="s('g')">save</button></h2>
 <table>
-    <tbody>
         <tr>
             <td>basicAuth</td>
             <td><input type=text minlength=1 maxlength=32 placeholder=login data-o=gu></td>
@@ -135,46 +135,36 @@ p={
         <tr>
             <td><label><input type=checkbox onclick="this.value=1*this.checked" data-o=gr>auto reboot</label></td>
         </tr>
-    </tbody>
 </table>
 
 <h2>stations<button onclick="s('w')">save</button></h2>
 <table>
-    <thead>
         <tr>
             <td>SSID</td>
             <td>password</td>
             <td></td>
         </tr>
-    </thead>
     <tbody id=w>
-    </tbody>
 </table>
 
 <h2>relays<button onclick="s('r')">save</button></h2>
 <table>
-    <thead>
         <tr>
             <td>name</td>
             <td>id</td>
             <td>onConnect</td>
             <td></td>
         </tr>
-    </thead>
     <tbody id=r>
-    </tbody>
 </table>
 
 <h2>wiring<button onclick="s('p')">save</button></h2>
 <table>
-    <thead>
         <tr>
             <td>id</td>
             <td>isNc</td>
             <td>pin</td>
             <td></td>
         </tr>
-    </thead>
     <tbody id=p>
-    </tbody>
 </table>
