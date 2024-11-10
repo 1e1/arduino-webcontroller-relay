@@ -29,8 +29,8 @@ f=(a,u)=>{
     let h=new XMLHttpRequest;
     h.onload=()=>{
         o[u]=JSON.parse(h.response);
-        p[u]();
-    }
+        p[u](a,u);
+    };
     h.open(a,`/cfg/${u}.json`);
     h.send(JSON.stringify(o[u]));
 };
@@ -66,14 +66,18 @@ d=(a,u)=>{
 p={
     g:(a,u)=>{
         document.querySelectorAll(`[data-o]`).forEach((a,u)=>{
-            a.value=a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o.substr(2)][a.dataset.o[1]]:o[a.dataset.o[0]][a.dataset.o[1]];
+            u=a.dataset.o;
+            if(o[u[0]])a.value=u.length>2?o[u[0]][u.substr(2)][u[1]]:o[u[0]][u[1]];
             a.onchange=()=>{
-                b(a.dataset.o[0],1);
-                a.dataset.o.length>2?o[a.dataset.o[0]][a.dataset.o.substr(2)][a.dataset.o[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value):o[a.dataset.o[0]][a.dataset.o[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value);
+                b(u[0],1);
+                u.length>2?o[u[0]][u.substr(2)][u[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value):o[u[0]][u[1]]=["text","password"].includes(a.type)?a.value:parseInt(a.value);
                 c(a);
             };
             c(a);
         });  
+    },
+    o:(a,u)=>{
+        p.g();
     },
     w:(a,u)=>{
         h='';
@@ -114,7 +118,7 @@ p={
 };
 </script>
 </head>
-<body onload="f('GET','g');f('GET','w');f('GET','r');f('GET','p')">
+<body onload="f('GET','g');f('GET','w');f('GET','o');f('GET','r');f('GET','p')">
 <h2>access point<button onclick="x('reboot')">reboot</button><button onclick="s('g')">save</button></h2>
 <table>
         <tr>
@@ -145,6 +149,14 @@ p={
             <td></td>
         </tr>
     <tbody id=w>
+</table>
+
+<h2>google<button onclick="s('o')">save</button></h2>
+<table>
+        <tr>
+            <td><input type=text minlength=1 maxlength=32 placeholder=calendar data-o=on></td>
+            <td><a href=google.html>login</a></td>
+        </tr>
 </table>
 
 <h2>relays<button onclick="s('r')">save</button></h2>

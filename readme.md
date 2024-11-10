@@ -163,9 +163,11 @@ Open a bowser on `https://{ip}` (645B).
 
 ![mobile](./doc/home.png)
 
-The config portal is on `https://{ip}/portal` (1020B).
+The config portal is on `https://{ip}/portal` (1020B / 1072B with Google addon).
 
 ![portal](./doc/portal2.png)
+
+The Google OAuth2 for limited-input device is on `https://{ip}/google` (301B)
 
 
 
@@ -175,6 +177,7 @@ The config portal is on `https://{ip}/portal` (1020B).
 
 - **Esp8266**
 - **ArduinoJson**
+- *FastTimer* (optional gor Google Calendar)
 - *ESPAsyncWebServer (optional for faster HTTP server, not HTTPS)*
 - *fauxmoESP (optional for Alexa)*
 - *ESP AsyncTCP (optional for ESPAsyncWebServer or fauxmoESP)*
@@ -182,11 +185,19 @@ The config portal is on `https://{ip}/portal` (1020B).
 
 ### Suggestions
 
-- ☐ TODO: read states from calendar
+- ☑︎ DONE: read states from calendar
 - ☑︎ DONE: ESP as master controller: ESP interrupts the sleeping Arduino on Serial (RX3=PCINT[9] on Mega)
 - ☑︎ DONE: ESP has no preconfigured credentials (from the firmware)
 - ☑︎ DONE: if the ESP cannot join a known network, it starts as hotspot during a # seconds
 - ☑︎ DONE: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)
+
+#### Google Calendar API
+
+- GET https://www.googleapis.com/calendar/v3/users/me/calendarList?fields=items(id,summary)
+{ items: [{ id: "123", summary: "ArduinoRelay" }] }
+
+- GET https://www.googleapis.com/calendar/v3/calendars/5pmqor21u4kf8ur46k5hbci0ic@group.calendar.google.com/events?fields=items(id,summary)&timeMin=2024-10-25T23:27:00Z&timeMax=2024-10-25T21:27:59Z
+{ items: [{ id: "123", summary: "ArduinoRelay" }] }
 
 
 ## more docs

@@ -34,7 +34,7 @@ SED_BACKUP_EXT=".sed"
 
 echo "original HTML"
 ls -l $INPUT_HTML
-sed -E 's/^[[:space:]]*//;s/[[:space:]]*$//;s/(\$\{.\})\.json/\1/' $INPUT_HTML \
+sed -E 's/^[[:space:]]*//;s/[[:space:]]*$//;s/(\$\{.\})\.json/\1/;s/([a-z]+)\.html/\1/' $INPUT_HTML \
     | tr -d '\r\n' > $TEMP_HTML
 
 # force the modification date to prevent this diff only (date embed into the zip)
@@ -60,6 +60,14 @@ rm "$TEMP_GZ"
 rm "$TEMP_BR"
 #rm "$TEMP_HTML"
 }
+
+
+cat <<EOT
+
+google
+######
+EOT
+seal google.html
 
 
 cat <<EOT

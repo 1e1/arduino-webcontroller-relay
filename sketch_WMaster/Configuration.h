@@ -42,25 +42,32 @@ class Configuration {
     String password;
   };
 
+  struct GCalendar {
+    String refreshToken;
+    String calendarName;
+  };
+
   struct Relay {
     uint8_t id;
-    TriState onConnect;
+    TriState onConnect; // TODO -> bool only?
     String name;
   };
 
-  Configuration(FS &fs);
+  Configuration(FS* fs) : _fs(fs) {};
 
   void begin(void);
   void setSafeMode(const bool isSafeMode=true);
   Global* getGlobal(void) { return &this->_global; };
   const std::list<WifiStation> getWifiStationList(void) const;
+  const GCalendar getGCalendar(void) const;
+  void setGCalendar(GCalendar gCal) const;
   const std::list<Relay> getRelayList(void) const;
 
   protected:
   fs::FS* _fs = nullptr;
   Global _global;
 
-  JsonDocument* _open(const char* filename) const;
+  void _open(const char* filename, JsonDocument& doc) const;
   void _loadGlobal(void);
 
 };

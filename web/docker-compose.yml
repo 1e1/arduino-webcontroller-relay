@@ -17,7 +17,7 @@ services:
         environment:
             - TZ=Europe/Paris
         volumes:
-            - "./nodered:/data"
+            - ./nodered:/data
         ports:
             - "1880:1880"
         restart: unless-stopped
@@ -27,7 +27,9 @@ services:
         environment:
             - TZ=Europe/Paris
         volumes:
-            - "./hass:/config"
+            #- ./hass2:/config
+            - /etc/localtime:/etc/localtime:ro
         ports:
             - "8123:8123"
+            - "4357:4357"
         restart: unless-stopped

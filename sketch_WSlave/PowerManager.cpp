@@ -129,8 +129,6 @@ EMPTY_INTERRUPT(WDT_vect);
     #endif
     //interrupts();
   }
-#endif
-
 #else
   void attachDefaultInterrupts(const uint8_t mode = RISING) {};
   void detachDefaultInterrupts() {};

@@ -10,6 +10,8 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClientSecureBearSSL.h>
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 #include <list>
@@ -30,6 +32,9 @@
 #if WM_COMPONENT & WM_COMPONENT_ALEXA
 #include <fauxmoESP.h>
 #endif
+#if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+#include "Scheduler.h"
+#endif
 
 #ifdef LED_BUILTIN
 #include "MorseLed.hpp"
@@ -42,10 +47,28 @@
 
 
 
-Configuration* configuration;
-Bridge* bridge;
-WebServer* server;
 bool isAdminReset;
+Configuration configuration(&LittleFS);
+Bridge bridge(&WM_SERIAL);
+//WiFiClient::setDefaultSync(true);
+
+#if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+Scheduler scheduler(&configuration, &bridge);
+#endif
+
+#ifdef WM_USE_ASYNC
+WebServerASync server(&LittleFS, &bridge
+#if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+, scheduler.getGCalendar()
+#endif
+);
+#else
+WebServerEsp8266 server(&LittleFS, &bridge
+#if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+, scheduler.getGCalendar()
+#endif
+);
+#endif
 
 #if WM_COMPONENT & WM_COMPONENT_ALEXA
 fauxmoESP fauxmo;
@@ -55,6 +78,25 @@ fauxmoESP fauxmo;
 #if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
 unsigned long nextLog = 0;
 #endif
+
+
+void initRelayList(void)
+{
+  LOGLN(F("-- init Relay"));
+  BUSYLED_ON;
+
+  std::list<Configuration::Relay> relayList = configuration.getRelayList();
+
+  for (Configuration::Relay relay : relayList) {
+    if (relay.onConnect != Configuration::T_indeterminate) {
+      LOG(relay.name); LOG(F(" -> ")); LOGLN(relay.onConnect);
+      bridge.setRelay(relay.id, static_cast<bool>(relay.onConnect));
+    }
+  }
+
+  BUSYLED_OFF;
+  LOGLN(F("---"));
+}
 
 
 void connectWiFiSta(void)
@@ -71,7 +113,7 @@ void connectWiFiSta(void)
   WiFi.setPhyMode(WM_WIFI_STA_PHY_MODE);
 
   ESP8266WiFiMulti wifiMulti;
-  std::list<Configuration::WifiStation> wifiList = configuration->getWifiStationList();
+  std::list<Configuration::WifiStation> wifiList = configuration.getWifiStationList();
   for (Configuration::WifiStation wifi : wifiList) {
       LOGLN(wifi.ssid);
       wifiMulti.addAP(wifi.ssid.c_str() + '\0', wifi.password.c_str() + '\0');
@@ -98,17 +140,17 @@ void connectWiFiAp(void)
   WiFi.setOutputPower(WM_WIFI_AP_OUTPUT_POWER);
   WiFi.setPhyMode(WM_WIFI_AP_PHY_MODE);
 
-  LOG(F("AP ssid: "));LOGLN(configuration->getGlobal()->wifiAp.ssid);
-  LOG(F("AP password: "));LOGLN(configuration->getGlobal()->wifiAp.password);
+  LOG(F("AP ssid: "));LOGLN(configuration.getGlobal()->wifiAp.ssid);
+  LOG(F("AP password: "));LOGLN(configuration.getGlobal()->wifiAp.password);
   
   //IPAddress myIp(192, 168, 0, 1); // TODO CONSTANTIZE
   //WiFi.softAPConfig(myIp, myIp, IPAddress(255, 255, 255, 0));
 
   WiFi.softAP(
-    configuration->getGlobal()->wifiAp.ssid, 
-    configuration->getGlobal()->wifiAp.password, 
-    configuration->getGlobal()->wifiAp.channel, 
-    configuration->getGlobal()->wifiAp.isHidden
+    configuration.getGlobal()->wifiAp.ssid, 
+    configuration.getGlobal()->wifiAp.password, 
+    configuration.getGlobal()->wifiAp.channel, 
+    configuration.getGlobal()->wifiAp.isHidden
   );
   
   LOGLN(F("---"));
@@ -117,7 +159,7 @@ void connectWiFiAp(void)
 
 void connectWiFi(void)
 {
-  if (!configuration->getGlobal()->acl.isSafeMode) {
+  if (!configuration.getGlobal()->acl.isSafeMode) {
     connectWiFiSta();
   }
 
@@ -134,18 +176,7 @@ void connectWiFi(void)
       delay(WM_WIFI_CONNEXION_TIMEOUT_MS);
       if (WiFi.softAPgetStationNum()) {
         LOGLN(F("OK, run Relay commands:"));
-        BUSYLED_ON;
-
-        std::list<Configuration::Relay> relayList = configuration->getRelayList();
-
-        for (Configuration::Relay relay : relayList) {
-          if (relay.onConnect != Configuration::T_indeterminate) {
-            LOG(relay.name); LOG(F(" -> ")); LOGLN(relay.onConnect);
-            bridge->setRelay(relay.id, static_cast<bool>(relay.onConnect));
-          }
-        }
-
-        BUSYLED_OFF;
+        initRelayList();
       } else {
         //ESP.deepSleepInstant(ESP.deepSleepMax(), WAKE_RF_DISABLED); // TODO constantize (microseconds)
         delay(5 *60 *1000); // TODO constantize (millis)
@@ -173,8 +204,6 @@ void setup()
    */
   WM_SERIAL.begin(WM_SERIAL_SPEED);
   LittleFS.begin();
-  bridge = new Bridge(WM_SERIAL);
-  configuration = new Configuration(LittleFS);
 
   pinMode(WM_PIN_CONFIG, INPUT_PULLUP);
   pinMode(WM_PIN_SAFEMODE, INPUT_PULLUP);
@@ -214,13 +243,15 @@ void setup()
 
   {
     LOGLN(F("-- load Configuration"));
-    configuration->begin();
-    configuration->setSafeMode(isSafeMode);
+    configuration.begin();
+    configuration.setSafeMode(isSafeMode);
 
     if (isAdminReset) {
-      configuration->getGlobal()->acl.canAutoRestart = false;
+      configuration.getGlobal()->acl.canAutoRestart = false;
     }
     LOGLN(F("---"));
+
+    initRelayList();
   }
 
   connectWiFi();
@@ -244,7 +275,7 @@ void setup()
     fauxmo.createServer(true);
     fauxmo.enable(true);
 
-    std::list<Configuration::Relay> relayList = configuration->getRelayList();
+    std::list<Configuration::Relay> relayList = configuration.getRelayList();
 
     LOGLN(F("register devices:"));
     { // register Alexa devices
@@ -264,7 +295,7 @@ void setup()
       
       for (Configuration::Relay relay : relayList) {
         if (relay.name.equals(device_name)) {
-          bridge->setRelay(relay.id, state);
+          bridge.setRelay(relay.id, state);
           return;
         }
       }
@@ -274,15 +305,17 @@ void setup()
   }
   #endif
 
+  #if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+  {
+    LOGLN(F("-- start Scheduler"));
+    scheduler.begin();
+  }
+  #endif
+
   {
     LOGLN(F("-- setup WebServer"));
-    #ifdef WM_USE_ASYNC
-    server = new WebServerASync(LittleFS, bridge);
-    #else
-    server = new WebServerEsp8266(LittleFS, bridge);
-    #endif
-    server->setAuthentication(configuration->getGlobal()->acl.username, configuration->getGlobal()->acl.password);
-    server->begin();
+    server.setAuthentication(configuration.getGlobal()->acl.username, configuration.getGlobal()->acl.password);
+    server.begin();
     LOGLN(F("---"));
   }
 
@@ -296,7 +329,7 @@ void setup()
 void loop()
 {
   if (WiFi.status() != WL_CONNECTED) {
-    if (configuration->getGlobal()->acl.canAutoRestart) {
+    if (configuration.getGlobal()->acl.canAutoRestart) {
       LOGLN(F("** WiFi disconnected **"));
       LOGLN(F("** RESTART **"));
       ESP.restart();
@@ -317,15 +350,22 @@ void loop()
   #if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
   if (millis() > nextLog) {
     nextLog += 2000;
+    LOGF("[HW] Total heap: %d bytes\n", ESP.getHeapSize());
     LOGF("[HW] Free heap: %d bytes\n", ESP.getFreeHeap());
+    LOGF("[HW] Total PSRAM: %d bytes\n", ESP.getPsramSize()); // 0 = PSRAM is not enabled
+    LOGF("[HW] Free PSRAM: %d bytes\n", ESP.getFreePsram());
   }
   #endif
 
+  #if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+  scheduler.loop();
+  yield();
+  #endif
   #if WM_COMPONENT & WM_COMPONENT_ALEXA
   fauxmo.handle();
   yield();
   #endif
-  server->loop();
+  server.loop();
   #if WM_COMPONENT & WM_COMPONENT_MDNS
   yield();
   MDNS.update();

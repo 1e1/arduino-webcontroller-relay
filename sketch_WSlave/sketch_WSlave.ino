@@ -10,10 +10,21 @@
 #include <Arduino.h>
 #include "config.h"
 #include "macro.h"
-#include "InterfaceEthernet.h"
-#include "InterfaceSerial.h"
-#include "InterfaceUsb.h"
+
 #include "PowerManager.h"
+
+#if WS_INTERFACE & WS_INTERFACE_WIFI
+#include "InterfaceWifi.h"
+#endif
+#if WS_INTERFACE & WS_INTERFACE_ETHERNET
+#include "InterfaceEthernet.h"
+#endif
+#if WS_INTERFACE & WS_INTERFACE_SERIAL
+#include "InterfaceSerial.h"
+#endif
+#if WS_INTERFACE & WS_INTERFACE_USB
+#include "InterfaceUsb.h"
+#endif
 
 
 

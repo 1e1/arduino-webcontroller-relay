@@ -14,29 +14,42 @@ extern "C" {
 #include <ArduinoJson.h>
 #include "WebServer.h"
 
+#if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+#include "GoogleSchedular.hpp"
+#endif
+
 
 
 class WebServerEsp8266 : public WebServer {
 
   public:
-  WebServerEsp8266(FS &fs, Bridge* bridge);
+  WebServerEsp8266(FS* fs, Bridge* bridge);
+
+  #if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+  WebServerEsp8266(FS* fs, Bridge* bridge, GoogleSchedular* gCalendar)
+  : WebServerEsp8266(fs, bridge)
+  { this->_gCalendar = gCalendar; };
+  #endif
 
   void begin(void);
   void loop(void);
 
   void setAuthentication(String username, String password);
-  //void setMode(const Mode mode);
+  
 
   protected:
+  void _init(void);
+  void _setServer(void);
   void _setRoutes(void);
-  void _setRoutesPortalOnly(void);
-  void _setRoutesControllerOnly(void) const;
   const bool _isAllowed(void) const;
   void _handleCfg(void);
   void _handleApi(void) const;
+  void _handleOa2(void) const;
   void _uploadAndStreamJson(const char* path, const bool isArray=false, const bool isUpload=false) const;
   void _redirect(String uri) const;
+  void _send404(void) const;
   void _streamAbout(void) const;
+  void _streamFile(const char* path, const char* contentType) const;
   void _streamHtml(const char* path) const;
   void _streamJson(const char* path, const bool isArray=false) const;
   void _sendRelayMessage(const Bridge::RelayMessage* relay) const;
@@ -56,6 +69,10 @@ class WebServerEsp8266 : public WebServer {
   #endif
 
   String _relayMessages;
+
+  #if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+  GoogleSchedular* _gCalendar;
+  #endif
 };
 
 

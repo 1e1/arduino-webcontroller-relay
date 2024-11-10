@@ -11,13 +11,14 @@
 #define WS_RELAY_NB_MAX     32
 #define WS_STORAGE          WS_STORAGE_EEPROM
 #define WS_LOG_LEVEL        WS_LOG_LEVEL_OFF
-#define WS_LOWPOWER         ( WS_LOWPOWER_ALL - WS_LOWPOWER_NO_LED - WS_LOWPOWER_DOWNCLOCK )
+//#define WS_LOWPOWER         ( WS_LOWPOWER_ALL - WS_LOWPOWER_NO_LED - WS_LOWPOWER_DOWNCLOCK )
+#define WS_LOWPOWER         WS_LOWPOWER_NONE
 // =========================
 
 
 // ITF conf
 // =========================
-#define WS_INTERFACE        ( WS_INTERFACE_SERIAL + WS_INTERFACE_USB )
+#define WS_INTERFACE        ( WS_INTERFACE_SERIAL + WS_INTERFACE_USB + WS_INTERFACE_LCD )
 #define WS_VERBOSE          WS_VERBOSE_ALL
 #define WS_ACL_ALLOW        WS_ACL_ALLOW_ALL
 // =========================
