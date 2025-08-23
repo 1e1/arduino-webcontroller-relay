@@ -21,9 +21,9 @@ static const uint8_t _length_undefined = 0;
 
 
 
-Bridge::Bridge(Stream &inputStream)
+Bridge::Bridge(Stream* inputStream)
 {
-  this->_stream = &inputStream;
+  this->_stream = inputStream;
   this->_relayMessage = new RelayMessage;
   this->_length = _length_undefined;
 

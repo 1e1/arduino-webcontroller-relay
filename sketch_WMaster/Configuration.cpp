@@ -21,12 +21,6 @@
 
 
 
-Configuration::Configuration(FS &fs)
-{
-  this->_fs = &fs;
-}
-
-
 void Configuration::begin()
 {
   if (_fs->exists(WM_CONFIG_GLOBAL_PATH)) {
@@ -65,7 +59,10 @@ const std::list<Configuration::WifiStation> Configuration::getWifiStationList() 
 {
   std::list<Configuration::WifiStation> wifiStationList;
   if (_fs->exists(WM_CONFIG_WIFI_PATH)) {
-    JsonArray root = this->_open(WM_CONFIG_WIFI_PATH)->as<JsonArray>();
+    JsonDocument doc;
+    this->_open(WM_CONFIG_WIFI_PATH, doc);
+    
+    const JsonArray root = doc.as<JsonArray>();
 
     for (JsonObject o : root) {
       Configuration::WifiStation wifi {
@@ -81,11 +78,45 @@ const std::list<Configuration::WifiStation> Configuration::getWifiStationList() 
 }
 
 
+const Configuration::GCalendar Configuration::getGCalendar() const
+{
+  GCalendar gCal;
+  if (_fs->exists(WM_CONFIG_GCALENDAR_PATH)) {
+    JsonDocument doc;
+    this->_open(WM_CONFIG_GCALENDAR_PATH, doc);
+
+    const String name = doc["n"].as<String>();
+
+    gCal = {
+      .refreshToken = name.isEmpty() ? "" : doc["t"].as<String>(),
+      .calendarName = name,
+    };
+  }
+
+  return gCal;
+}
+
+
+void Configuration::setGCalendar(Configuration::GCalendar gCal) const
+{
+  JsonDocument doc;
+  doc["t"] = gCal.refreshToken;
+  doc["n"] = gCal.calendarName;
+
+  File file = _fs->open(WM_CONFIG_GCALENDAR_PATH, "w");
+  serializeJson(doc, file);
+  file.close();
+}
+
+
 const std::list<Configuration::Relay> Configuration::getRelayList() const
 {
   std::list<Configuration::Relay> relayList;
   if (_fs->exists(WM_CONFIG_RELAY_PATH)) {
-    JsonArray root = this->_open(WM_CONFIG_RELAY_PATH)->as<JsonArray>();
+    JsonDocument doc;
+    this->_open(WM_CONFIG_RELAY_PATH, doc);
+
+    const JsonArray root = doc.as<JsonArray>();
 
     for (JsonObject o : root) {
       Configuration::Relay relay {
@@ -110,21 +141,21 @@ const std::list<Configuration::Relay> Configuration::getRelayList() const
 
 
 
-JsonDocument* Configuration::_open(const char* filename) const
+void Configuration::_open(const char* filename, JsonDocument& doc) const
 {
   File file = _fs->open(filename, "r"); // "w+"
-  DynamicJsonDocument* doc = new DynamicJsonDocument(WM_CONFIG_BUFFER_SIZE);
-  deserializeJson(*doc, file, DeserializationOption::NestingLimit(2));
+  deserializeJson(doc, file, DeserializationOption::NestingLimit(2));
   file.close();
-  doc->shrinkToFit();
-
-  return doc;
+  doc.shrinkToFit();
 }
 
 
 void Configuration::_loadGlobal()
 {
-  JsonObject root = this->_open(WM_CONFIG_GLOBAL_PATH)->as<JsonObject>();
+  JsonDocument doc;
+  this->_open(WM_CONFIG_GLOBAL_PATH, doc);
+
+  JsonObject root = doc.as<JsonObject>();
   
   Configuration::Global g {
     .acl = {

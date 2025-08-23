@@ -1,0 +1,45 @@
+<html>
+<style>
+button{
+    background:linear-gradient(90deg,#ddd 0,#ddd 50%,#8F0 50%,#8F0 100%)0 0/200%;
+    font-family:monospace;
+    width:280px;
+    animation:button 300s linear
+}
+h2{
+    background:peru;
+    padding:0 1em
+}
+
+@keyframes button{
+    0%{
+        background-position:100% 0;
+    }
+    100%{
+        background-position:0 0;
+    }
+}
+</style>
+<body>
+<h2>oauth</h2>
+<table>
+        <tr>
+            <td>code</td>
+            <td><button onclick="navigator.clipboard.writeText(this.innerHTML);"></button></td>
+        </tr>
+        <tr>
+            <td>url</td>
+            <td><a></a></td>
+        </tr>
+</table>
+<script>
+    x=new XMLHttpRequest;
+    x.onload=()=>{
+        u=JSON.parse(x.response);
+        document.querySelector('a').href=u.u;
+        document.querySelector('a').innerHTML=u.u;
+        document.querySelector('button').innerHTML=u.c;
+    };
+    x.open("GET","/oa2/g.json");
+    x.send();
+</script>

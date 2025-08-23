@@ -20,7 +20,8 @@
 #define WM_COMPONENT_ALEXA          4
 #define WM_COMPONENT_LED            8
 #define WM_COMPONENT_HASS           16
-#define WM_COMPONENT_ALL            ( WM_COMPONENT_MDNS + WM_COMPONENT_API + WM_COMPONENT_ALEXA + WM_COMPONENT_LED + WM_COMPONENT_HASS )
+#define WM_COMPONENT_GCALENDAR      32
+#define WM_COMPONENT_ALL            ( WM_COMPONENT_MDNS + WM_COMPONENT_API + WM_COMPONENT_ALEXA + WM_COMPONENT_LED + WM_COMPONENT_HASS + WM_COMPONENT_GCALENDAR )
 
 
 #define WM_CONFIG_KEY_PATH          "_KEY.txt"
@@ -28,8 +29,10 @@
 #define WM_CONFIG_GLOBAL_PATH       "global.json"
 #define WM_CONFIG_WIFI_PATH         "wifis.json"
 #define WM_CONFIG_RELAY_PATH        "relays.json"
+#define WM_CONFIG_GCALENDAR_PATH    "gcal.json"
 #define WM_WEB_INDEX_BASENAME       "index"
 #define WM_WEB_PORTAL_BASENAME      "portal"
+#define WM_WEB_GOOGLE_BASENAME      "google"
 
 #define WM_WEB_PORT_DEFAULT         80
 #define WM_WEB_PORT_DEFAULT_SECURE  443

@@ -9,8 +9,8 @@
 // =========================
 #define WM_PIN_SAFEMODE     2  /* GPIO0: GND if switch#7 ON | GPIO02: top GND | GIO16: bottom GND */
 #define WM_PIN_CONFIG       12 /* GPIO12; face to GND */
-#define WM_LOG_LEVEL        WM_LOG_LEVEL_OFF
-#define WM_COMPONENT        ( WM_COMPONENT_ALL - WM_COMPONENT_ALEXA )
+#define WM_LOG_LEVEL        WM_LOG_LEVEL_ALL
+#define WM_COMPONENT        ( WM_COMPONENT_ALL - WM_COMPONENT_ALEXA - WM_COMPONENT_LED )
 #define WM_LED_ON           HIGH
 // =========================
 
@@ -25,6 +25,13 @@
 // WEB conf
 // =========================
 #define WM_WEB_SERVER_SECURE    WM_WEB_SERVER_SECURE_YES
+// =========================
+
+
+// Google Calendar conf
+// =========================
+#define WS_GOOGLE_API_CLIENT_ID     "**** CLIENT_ID ****"
+#define WS_GOOGLE_API_CLIENT_SECRET "**** CLIENT_SECRET ****"
 // =========================
 
 

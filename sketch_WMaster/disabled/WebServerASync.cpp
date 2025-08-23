@@ -294,7 +294,7 @@ void WebServerASync::_handleApi(AsyncWebServerRequest* request) const
         return request->send(400);
       }
 
-      StaticJsonDocument<WM_API_BUFFER_SIZE> jsonBuffer;
+      JsonDocument jsonBuffer;
       DeserializationError error = deserializeJson(jsonBuffer, (uint8_t*)(request->_tempObject), DeserializationOption::NestingLimit(2));
       if (!error) {
         const bool state = jsonBuffer["s"].as<bool>();
@@ -398,7 +398,7 @@ void WebServerASync::_sendRelayMessage(AsyncWebServerRequest* request, const Bri
 bool WebServerASync::_uploadJson(AsyncWebServerRequest* request, const char* path) const
 {
   if (request->_tempObject != NULL) {
-    DynamicJsonDocument jsonBuffer(WM_CONFIG_BUFFER_SIZE);
+    JsonDocument jsonBuffer;
     DeserializationError error = deserializeJson(jsonBuffer, (uint8_t*)(request->_tempObject), DeserializationOption::NestingLimit(2));
     
     if (!error) {
@@ -472,7 +472,7 @@ bool WebServerASync::_writeSerialJson(AsyncWebServerRequest* request) const
 
   JsonArray root;
   {
-    DynamicJsonDocument jsonBuffer(WM_CORE_BUFFER_SIZE);
+    JsonDocument jsonBuffer;
     DeserializationError error = deserializeJson(jsonBuffer, (uint8_t*)(request->_tempObject), DeserializationOption::NestingLimit(2));
     if (error) {
       return false;

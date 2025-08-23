@@ -25,9 +25,9 @@
 
 
 
-void WebServer::setFs(FS &fs)
+void WebServer::setFs(FS* fs)
 {
-  this->_fs = &fs;
+  this->_fs = fs;
 }
 
 

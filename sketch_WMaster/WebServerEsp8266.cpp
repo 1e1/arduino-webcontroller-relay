@@ -25,32 +25,12 @@ static BearSSL::ServerSessions _serverCache(WM_WEB_SERVER_CACHE_SIZE);
 
 
 
-WebServerEsp8266::WebServerEsp8266(FS &fs, Bridge* bridge)
+WebServerEsp8266::WebServerEsp8266(FS* fs, Bridge* bridge)
 {
   this->setFs(fs);
   this->setBridge(bridge);
-
-  #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
-  this->_server = new BearSSL::ESP8266WebServerSecure(WM_WEB_PORT_DEFAULT_SECURE);
   
-  LOG(F("certificate "));
-  this->_server->getServer().setCache(&_serverCache);
-
-  if (certificate::serverCertType == certificate::CertType::CT_ECC) {
-    LOGLN(F("ECC"));
-    this->_server->getServer().setECCert(new BearSSL::X509List(certificate::serverCert), BR_KEYTYPE_KEYX|BR_KEYTYPE_SIGN, new BearSSL::PrivateKey(certificate::serverKey));
-  } else if(certificate::serverCertType == certificate::CertType::CT_RSA) {
-    LOGLN(F("RSA"));
-    this->_server->getServer().setRSACert(new BearSSL::X509List(certificate::serverCert), new BearSSL::PrivateKey(certificate::serverKey));
-  } else {
-    LOGLN(F("ERROR"));
-  }
-  #else
-  this->_server = new ESP8266WebServer(WM_WEB_PORT_DEFAULT);
-  #endif
-
-  this->_username = new char[1]; // { '\0' };
-  this->_password = new char[1]; // { '\0' };
+  this->_init();
 } 
 
 
@@ -79,21 +59,6 @@ void WebServerEsp8266::setAuthentication(String username, String password)
   LOG("'"); LOG(_username); LOG(F("' : '")); LOG(_password); LOGLN("'");
 }
 
-/*
-void WebServerEsp8266::setMode(const Mode mode)
-{
-  switch (mode) {
-    case MODE_PORTAL:
-      return this->_setRoutesPortalOnly();
-    
-    case MODE_API:
-      return this->_setRoutesControllerOnly();
-    
-    default:
-      return this->_setRoutes();
-  }
-}
-*/
 
 
 /***********************************************************
@@ -103,19 +68,56 @@ void WebServerEsp8266::setMode(const Mode mode)
 
 
 
+void WebServerEsp8266::_init(void)
+{
+  this->_setServer();
+
+  this->_username = new char[1]; // { '\0' };
+  this->_password = new char[1]; // { '\0' };
+}
+
+
+void WebServerEsp8266::_setServer(void)
+{
+  #if WM_WEB_SERVER_SECURE == WM_WEB_SERVER_SECURE_YES
+  this->_server = new BearSSL::ESP8266WebServerSecure(WM_WEB_PORT_DEFAULT_SECURE);
+  
+  LOG(F("certificate "));
+  this->_server->getServer().setCache(&_serverCache);
+
+  if (certificate::serverCertType == certificate::CertType::CT_ECC) {
+    LOGLN(F("ECC"));
+    this->_server->getServer().setECCert(new BearSSL::X509List(certificate::serverCert), BR_KEYTYPE_KEYX|BR_KEYTYPE_SIGN, new BearSSL::PrivateKey(certificate::serverKey));
+  } else if(certificate::serverCertType == certificate::CertType::CT_RSA) {
+    LOGLN(F("RSA"));
+    this->_server->getServer().setRSACert(new BearSSL::X509List(certificate::serverCert), new BearSSL::PrivateKey(certificate::serverKey));
+  } else {
+    LOGLN(F("ERROR"));
+  }
+  #else
+  this->_server = new ESP8266WebServer(WM_WEB_PORT_DEFAULT);
+  #endif
+
+  //this->_server->keepAlive(true);
+}
+
+
 void WebServerEsp8266::_setRoutes(void)
 {
   #if WM_COMPONENT & WM_COMPONENT_API
   this->_server->on("/", HTTP_GET, [=]() {
     this->_redirect(WebServer::ROUTE_HOME);
+    this->_server->client().stop();
   });
 
   this->_server->on(WebServer::ROUTE_HOME, HTTP_GET, [=]() {
     this->_streamHtml(WM_WEB_INDEX_BASENAME "." WM_WEB_FILE_EXT);
+    this->_server->client().stop();
   });
 
   this->_server->on("/api/r", HTTP_GET, [=]() {
     this->_streamJson(WM_CONFIG_RELAY_PATH, true); 
+    this->_server->client().stop();
   });
   #endif
 
@@ -123,78 +125,48 @@ void WebServerEsp8266::_setRoutes(void)
     if (this->_isAllowed()) {
       this->_streamHtml(WM_WEB_PORTAL_BASENAME "." WM_WEB_FILE_EXT);
     }
+    this->_server->client().stop();
   });
-  
+
+  #if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+  this->_server->on(WebServer::ROUTE_GOOGLE, HTTP_GET, [=]() {
+    this->_streamHtml(WM_WEB_GOOGLE_BASENAME "." WM_WEB_FILE_EXT);
+    this->_server->client().stop();
+  });
+  #endif
+
   this->_server->on(WebServer::ROUTE_ABOUT, HTTP_GET, [=]() {
+    LOGLN(F("about"));
     this->_streamAbout();
+    this->_server->client().stop();
   });
   
   this->_server->onNotFound([=]() {
-    #if WM_COMPONENT & WM_COMPONENT_API
     switch (this->_server->uri().charAt(1)) {
+      #if WM_COMPONENT & WM_COMPONENT_API
       case 'a':
         LOGLN(F("handle API"));
-        return this->_handleApi();
+        this->_handleApi();
+        break;
+      #endif
       case 'c':
         LOGLN(F("handle Cfg"));
-        return this->_handleCfg();
+        this->_handleCfg();
+        break;
+      #if WM_COMPONENT & WM_COMPONENT_GCALENDAR
+      case 'o':
+        LOGLN(F("handle Oauth2"));
+        this->_handleOa2();
+        break;
+      #endif
+      default: 
+        LOGLN(F("handle NotFound"));
+        this->_send404();
+        break;
     }
 
-    LOGLN(F("handle NotFound"));
+    this->_server->client().stop();
     
-    this->_server->send(404);
-
-    #else
-    this->_handleCfg();
-    #endif
-  });
-}
-
-
-void WebServerEsp8266::_setRoutesPortalOnly(void)
-{
-  this->_server->on("/", HTTP_GET, [=]() {
-    this->_redirect(WebServer::ROUTE_PORTAL);
-  });
-
-  this->_server->on(WebServer::ROUTE_PORTAL, HTTP_GET, [=]() {
-    if (this->_isAllowed()) {
-      this->_streamHtml(WM_WEB_PORTAL_BASENAME "." WM_WEB_FILE_EXT);
-    }
-  });
-  
-  this->_server->on(WebServer::ROUTE_ABOUT, HTTP_GET, [=]() {
-    LOGLN(F("/about"));
-    this->_streamAbout();
-  });
-  
-  this->_server->onNotFound([=]() {
-    LOGLN(F("/notFound"));
-    this->_handleCfg();
-  });
-}
-
-
-void WebServerEsp8266::_setRoutesControllerOnly(void) const
-{
-  this->_server->on("/", HTTP_GET, [=]() {
-    this->_redirect(WebServer::ROUTE_HOME);
-  });
-
-  this->_server->on(WebServer::ROUTE_HOME, HTTP_GET, [=]() {
-    this->_streamHtml(WM_WEB_INDEX_BASENAME "." WM_WEB_FILE_EXT);
-  });
-
-  this->_server->on("/api/r", HTTP_GET, [=]() {
-    this->_streamJson(WM_CONFIG_RELAY_PATH, true); 
-  });
-  
-  this->_server->on(WebServer::ROUTE_ABOUT, HTTP_GET, [=]() {
-    this->_streamAbout();
-  });
-  
-  this->_server->onNotFound([=]() {
-    this->_handleApi();
   });
 }
 
@@ -234,13 +206,16 @@ void WebServerEsp8266::_handleCfg(void)
 
     switch (cfg) {
       case 'g':
-        return this->_uploadAndStreamJson(WM_CONFIG_GLOBAL_PATH, FPSTR(WebServer::JSON_OBJECT_EMPTY), isPost);
+        return this->_uploadAndStreamJson(WM_CONFIG_GLOBAL_PATH, false, isPost);
 
       case 'r':
-        return this->_uploadAndStreamJson(WM_CONFIG_RELAY_PATH, FPSTR(WebServer::JSON_ARRAY_EMPTY), isPost);
+        return this->_uploadAndStreamJson(WM_CONFIG_RELAY_PATH, true, isPost);
 
       case 'w':
-        return this->_uploadAndStreamJson(WM_CONFIG_WIFI_PATH, FPSTR(WebServer::JSON_ARRAY_EMPTY), isPost);
+        return this->_uploadAndStreamJson(WM_CONFIG_WIFI_PATH, true, isPost);
+
+      case 'o':
+        return this->_uploadAndStreamJson(WM_CONFIG_GCALENDAR_PATH, true, isPost);
         
       case 'p':
         if (isPost) {
@@ -252,8 +227,49 @@ void WebServerEsp8266::_handleCfg(void)
     }
   }
 
-  this->_server->sendHeader(FPSTR(WebServer::CACHE_CONTROL), FPSTR(WebServer::MAX_AGE_86400));
-  this->_server->send(404);
+  this->_send404();
+}
+
+
+void WebServerEsp8266::_handleOa2(void) const
+{
+  if (!this->_isAllowed()) {
+    return;
+  }
+
+  String uri = this->_server->uri();
+  if (uri.startsWith(F("/oa2/"))) {
+    uri.remove(0, String("/oa2/").length());
+
+    const char provider = uri.charAt(0);
+
+    switch (provider) {
+      case 'g':
+        LOGLN("/oa2/g.json");
+        /* * /
+        String url;
+        String code;
+        this->_gCalendar->startRegistration(url, code);
+
+        this->_server->send(
+          200, 
+          FPSTR(WebServer::TEXT_JSON), 
+          String(F("{\"u\":\"")) + url + F("\",\"c\":\"") + code + F("\"}")
+        );
+        /* */
+        String code = this->_gCalendar->getQuietUserCode();
+
+        this->_server->send(
+          200, 
+          FPSTR(WebServer::TEXT_JSON), 
+          F("{\"u\":\"https://www.google.com/device\",\"c\":\"") + code + F("\"}")
+        );
+        /* */
+        return;
+    }
+  }
+
+  this->_send404();
 }
 
 
@@ -276,8 +292,8 @@ void WebServerEsp8266::_handleApi(void) const
           return this->_server->send(400);
         }
         
-        String payload = this->_server->arg(FPSTR(WebServer::PLAIN));
-        StaticJsonDocument<WM_API_BUFFER_SIZE> jsonBuffer;
+        const String payload = this->_server->arg(FPSTR(WebServer::PLAIN));
+        JsonDocument jsonBuffer;
         DeserializationError error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
         LOGLN(payload);
         
@@ -293,8 +309,7 @@ void WebServerEsp8266::_handleApi(void) const
     }
   }
 
-  this->_server->sendHeader(FPSTR(WebServer::CACHE_CONTROL), FPSTR(WebServer::MAX_AGE_86400));
-  this->_server->send(404);
+  this->_send404();
 }
 
 
@@ -313,7 +328,14 @@ void WebServerEsp8266::_redirect(String uri) const
 {
     this->_server->sendHeader(FPSTR(WebServer::LOCATION), uri, true);
     this->_server->send(307, FPSTR(WebServer::TEXT_HTML), emptyString);
-    this->_server->client().stop();
+    //this->_server->client().stop();
+}
+
+
+void WebServerEsp8266::_send404(void) const
+{
+    this->_server->sendHeader(FPSTR(WebServer::CACHE_CONTROL), FPSTR(WebServer::MAX_AGE_86400));
+    this->_server->send(404);
 }
 
 
@@ -347,7 +369,7 @@ void WebServerEsp8266::_streamHtml(const char* path) const
 void WebServerEsp8266::_streamJson(const char* path, const bool isArray) const
 {
   if (!this->_fs->exists(path)) {
-    return this->_server->send(200, FPSTR(WebServer::TEXT_JSON), isArray ? F("[]") : F("{}"));
+    return this->_server->send(200, FPSTR(WebServer::TEXT_JSON), isArray ? FPSTR(WebServer::JSON_ARRAY_EMPTY) : FPSTR(WebServer::JSON_OBJECT_EMPTY));
   }
 
   File file = this->_fs->open(path, "r");
@@ -373,7 +395,7 @@ void WebServerEsp8266::_uploadJson(const char* path) const
   }
 
   String payload = this->_server->arg(FPSTR(WebServer::PLAIN));
-  DynamicJsonDocument jsonBuffer(WM_CONFIG_BUFFER_SIZE);
+  JsonDocument jsonBuffer;
   DeserializationError error = deserializeJson(jsonBuffer, payload, DeserializationOption::NestingLimit(2));
   LOGLN(payload);
   
@@ -410,7 +432,11 @@ void WebServerEsp8266::_readSerialJson(void)
   }
 
   if (!this->_bridge->prepareRelayList()) {
-    return this->_server->send(503);
+    return this->_server->send(
+      503, 
+      FPSTR(WebServer::TEXT_JSON), 
+      FPSTR(WebServer::JSON_ARRAY_EMPTY)
+    );
   }
 
   uint8_t dec;
@@ -451,7 +477,7 @@ void WebServerEsp8266::_writeSerialJson(void) const
 
   JsonArray root;
   {
-    DynamicJsonDocument doc(WM_CORE_BUFFER_SIZE);
+    JsonDocument doc;
     String payload = this->_server->arg(FPSTR(WebServer::PLAIN));
     DeserializationError error = deserializeJson(doc, payload, DeserializationOption::NestingLimit(2));
     doc.shrinkToFit();

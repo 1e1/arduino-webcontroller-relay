@@ -14,14 +14,8 @@
 class WebServer {
 
   public:
-  typedef enum { 
-      MODE_NONE, 
-      MODE_PORTAL, 
-      MODE_API,
-      MODE_ALL, 
-  } Mode;
-
-  static constexpr const char TEXT_HTML[] PROGMEM = "text/html";
+  
+  static constexpr const char TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
   static constexpr const char TEXT_JSON[] PROGMEM = "text/json";
   static constexpr const char PLAIN[] PROGMEM = "plain";
   static constexpr const char LOCATION[] PROGMEM = "Location";
@@ -35,6 +29,7 @@ class WebServer {
 
   static constexpr const char ROUTE_HOME[] = "/home";
   static constexpr const char ROUTE_PORTAL[] = "/portal";
+  static constexpr const char ROUTE_GOOGLE[] = "/google";
   static constexpr const char ROUTE_ABOUT[] = "/about";
 
   static constexpr const char RELAY_JSON[] PROGMEM = " {\"i\":##,\"s\":#,\"l\":#,\"p\":##,\"n\":#}";
@@ -42,10 +37,9 @@ class WebServer {
   virtual void begin(void) =0;
   virtual void loop(void) =0;
 
-  void setFs(FS &fs);
+  void setFs(FS* fs);
   void setBridge(Bridge* bridge);
   virtual void setAuthentication(String username, String password) =0;
-  //virtual void setMode(const Mode mode) =0;
 
   protected:
 

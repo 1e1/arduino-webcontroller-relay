@@ -23,7 +23,7 @@ class Bridge {
   };
   typedef std::function<void(const RelayMessage*, const uint8_t)> TPrintMessageRelayFunction;
 
-  Bridge(Stream &inputStream);
+  Bridge(Stream* inputStream);
   
   const RelayMessage* getCurrentRelayMessage(void) const { return this->_relayMessage; };
   uint8_t size(void);
