@@ -244,28 +244,17 @@ void WebServerEsp8266::_handleOa2(void) const
     const char provider = uri.charAt(0);
 
     switch (provider) {
-      case 'g':
+      case 'g': {
         LOGLN("/oa2/g.json");
-        /* * /
-        String url;
-        String code;
-        this->_gCalendar->startRegistration(url, code);
+        const String code = this->_gCalendar->getQuietUserCode();
 
         this->_server->send(
-          200, 
-          FPSTR(WebServer::TEXT_JSON), 
-          String(F("{\"u\":\"")) + url + F("\",\"c\":\"") + code + F("\"}")
-        );
-        /* */
-        String code = this->_gCalendar->getQuietUserCode();
-
-        this->_server->send(
-          200, 
-          FPSTR(WebServer::TEXT_JSON), 
+          200,
+          FPSTR(WebServer::TEXT_JSON),
           F("{\"u\":\"https://www.google.com/device\",\"c\":\"") + code + F("\"}")
         );
-        /* */
         return;
+      }
     }
   }
 

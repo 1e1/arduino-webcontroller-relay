@@ -28,21 +28,38 @@ void Scheduler::begin(void)
 {
   _ntp.begin(WM_NTP_CLIENT_PORT);
   _ntp.request(WM_NTP_HOST);
-  do {
-      delay(10);
-  } while(!_ntp.listenSync());
 
-  Configuration::GCalendar gCalConfig = _configuration->getGCalendar();
-  LOG("refreshToken: ");LOGLN(gCalConfig.refreshToken);
-  LOG("length: ");LOGLN(gCalConfig.refreshToken.length());
+  // Wait for the first NTP sync so token expiry and the event window start with a
+  // valid clock, but never hang boot forever: retry periodically (the first UDP
+  // datagram may be lost) and give up after a few seconds. loop() keeps syncing
+  // the clock afterwards, so the calendar recovers once NTP answers.
+  constexpr unsigned long NTP_SYNC_TIMEOUT_MS  = 8000;
+  constexpr unsigned long NTP_REQUEST_EVERY_MS = 2000;
+  const unsigned long startedAt = millis();
+  unsigned long lastRequestAt = startedAt;
+  while (!_ntp.listenSync()) {
+    if (millis() - startedAt >= NTP_SYNC_TIMEOUT_MS) {
+      LOGLN("NTP sync timeout, continuing");
+      break;
+    }
+    if (millis() - lastRequestAt >= NTP_REQUEST_EVERY_MS) {
+      _ntp.request(WM_NTP_HOST);
+      lastRequestAt = millis();
+    }
+    delay(10);
+  }
 
-  // prevent "null" value
-  if (gCalConfig.refreshToken.length() > 8) {
-    LOGLN("setRefreshToken");
+  const Configuration::GCalendar gCalConfig = _configuration->getGCalendar();
+  LOG("refreshToken length: "); LOGLN(gCalConfig.refreshToken.length());
+
+  // Reuse the stored refresh_token to reconnect silently after a reboot;
+  // start the device pairing flow only when no valid token is available.
+  if (_isValidToken(gCalConfig.refreshToken)) {
+    LOGLN("reuse refresh_token");
     _gCalendar.setRefreshToken(gCalConfig.refreshToken);
     _gCalendar.maintain();
   } else {
-    LOGLN("startQuietRegistration");
+    LOGLN("start device registration");
     _gCalendar.startQuietRegistration();
   }
 }
@@ -51,22 +68,34 @@ void Scheduler::loop(void)
 {
   _timer1s4mn.update();
 
-  // every 2s
+  // every 2s: keep the NTP clock fresh (token expiry and the event window rely on it)
   if (_timer1s4mn.isTickBy128()) {
     _ntp.request(WM_NTP_HOST);
   }
 
   yield();
-  
+
   if (_ntp.listen()) {
+    // Keep the OAuth2 session healthy: refresh the access_token, finish a pending
+    // device registration, or bootstrap from the stored refresh_token.
     _gCalendar.maintain();
 
-    if (!_gCalendar.isLinked() && _gCalendar.isAuthenticated()) {
+    if (_gCalendar.isAuthInvalid()) {
+      // Google rejected the stored refresh_token (revoked, or expired after the
+      // 7-day testing-mode window): forget it and restart the pairing flow.
+      LOGLN("refresh_token rejected, re-registering");
       Configuration::GCalendar gCalConfig = _configuration->getGCalendar();
-      
-      // save refresh_token
-      if (_gCalendar.getRefreshToken().length() > 8 && !_gCalendar.getRefreshToken().equals(gCalConfig.refreshToken)) {
-        gCalConfig.refreshToken = _gCalendar.getRefreshToken();
+      gCalConfig.refreshToken = "";
+      _configuration->setGCalendar(gCalConfig);
+      _gCalendar.startQuietRegistration();
+    } else if (!_gCalendar.isLinked() && _gCalendar.isAuthenticated()) {
+      Configuration::GCalendar gCalConfig = _configuration->getGCalendar();
+
+      // Persist a freshly obtained refresh_token so the next boot reconnects
+      // silently (write-once: the token is stable, flash wear stays negligible).
+      const String refreshToken = _gCalendar.getRefreshToken();
+      if (_isValidToken(refreshToken) && !refreshToken.equals(gCalConfig.refreshToken)) {
+        gCalConfig.refreshToken = refreshToken;
         _configuration->setGCalendar(gCalConfig);
         LOGLN("renew g-token");
       }
@@ -76,42 +105,37 @@ void Scheduler::loop(void)
 
   yield();
 
-  // every 1mn
+  // every 1mn: sync the calendar and mirror the running events onto the relays
   if (_timer1s4mn.isPureTickBy4()) {
     _ntp.syncRFC3339();
-    String ts = _ntp.getTimestampRFC3339();
-    _gCalendar.syncAt(ts);
-    LOG("* new 2mn02s @"); LOG(ts); LOG(" = "); LOG(_ntp.getTimestampUnix()); LOGLN(" *");
+    // Zero-copy: feed the NTP client's internal RFC3339 buffer straight to
+    // syncAt(), avoiding a transient String that would fragment the ESP heap.
+    _gCalendar.syncAt(_ntp.c_str());
+    LOG("* sync @"); LOG(_ntp.c_str()); LOG(" = "); LOG(_ntp.getTimestampUnix()); LOGLN(" *");
 
     std::list<uint8_t> gRelayIds;
     _assignEventRelayIds(gRelayIds);
 
-    // Iterate through the current events
+    // Switch ON the relays whose event just started (not ON in the previous sync).
     for (uint8_t gRelayId : gRelayIds) {
-      LOGLN("test-in: " + gRelayId);
-      // Check if the event is new (not in the previous list)
-      if (std::find(_persitentRelayIds.begin(), _persitentRelayIds.end(), gRelayId) == _persitentRelayIds.end()) {
-        // Call welcome() for new events
-        LOGLN("welcome: " + gRelayId);
+      if (std::find(_persistentRelayIds.begin(), _persistentRelayIds.end(), gRelayId) == _persistentRelayIds.end()) {
+        LOG("welcome: "); LOGLN(gRelayId);
         _bridge->setRelay(gRelayId, true);
       }
     }
 
-    // Iterate through the previous events
-    for (uint8_t persitentRelayId : _persitentRelayIds) {
-      LOGLN("test-out: " + persitentRelayId);
-      // Check if the event is no longer in the current list
-      if (std::find(gRelayIds.begin(), gRelayIds.end(), persitentRelayId) == gRelayIds.end()) {
-        // Call leave() for events that are no longer in the list
-        LOGLN("leave: " + persitentRelayId);
-        _bridge->setRelay(persitentRelayId, false);
+    // Switch OFF the relays whose event just ended (gone from the current sync).
+    for (uint8_t persistentRelayId : _persistentRelayIds) {
+      if (std::find(gRelayIds.begin(), gRelayIds.end(), persistentRelayId) == gRelayIds.end()) {
+        LOG("leave: "); LOGLN(persistentRelayId);
+        _bridge->setRelay(persistentRelayId, false);
       }
     }
 
-    // Update the previous list for the next iteration
-    _persitentRelayIds.assign(gRelayIds.begin(), gRelayIds.end());
+    // Remember the current set for the next iteration.
+    _persistentRelayIds.assign(gRelayIds.begin(), gRelayIds.end());
   }
-} 
+}
 
 
 

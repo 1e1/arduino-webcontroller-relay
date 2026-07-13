@@ -350,10 +350,15 @@ void loop()
   #if WM_LOG_LEVEL != WM_LOG_LEVEL_OFF
   if (millis() > nextLog) {
     nextLog += 2000;
-    LOGF("[HW] Total heap: %d bytes\n", ESP.getHeapSize());
     LOGF("[HW] Free heap: %d bytes\n", ESP.getFreeHeap());
+    #ifdef ESP32
+    LOGF("[HW] Total heap: %d bytes\n", ESP.getHeapSize());
     LOGF("[HW] Total PSRAM: %d bytes\n", ESP.getPsramSize()); // 0 = PSRAM is not enabled
     LOGF("[HW] Free PSRAM: %d bytes\n", ESP.getFreePsram());
+    #else
+    LOGF("[HW] Heap fragmentation: %d%%\n", ESP.getHeapFragmentation());
+    LOGF("[HW] Max free block: %d bytes\n", ESP.getMaxFreeBlockSize());
+    #endif
   }
   #endif
 
