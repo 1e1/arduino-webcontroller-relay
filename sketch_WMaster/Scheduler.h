@@ -28,7 +28,6 @@ class Scheduler {
     : _configuration(cfg), _bridge(bdg), _gCalendar(WS_GOOGLE_API_CLIENT_ID, WS_GOOGLE_API_CLIENT_SECRET, &_ntp)
     {}
 
-    //__attribute__((always_inline)) inline TimestampRFC3339Ntp<UDP> getTimestampRFC3339Ntp(void) { return _ntp; }
     __attribute__((always_inline)) inline GoogleSchedular* getGCalendar(void) { return &_gCalendar; }
 
     void begin(void);
@@ -36,6 +35,10 @@ class Scheduler {
 
 
     protected:
+
+    // A refresh_token shorter than this is treated as absent ("", "null", ...).
+    static constexpr size_t MIN_REFRESH_TOKEN_LENGTH = 8;
+    static bool _isValidToken(const String& token) { return token.length() > MIN_REFRESH_TOKEN_LENGTH; }
 
     const bool _findRelayIdByName(const std::list<Configuration::Relay>& relayList, const String& gEvent, uint8_t& relayId) const;
     void _findRelayIdsByNames(const std::list<Configuration::Relay>& relayList, const std::list<String>& gEvents, std::list<uint8_t>& relayIds) const;
@@ -46,8 +49,9 @@ class Scheduler {
     TimestampNtp<WiFiUDP> _ntp;
     GoogleSchedular _gCalendar;
     FastTimer<FastTimerPrecision::P_1s_4m> _timer1s4mn;
-    // std::list<String> _persitentEvents; // TODO switch to relayIds?
-    std::list<uint8_t> _persitentRelayIds;
+    // Relays currently ON because of a running calendar event, so the next sync
+    // can tell which events just started and which just ended.
+    std::list<uint8_t> _persistentRelayIds;
 };
 
 

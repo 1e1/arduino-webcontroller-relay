@@ -176,8 +176,9 @@ The Google OAuth2 for limited-input device is on `https://{ip}/google` (301B)
 #### software
 
 - **Esp8266**
-- **ArduinoJson**
-- *FastTimer* (optional gor Google Calendar)
+- **ArduinoJson** (>= 7.0.0)
+- *GoogleSchedular (>= 4.1.0, optional for Google Calendar)*
+- *FastTimer (>= 3.1.0, required by GoogleSchedular)*
 - *ESPAsyncWebServer (optional for faster HTTP server, not HTTPS)*
 - *fauxmoESP (optional for Alexa)*
 - *ESP AsyncTCP (optional for ESPAsyncWebServer or fauxmoESP)*
@@ -191,13 +192,55 @@ The Google OAuth2 for limited-input device is on `https://{ip}/google` (301B)
 - ☑︎ DONE: if the ESP cannot join a known network, it starts as hotspot during a # seconds
 - ☑︎ DONE: when the ESP as hotspot has a connected client, it switch ON the relay #0 (should be the home router)
 
-#### Google Calendar API
+### Google Calendar
 
-- GET https://www.googleapis.com/calendar/v3/users/me/calendarList?fields=items(id,summary)
-{ items: [{ id: "123", summary: "ArduinoRelay" }] }
+Drive your relays from a Google Calendar: name an event exactly like a relay,
+and that relay turns **ON** while the event is running, then **OFF** when it
+ends. The board syncs the calendar about once a minute.
 
-- GET https://www.googleapis.com/calendar/v3/calendars/5pmqor21u4kf8ur46k5hbci0ic@group.calendar.google.com/events?fields=items(id,summary)&timeMin=2024-10-25T23:27:00Z&timeMax=2024-10-25T21:27:59Z
-{ items: [{ id: "123", summary: "ArduinoRelay" }] }
+#### 1. Create your Google credentials (once)
+
+The board uses the OAuth2 *limited-input device* flow, so you only need a free
+Google account:
+
+1. Open the [Google Cloud console](https://console.cloud.google.com/) and create
+   a project (e.g. `WrightRelay`).
+2. On the **OAuth consent screen**, keep the project in *testing* mode and add
+   your own Google account under *Test users*.
+3. Under **Credentials**, create an *OAuth client ID* of type **TV and Limited
+   Input devices**. Google gives you a `CLIENT_ID` and a `CLIENT_SECRET`.
+
+Put those two values in the Master sketch config as `WS_GOOGLE_API_CLIENT_ID`
+and `WS_GOOGLE_API_CLIENT_SECRET`, then flash the board.
+
+> Details: https://developers.google.com/identity/protocols/oauth2/limited-input-device
+
+#### 2. Pair the board (once)
+
+1. Open the pairing page at `https://{ip}/google`. It shows a short **code**.
+2. Go to https://www.google.com/device, sign in with the test account, and type
+   the code.
+
+That's it. The board stores the resulting `refresh_token` and reconnects
+**silently** after every reboot — no need to pair again. If Google later revokes
+the token (or it expires after the 7-day testing-mode window), the board detects
+it, clears the stale token and reopens the pairing page automatically.
+
+#### 3. Pick the calendar and name your events
+
+In the config portal set the **calendar name** (its display name, e.g.
+`ArduinoRelay`). Then create events in that calendar whose **title matches a
+relay name** exactly. While such an event is running, its relay is ON.
+
+#### API reference
+
+Under the hood the board only reads two endpoints (minimal `fields=` payloads to
+stay light on the ESP):
+
+```
+GET /calendar/v3/users/me/calendarList?fields=items(id,summary)
+GET /calendar/v3/calendars/{calendarId}/events?fields=items(summary)&singleEvents=true&timeMin=...&timeMax=...
+```
 
 
 ## more docs

@@ -97,7 +97,7 @@ const Configuration::GCalendar Configuration::getGCalendar() const
 }
 
 
-void Configuration::setGCalendar(Configuration::GCalendar gCal) const
+void Configuration::setGCalendar(const Configuration::GCalendar& gCal) const
 {
   JsonDocument doc;
   doc["t"] = gCal.refreshToken;

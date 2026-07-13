@@ -60,7 +60,7 @@ class Configuration {
   Global* getGlobal(void) { return &this->_global; };
   const std::list<WifiStation> getWifiStationList(void) const;
   const GCalendar getGCalendar(void) const;
-  void setGCalendar(GCalendar gCal) const;
+  void setGCalendar(const GCalendar& gCal) const;
   const std::list<Relay> getRelayList(void) const;
 
   protected:
